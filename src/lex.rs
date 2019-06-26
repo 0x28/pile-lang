@@ -2,14 +2,6 @@ use std::iter::Peekable;
 use std::str::Chars;
 
 #[derive(Debug)]
-pub enum Operator {
-    Plus,
-    Minus,
-    Div,
-    Mul,
-}
-
-#[derive(Debug)]
 pub enum Number {
     Natural(u32),
     Integer(i32),
@@ -24,8 +16,11 @@ pub enum Token {
     Dotimes,
     While,
     Loop,
+    Plus,
+    Minus,
+    Div,
+    Mul,
     Number(Number),
-    Operator(Operator),
     Identifier(String),
     String(String),
     Fin,
@@ -132,13 +127,34 @@ impl<'a> Lexer<'a> {
         Ok(Token::String(string))
     }
 
+    fn operator(&mut self) -> Result<Token, String> {
+        let mut operator = String::with_capacity(Lexer::DEFAULT_CAPACITY);
+
+        while let Some(&lookahead) = self.input.peek() {
+            self.consume();
+            match lookahead {
+                c if c.is_whitespace() => break,
+                c => operator.push(c),
+            }
+        }
+
+        match operator.as_ref() {
+            "+" => Ok(Token::Plus),
+            "-" => Ok(Token::Minus),
+            "*" => Ok(Token::Mul),
+            "/" => Ok(Token::Div),
+            o => Err(format!("Unkown operator '{}'", o)),
+        }
+    }
+
     pub fn next(&mut self) -> Result<Token, String> {
         while let Some(lookahead) = self.input.peek() {
             match lookahead {
                 '#' => self.skip_comment(),
                 c if c.is_whitespace() => self.skip_whitespace(),
                 '"' => return self.string(),
-                c if c.is_alphanumeric() => return self.identifier(),
+                '+' | '-' | '*' | '/' => return self.operator(),
+                c if c.is_alphabetic() => return self.identifier(),
                 c => return Err(format!("Unknown char '{}'", c)),
             }
         }
