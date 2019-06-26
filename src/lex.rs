@@ -127,6 +127,28 @@ impl<'a> Lexer<'a> {
         Ok(Token::String(string))
     }
 
+    fn number(&mut self) -> Result<Token, String> {
+        let mut number = String::with_capacity(Lexer::DEFAULT_CAPACITY);
+
+        while let Some(&lookahead) = self.input.peek() {
+            self.consume();
+            match lookahead {
+                c if c.is_whitespace() => break,
+                c => number.push(c),
+            }
+        }
+
+        if let Ok(nat) = number.parse() {
+            Ok(Token::Number(Number::Natural(nat)))
+        } else if let Ok(int) = number.parse() {
+            Ok(Token::Number(Number::Integer(int)))
+        } else if let Ok(float) = number.parse() {
+            Ok(Token::Number(Number::Float(float)))
+        } else {
+            Err(format!("'{}' isn't a number", number))
+        }
+    }
+
     fn operator(&mut self) -> Result<Token, String> {
         let mut operator = String::with_capacity(Lexer::DEFAULT_CAPACITY);
 
@@ -143,7 +165,9 @@ impl<'a> Lexer<'a> {
             "-" => Ok(Token::Minus),
             "*" => Ok(Token::Mul),
             "/" => Ok(Token::Div),
-            o => Err(format!("Unkown operator '{}'", o)),
+            n => self
+                .number()
+                .map_err(|_err| format!("Unknown operator '{}'", n)),
         }
     }
 
@@ -153,6 +177,7 @@ impl<'a> Lexer<'a> {
                 '#' => self.skip_comment(),
                 c if c.is_whitespace() => self.skip_whitespace(),
                 '"' => return self.string(),
+                '0'...'9' => return self.number(),
                 '+' | '-' | '*' | '/' => return self.operator(),
                 c if c.is_alphabetic() => return self.identifier(),
                 c => return Err(format!("Unknown char '{}'", c)),
