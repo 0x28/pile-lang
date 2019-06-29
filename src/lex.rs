@@ -28,6 +28,7 @@ pub enum Token {
 
 pub struct Lexer<'a> {
     input: Peekable<Chars<'a>>,
+    line_number: u64,
 }
 
 impl<'a> Lexer<'a> {
@@ -36,6 +37,7 @@ impl<'a> Lexer<'a> {
     pub fn new(input: Chars) -> Lexer {
         Lexer {
             input: input.peekable(),
+            line_number: 1,
         }
     }
 
@@ -171,19 +173,32 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    pub fn next(&mut self) -> Result<Token, String> {
+    pub fn next(&mut self) -> (u64, Result<Token, String>) {
         while let Some(lookahead) = self.input.peek() {
-            match lookahead {
-                '#' => self.skip_comment(),
-                c if c.is_whitespace() => self.skip_whitespace(),
-                '"' => return self.string(),
-                '0'...'9' => return self.number(),
-                '+' | '-' | '*' | '/' => return self.operator(),
-                c if c.is_alphabetic() => return self.identifier(),
-                c => return Err(format!("Unknown char '{}'", c)),
-            }
+            let token = match lookahead {
+                '#' => {
+                    self.skip_comment();
+                    continue;
+                }
+                '\n' => {
+                    self.line_number += 1;
+                    self.consume();
+                    continue;
+                }
+                c if c.is_whitespace() => {
+                    self.skip_whitespace();
+                    continue;
+                }
+                '"' => self.string(),
+                '0'...'9' => self.number(),
+                '+' | '-' | '*' | '/' => self.operator(),
+                c if c.is_alphabetic() => self.identifier(),
+                c => Err(format!("Unknown char '{}'", c)),
+            };
+
+            return (self.line_number, token);
         }
 
-        Ok(Token::Fin)
+        (self.line_number, Ok(Token::Fin))
     }
 }
