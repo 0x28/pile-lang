@@ -174,7 +174,7 @@ impl<'a> Lexer<'a> {
     }
 
     pub fn next(&mut self) -> (u64, Result<Token, String>) {
-        while let Some(lookahead) = self.input.peek() {
+        while let Some(&lookahead) = self.input.peek() {
             let token = match lookahead {
                 '#' => {
                     self.skip_comment();
@@ -193,7 +193,10 @@ impl<'a> Lexer<'a> {
                 '0'...'9' => self.number(),
                 '+' | '-' | '*' | '/' => self.operator(),
                 c if c.is_alphabetic() => self.identifier(),
-                c => Err(format!("Unknown char '{}'", c)),
+                c => {
+                    self.consume();
+                    Err(format!("Unknown char '{}'", c))
+                }
             };
 
             return (self.line_number, token);
