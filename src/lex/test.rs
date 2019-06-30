@@ -118,7 +118,7 @@ fn test_numbers_integer() {
     let mut lexer = Lexer::new(
         "-1\n-2\n-3\n-4000\n-0044
         -1000 -200 -42 -42"
-        .chars(),
+            .chars(),
     );
     let expected = vec![
         (1, Ok(Token::Number(Number::Integer(-1)))),
@@ -130,6 +130,28 @@ fn test_numbers_integer() {
         (6, Ok(Token::Number(Number::Integer(-200)))),
         (6, Ok(Token::Number(Number::Integer(-42)))),
         (6, Ok(Token::Number(Number::Integer(-42)))),
+    ];
+
+    compare_token_lists(&mut lexer, expected);
+}
+
+#[test]
+fn test_numbers_float() {
+    let mut lexer = Lexer::new(
+        "1.1\n2.2\n3.3\n-10e20\n-inf +inf
+         3.1415 7777.7777 -3e-10"
+            .chars(),
+    );
+    let expected = vec![
+        (1, Ok(Token::Number(Number::Float(1.1)))),
+        (2, Ok(Token::Number(Number::Float(2.2)))),
+        (3, Ok(Token::Number(Number::Float(3.3)))),
+        (4, Ok(Token::Number(Number::Float(-10e20)))),
+        (5, Ok(Token::Number(Number::Float(std::f32::NEG_INFINITY)))),
+        (5, Ok(Token::Number(Number::Float(std::f32::INFINITY)))),
+        (6, Ok(Token::Number(Number::Float(3.1415)))),
+        (6, Ok(Token::Number(Number::Float(7777.7777)))),
+        (6, Ok(Token::Number(Number::Float(-3e-10)))),
     ];
 
     compare_token_lists(&mut lexer, expected);
