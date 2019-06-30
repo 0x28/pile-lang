@@ -145,10 +145,12 @@ impl<'a> Lexer<'a> {
         let mut number = String::with_capacity(Lexer::DEFAULT_CAPACITY);
 
         while let Some(&lookahead) = self.input.peek() {
-            self.consume();
             match lookahead {
                 c if c.is_whitespace() => break,
-                c => number.push(c),
+                c => {
+                    self.consume();
+                    number.push(c);
+                }
             }
         }
 
@@ -159,10 +161,12 @@ impl<'a> Lexer<'a> {
         let mut operator = String::with_capacity(Lexer::DEFAULT_CAPACITY);
 
         while let Some(&lookahead) = self.input.peek() {
-            self.consume();
             match lookahead {
                 c if c.is_whitespace() => break,
-                c => operator.push(c),
+                c => {
+                    self.consume();
+                    operator.push(c);
+                }
             }
         }
 
