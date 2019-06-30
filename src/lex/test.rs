@@ -20,8 +20,7 @@ fn compare_token_lists(
 
     assert_eq!(results.len(), expected.len());
 
-    for (actual, expected) in results.iter().zip(expected.iter())
-    {
+    for (actual, expected) in results.iter().zip(expected.iter()) {
         assert_eq!(actual, expected);
     }
 }
@@ -81,6 +80,56 @@ fn test_unknown_char() {
         (1, Ok(Token::Identifier(String::from("hello")))),
         (1, Ok(Token::Identifier(String::from("world")))),
         (1, Err(String::from("Unknown char '\\'"))),
+    ];
+
+    compare_token_lists(&mut lexer, expected);
+}
+
+#[test]
+fn test_numbers_natural() {
+    let mut lexer = Lexer::new(
+        "100 2000 3000 123 4543 123 21393
+         203 040 05060 70 80 002 1203004 003"
+            .chars(),
+    );
+    let expected = vec![
+        (1, Ok(Token::Number(Number::Natural(100)))),
+        (1, Ok(Token::Number(Number::Natural(2000)))),
+        (1, Ok(Token::Number(Number::Natural(3000)))),
+        (1, Ok(Token::Number(Number::Natural(123)))),
+        (1, Ok(Token::Number(Number::Natural(4543)))),
+        (1, Ok(Token::Number(Number::Natural(123)))),
+        (1, Ok(Token::Number(Number::Natural(21393)))),
+        (2, Ok(Token::Number(Number::Natural(203)))),
+        (2, Ok(Token::Number(Number::Natural(40)))),
+        (2, Ok(Token::Number(Number::Natural(5060)))),
+        (2, Ok(Token::Number(Number::Natural(70)))),
+        (2, Ok(Token::Number(Number::Natural(80)))),
+        (2, Ok(Token::Number(Number::Natural(2)))),
+        (2, Ok(Token::Number(Number::Natural(1203004)))),
+        (2, Ok(Token::Number(Number::Natural(3)))),
+    ];
+
+    compare_token_lists(&mut lexer, expected);
+}
+
+#[test]
+fn test_numbers_integer() {
+    let mut lexer = Lexer::new(
+        "-1\n-2\n-3\n-4000\n-0044
+        -1000 -200 -42 -42"
+        .chars(),
+    );
+    let expected = vec![
+        (1, Ok(Token::Number(Number::Integer(-1)))),
+        (2, Ok(Token::Number(Number::Integer(-2)))),
+        (3, Ok(Token::Number(Number::Integer(-3)))),
+        (4, Ok(Token::Number(Number::Integer(-4000)))),
+        (5, Ok(Token::Number(Number::Integer(-44)))),
+        (6, Ok(Token::Number(Number::Integer(-1000)))),
+        (6, Ok(Token::Number(Number::Integer(-200)))),
+        (6, Ok(Token::Number(Number::Integer(-42)))),
+        (6, Ok(Token::Number(Number::Integer(-42)))),
     ];
 
     compare_token_lists(&mut lexer, expected);
