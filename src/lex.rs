@@ -1,14 +1,14 @@
 use std::iter::Peekable;
 use std::str::Chars;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Number {
     Natural(u32),
     Integer(i32),
     Float(f32),
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Token {
     Begin,
     End,
@@ -202,3 +202,6 @@ impl<'a> Lexer<'a> {
         (self.line_number, Ok(Token::Fin))
     }
 }
+
+#[cfg(test)]
+mod test;
