@@ -129,6 +129,18 @@ impl<'a> Lexer<'a> {
         Ok(Token::String(string))
     }
 
+    fn parse_number(s: &str) -> Result<Token, String> {
+        if let Ok(nat) = s.parse() {
+            Ok(Token::Number(Number::Natural(nat)))
+        } else if let Ok(int) = s.parse() {
+            Ok(Token::Number(Number::Integer(int)))
+        } else if let Ok(float) = s.parse() {
+            Ok(Token::Number(Number::Float(float)))
+        } else {
+            Err(format!("'{}' isn't a number", s))
+        }
+    }
+
     fn number(&mut self) -> Result<Token, String> {
         let mut number = String::with_capacity(Lexer::DEFAULT_CAPACITY);
 
@@ -140,15 +152,7 @@ impl<'a> Lexer<'a> {
             }
         }
 
-        if let Ok(nat) = number.parse() {
-            Ok(Token::Number(Number::Natural(nat)))
-        } else if let Ok(int) = number.parse() {
-            Ok(Token::Number(Number::Integer(int)))
-        } else if let Ok(float) = number.parse() {
-            Ok(Token::Number(Number::Float(float)))
-        } else {
-            Err(format!("'{}' isn't a number", number))
-        }
+        Lexer::parse_number(number.as_ref())
     }
 
     fn operator(&mut self) -> Result<Token, String> {
@@ -167,8 +171,7 @@ impl<'a> Lexer<'a> {
             "-" => Ok(Token::Minus),
             "*" => Ok(Token::Mul),
             "/" => Ok(Token::Div),
-            n => self
-                .number()
+            n => Lexer::parse_number(operator.as_ref())
                 .map_err(|_err| format!("Unknown operator '{}'", n)),
         }
     }
