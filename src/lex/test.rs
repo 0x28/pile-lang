@@ -190,3 +190,29 @@ fn test_keywords() {
 
     compare_token_lists(&mut lexer, expected);
 }
+
+#[test]
+fn test_identifier() {
+    let mut lexer = Lexer::new(
+        "quote var 100 def
+         begin VAR 200 + end loop
+         definition_var looped while_not".chars()
+    );
+    let expected = vec![
+        (1, Ok(Token::Quote)),
+        (1, Ok(Token::Identifier(String::from("var")))),
+        (1, Ok(Token::Number(Number::Natural(100)))),
+        (1, Ok(Token::Def)),
+        (2, Ok(Token::Begin)),
+        (2, Ok(Token::Identifier(String::from("var")))),
+        (2, Ok(Token::Number(Number::Natural(200)))),
+        (2, Ok(Token::Plus)),
+        (2, Ok(Token::End)),
+        (2, Ok(Token::Loop)),
+        (3, Ok(Token::Identifier(String::from("definition_var")))),
+        (3, Ok(Token::Identifier(String::from("looped")))),
+        (3, Ok(Token::Identifier(String::from("while_not")))),
+    ];
+
+    compare_token_lists(&mut lexer, expected);
+}
