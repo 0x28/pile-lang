@@ -16,6 +16,7 @@ pub enum Token {
     Dotimes,
     While,
     Loop,
+    Quote,
     Plus,
     Minus,
     Div,
@@ -87,6 +88,7 @@ impl<'a> Lexer<'a> {
             "dotimes" => Token::Dotimes,
             "while" => Token::While,
             "loop" => Token::Loop,
+            "quote" => Token::Quote,
             _ => Token::Identifier(ident),
         })
     }

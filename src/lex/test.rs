@@ -166,7 +166,7 @@ fn test_keywords() {
           100 *
         end
 
-        while def dotimes LOOP DEF DOTIMES END BEGIN
+        while def dotimes LOOP DEF DOTIMES END BEGIN QUOTE quote
         ".chars(),
     );
     let expected = vec![
@@ -184,6 +184,8 @@ fn test_keywords() {
         (7, Ok(Token::Dotimes)),
         (7, Ok(Token::End)),
         (7, Ok(Token::Begin)),
+        (7, Ok(Token::Quote)),
+        (7, Ok(Token::Quote)),
     ];
 
     compare_token_lists(&mut lexer, expected);
