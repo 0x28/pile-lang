@@ -70,9 +70,9 @@ impl<'a> Lexer<'a> {
     fn identifier(&mut self) -> Result<Token, String> {
         let mut ident = String::with_capacity(Lexer::DEFAULT_CAPACITY);
 
-        while let Some(lookahead) = self.input.peek() {
-            if lookahead.is_alphanumeric() {
-                ident.push(*lookahead);
+        while let Some(&lookahead) = self.input.peek() {
+            if lookahead.is_alphanumeric() || lookahead == '_' {
+                ident.push(lookahead);
                 self.consume();
             } else {
                 break;
@@ -201,7 +201,7 @@ impl<'a> Lexer<'a> {
                 '"' => self.string(),
                 '0'...'9' => self.number(),
                 '+' | '-' | '*' | '/' => self.operator(),
-                c if c.is_alphabetic() => self.identifier(),
+                c if c.is_alphabetic() || c == '_' => self.identifier(),
                 c => {
                     self.consume();
                     Err(format!("Unknown char '{}'", c))
