@@ -156,3 +156,35 @@ fn test_numbers_float() {
 
     compare_token_lists(&mut lexer, expected);
 }
+
+#[test]
+fn test_keywords() {
+    let mut lexer = Lexer::new(
+        "
+        begin
+          10 +
+          100 *
+        end
+
+        while def dotimes LOOP DEF DOTIMES END BEGIN
+        ".chars(),
+    );
+    let expected = vec![
+        (2, Ok(Token::Begin)),
+        (3, Ok(Token::Number(Number::Natural(10)))),
+        (3, Ok(Token::Plus)),
+        (4, Ok(Token::Number(Number::Natural(100)))),
+        (4, Ok(Token::Mul)),
+        (5, Ok(Token::End)),
+        (7, Ok(Token::While)),
+        (7, Ok(Token::Def)),
+        (7, Ok(Token::Dotimes)),
+        (7, Ok(Token::Loop)),
+        (7, Ok(Token::Def)),
+        (7, Ok(Token::Dotimes)),
+        (7, Ok(Token::End)),
+        (7, Ok(Token::Begin)),
+    ];
+
+    compare_token_lists(&mut lexer, expected);
+}
