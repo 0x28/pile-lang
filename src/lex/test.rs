@@ -27,7 +27,7 @@ fn compare_token_lists(
 
 #[test]
 fn test_empty_program() {
-    let mut lexer = Lexer::new("".chars());
+    let mut lexer = Lexer::new("");
     let result = token_list(&mut lexer);
 
     assert_eq!(result.len(), 0);
@@ -35,7 +35,7 @@ fn test_empty_program() {
 
 #[test]
 fn test_comment_simple() {
-    let mut lexer = Lexer::new("# hello world\n1 1 +".chars());
+    let mut lexer = Lexer::new("# hello world\n1 1 +");
     let expected = vec![
         (2, Ok(Token::Number(Number::Natural(1)))),
         (2, Ok(Token::Number(Number::Natural(1)))),
@@ -47,7 +47,7 @@ fn test_comment_simple() {
 
 #[test]
 fn test_comment_only() {
-    let mut lexer = Lexer::new("# empty program".chars());
+    let mut lexer = Lexer::new("# empty program");
     let result = token_list(&mut lexer);
 
     assert_eq!(result.len(), 0);
@@ -55,7 +55,7 @@ fn test_comment_only() {
 
 #[test]
 fn test_string_simple() {
-    let mut lexer = Lexer::new("\"yay programming languages :)\"".chars());
+    let mut lexer = Lexer::new("\"yay programming languages :)\"");
     let expected = vec![(
         1,
         Ok(Token::String(String::from("yay programming languages :)"))),
@@ -66,7 +66,7 @@ fn test_string_simple() {
 
 #[test]
 fn test_string_escaped() {
-    let mut lexer = Lexer::new("\"\\n\\n\\n\\t\\r\0\"".chars());
+    let mut lexer = Lexer::new("\"\\n\\n\\n\\t\\r\0\"");
     let expected = vec![(1, Ok(Token::String(String::from("\n\n\n\t\r\0"))))];
 
     compare_token_lists(&mut lexer, expected);
@@ -74,7 +74,7 @@ fn test_string_escaped() {
 
 #[test]
 fn test_unknown_char() {
-    let mut lexer = Lexer::new("\\hello world\\".chars());
+    let mut lexer = Lexer::new("\\hello world\\");
     let expected = vec![
         (1, Err(String::from("Unknown char '\\'"))),
         (1, Ok(Token::Identifier(String::from("hello")))),
@@ -90,7 +90,6 @@ fn test_numbers_natural() {
     let mut lexer = Lexer::new(
         "100 2000 3000 123 4543 123 21393
          203 040 05060 70 80 002 1203004 003"
-            .chars(),
     );
     let expected = vec![
         (1, Ok(Token::Number(Number::Natural(100)))),
@@ -118,7 +117,6 @@ fn test_numbers_integer() {
     let mut lexer = Lexer::new(
         "-1\n-2\n-3\n-4000\n-0044
         -1000 -200 -42 -42"
-            .chars(),
     );
     let expected = vec![
         (1, Ok(Token::Number(Number::Integer(-1)))),
@@ -140,7 +138,6 @@ fn test_numbers_float() {
     let mut lexer = Lexer::new(
         "1.1\n2.2\n3.3\n-10e20\n-inf +inf
          3.1415 7777.7777 -3e-10"
-            .chars(),
     );
     let expected = vec![
         (1, Ok(Token::Number(Number::Float(1.1)))),
@@ -166,8 +163,7 @@ fn test_keywords() {
           100 *
         end
 
-        while def dotimes LOOP DEF DOTIMES END BEGIN QUOTE quote
-        ".chars(),
+        while def dotimes LOOP DEF DOTIMES END BEGIN QUOTE quote "
     );
     let expected = vec![
         (2, Ok(Token::Begin)),
@@ -196,7 +192,7 @@ fn test_identifier() {
     let mut lexer = Lexer::new(
         "quote var 100 def
          begin VAR 200 + end loop
-         definition_var looped while_not".chars()
+         definition_var looped while_not"
     );
     let expected = vec![
         (1, Ok(Token::Quote)),

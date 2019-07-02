@@ -35,9 +35,9 @@ pub struct Lexer<'a> {
 impl<'a> Lexer<'a> {
     const DEFAULT_CAPACITY: usize = 16;
 
-    pub fn new(input: Chars) -> Lexer {
+    pub fn new(s: &str) -> Lexer {
         Lexer {
-            input: input.peekable(),
+            input: s.chars().peekable(),
             line_number: 1,
         }
     }
