@@ -44,9 +44,9 @@ impl<'a> Lexer<'a> {
 
     fn skip<P>(&mut self, predicate: P)
     where
-        P: Fn(&char) -> bool,
+        P: Fn(char) -> bool,
     {
-        while let Some(lookahead) = self.input.peek() {
+        while let Some(&lookahead) = self.input.peek() {
             if predicate(lookahead) {
                 self.consume()
             } else {
@@ -55,12 +55,30 @@ impl<'a> Lexer<'a> {
         }
     }
 
+    fn collect_while<P>(&mut self, predicate: P) -> String
+    where
+        P: Fn(char) -> bool,
+    {
+        let mut word = String::with_capacity(Lexer::DEFAULT_CAPACITY);
+
+        while let Some(&lookahead) = self.input.peek() {
+            if predicate(lookahead) {
+                word.push(lookahead);
+                self.consume();
+            } else {
+                break;
+            }
+        }
+
+        word
+    }
+
     fn skip_comment(&mut self) {
-        self.skip(|&c| c != '\n');
+        self.skip(|c| c != '\n');
     }
 
     fn skip_whitespace(&mut self) {
-        self.skip(|c| c.is_whitespace() && *c != '\n');
+        self.skip(|c| c.is_whitespace() && c != '\n');
     }
 
     fn consume(&mut self) {
@@ -68,18 +86,9 @@ impl<'a> Lexer<'a> {
     }
 
     fn identifier(&mut self) -> Result<Token, String> {
-        let mut ident = String::with_capacity(Lexer::DEFAULT_CAPACITY);
-
-        while let Some(&lookahead) = self.input.peek() {
-            if lookahead.is_alphanumeric() || lookahead == '_' {
-                ident.push(lookahead);
-                self.consume();
-            } else {
-                break;
-            }
-        }
-
-        let ident = ident.to_lowercase();
+        let ident = self
+            .collect_while(|c| c.is_alphanumeric() || c == '_')
+            .to_lowercase();
 
         Ok(match ident.as_ref() {
             "begin" => Token::Begin,
@@ -144,33 +153,13 @@ impl<'a> Lexer<'a> {
     }
 
     fn number(&mut self) -> Result<Token, String> {
-        let mut number = String::with_capacity(Lexer::DEFAULT_CAPACITY);
-
-        while let Some(&lookahead) = self.input.peek() {
-            match lookahead {
-                c if c.is_whitespace() => break,
-                c => {
-                    self.consume();
-                    number.push(c);
-                }
-            }
-        }
+        let number = self.collect_while(|c| !c.is_whitespace() );
 
         Lexer::parse_number(number.as_ref())
     }
 
     fn operator(&mut self) -> Result<Token, String> {
-        let mut operator = String::with_capacity(Lexer::DEFAULT_CAPACITY);
-
-        while let Some(&lookahead) = self.input.peek() {
-            match lookahead {
-                c if c.is_whitespace() => break,
-                c => {
-                    self.consume();
-                    operator.push(c);
-                }
-            }
-        }
+        let operator = self.collect_while(|c| !c.is_whitespace() );
 
         match operator.as_ref() {
             "+" => Ok(Token::Plus),
