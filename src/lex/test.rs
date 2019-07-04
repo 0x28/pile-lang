@@ -230,3 +230,35 @@ fn test_whitespace() {
 
     compare_token_lists(&mut lexer, expected);
 }
+
+#[test]
+fn test_error_missing_backspace() {
+    let mut lexer = Lexer::new(
+        "1 2 3 * + \"cool string\\"
+    );
+    let expected = vec![
+        (1, Ok(Token::Number(Number::Natural(1)))),
+        (1, Ok(Token::Number(Number::Natural(2)))),
+        (1, Ok(Token::Number(Number::Natural(3)))),
+        (1, Ok(Token::Mul)),
+        (1, Ok(Token::Plus)),
+        (1, Err(String::from("Missing character after backspace."))),
+    ];
+
+    compare_token_lists(&mut lexer, expected);
+}
+
+#[test]
+fn test_error_unknown_escape() {
+    let mut lexer = Lexer::new(
+        "\"cool string\\t\\z\" 3.14 \"some string\\a\\b\\c test\" 100"
+    );
+    let expected = vec![
+        (1, Err(String::from("Unknown escape chars: \'\\z\'"))),
+        (1, Ok(Token::Number(Number::Float(3.14)))),
+        (1, Err(String::from("Unknown escape chars: \'\\a\' \'\\b\' \'\\c\'"))),
+        (1, Ok(Token::Number(Number::Natural(100)))),
+    ];
+
+    compare_token_lists(&mut lexer, expected);
+}
