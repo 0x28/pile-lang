@@ -251,7 +251,7 @@ fn test_error_missing_backspace() {
 #[test]
 fn test_error_unknown_escape() {
     let mut lexer = Lexer::new(
-        "\"cool string\\t\\z\" 3.14 \"some string\\a\\b\\c test\" 100"
+        "\"cool string\\t\\z\" 3.14 \"some string\\a\\b\\c \\\"test\" 100"
     );
     let expected = vec![
         (1, Err(String::from("Unknown escape chars: \'\\z\'"))),
