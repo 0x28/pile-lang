@@ -212,3 +212,21 @@ fn test_identifier() {
 
     compare_token_lists(&mut lexer, expected);
 }
+
+#[test]
+fn test_whitespace() {
+    let mut lexer = Lexer::new(
+        "\r\t100 200\t\r\n + \n\n 200 100 +\n\n\n\"hallo\"\t\t\t"
+    );
+    let expected = vec![
+        (1, Ok(Token::Number(Number::Natural(100)))),
+        (1, Ok(Token::Number(Number::Natural(200)))),
+        (2, Ok(Token::Plus)),
+        (4, Ok(Token::Number(Number::Natural(200)))),
+        (4, Ok(Token::Number(Number::Natural(100)))),
+        (4, Ok(Token::Plus)),
+        (7, Ok(Token::String(String::from("hallo")))),
+    ];
+
+    compare_token_lists(&mut lexer, expected);
+}
