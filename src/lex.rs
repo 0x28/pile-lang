@@ -102,42 +102,51 @@ impl<'a> Lexer<'a> {
         })
     }
 
-    fn escape_char(&mut self) -> Result<char, String> {
-        let &c = match self.input.peek() {
-            Some(c) => c,
-            _ => {
-                return Err(String::from("Missing character after backspace."))
-            }
-        };
-        self.consume();
-
+    fn escape_char(c: char) -> Result<char, char> {
         match c {
             't' => Ok('\t'),
             'r' => Ok('\r'),
             'n' => Ok('\n'),
             '0' => Ok('\0'),
             '"' => Ok('"'),
-            c => Err(format!("Unknown escape char '{}'", c)),
+            c => Err(c),
         }
     }
 
     fn string(&mut self) -> Result<Token, String> {
         let mut string = String::with_capacity(Lexer::DEFAULT_CAPACITY);
+        let mut unknown_escapes = vec![];
 
         self.consume();
         while let Some(&lookahead) = self.input.peek() {
             self.consume();
-            match lookahead {
-                '\\' => {
-                    let escaped = self.escape_char()?;
-                    string.push(escaped)
+            match (lookahead, self.input.peek()) {
+                ('\\', Some(&c)) => {
+                    self.consume();
+                    match Lexer::escape_char(c) {
+                        Ok(escaped) => string.push(escaped),
+                        Err(unknown) => unknown_escapes.push(unknown),
+                    }
                 }
-                '"' => break,
-                c => string.push(c),
+                ('\\', None) => {
+                    return Err(String::from(
+                        "Missing character after backspace.",
+                    ))
+                }
+                ('"', _) => break,
+                (c, _) => string.push(c),
             }
         }
 
-        Ok(Token::String(string))
+        if unknown_escapes.len() > 0 {
+            let mut error = String::from("Unknown escape chars:");
+            for unknown in unknown_escapes {
+                error.push_str(format!(" '\\{}'", unknown).as_ref());
+            }
+            Err(error)
+        } else {
+            Ok(Token::String(string))
+        }
     }
 
     fn parse_number(s: &str) -> Result<Token, String> {
@@ -153,13 +162,13 @@ impl<'a> Lexer<'a> {
     }
 
     fn number(&mut self) -> Result<Token, String> {
-        let number = self.collect_while(|c| !c.is_whitespace() );
+        let number = self.collect_while(|c| !c.is_whitespace());
 
         Lexer::parse_number(number.as_ref())
     }
 
     fn operator(&mut self) -> Result<Token, String> {
-        let operator = self.collect_while(|c| !c.is_whitespace() );
+        let operator = self.collect_while(|c| !c.is_whitespace());
 
         match operator.as_ref() {
             "+" => Ok(Token::Plus),
