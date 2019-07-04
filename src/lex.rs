@@ -60,7 +60,7 @@ impl<'a> Lexer<'a> {
     }
 
     fn skip_whitespace(&mut self) {
-        self.skip(|c| c.is_whitespace());
+        self.skip(|c| c.is_whitespace() && *c != '\n');
     }
 
     fn consume(&mut self) {
