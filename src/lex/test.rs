@@ -35,8 +35,11 @@ fn test_empty_program() {
 
 #[test]
 fn test_comment_simple() {
-    let mut lexer = Lexer::new("# hello world\n1 1 +");
+    let mut lexer = Lexer::new("2 3 *# hello world\n1 1 +");
     let expected = vec![
+        (1, Ok(Token::Number(Number::Natural(2)))),
+        (1, Ok(Token::Number(Number::Natural(3)))),
+        (1, Ok(Token::Mul)),
         (2, Ok(Token::Number(Number::Natural(1)))),
         (2, Ok(Token::Number(Number::Natural(1)))),
         (2, Ok(Token::Plus)),
@@ -55,7 +58,7 @@ fn test_comment_only() {
 
 #[test]
 fn test_string_simple() {
-    let mut lexer = Lexer::new("\"yay programming languages :)\"");
+    let mut lexer = Lexer::new("\"yay programming languages :)\"# comment");
     let expected = vec![(
         1,
         Ok(Token::String(String::from("yay programming languages :)"))),
@@ -66,8 +69,9 @@ fn test_string_simple() {
 
 #[test]
 fn test_string_escaped() {
-    let mut lexer = Lexer::new("\"\\n\\n\\n\\t\\r\0\"");
-    let expected = vec![(1, Ok(Token::String(String::from("\n\n\n\t\r\0"))))];
+    let mut lexer = Lexer::new("\"\\n\\n\\n\\t\\r\0#test#\"");
+    let expected =
+        vec![(1, Ok(Token::String(String::from("\n\n\n\t\r\0#test#"))))];
 
     compare_token_lists(&mut lexer, expected);
 }
@@ -88,7 +92,7 @@ fn test_unknown_char() {
 #[test]
 fn test_numbers_natural() {
     let mut lexer = Lexer::new(
-        "100 2000 3000 123 4543 123 21393
+        "100 2000 3000 123 4543 123 21393#123#123
          203 040 05060 70 80 002 1203004 003",
     );
     let expected = vec![
@@ -137,7 +141,7 @@ fn test_numbers_integer() {
 fn test_numbers_float() {
     let mut lexer = Lexer::new(
         "1.1\n2.2\n3.3\n-10e20\n-inf +inf
-         3.1415 7777.7777 -3e-10",
+         3.1415 7777.7777 -3e-10#number :)",
     );
     let expected = vec![
         (1, Ok(Token::Number(Number::Float(1.1)))),
@@ -158,9 +162,9 @@ fn test_numbers_float() {
 fn test_keywords() {
     let mut lexer = Lexer::new(
         "
-        begin
+        begin#what
           10 +
-          100 *
+          100 *# this is a operator
         end
 
         while def dotimes LOOP DEF DOTIMES END BEGIN QUOTE quote if IF",
@@ -269,7 +273,8 @@ fn test_error_unknown_escape() {
 
 #[test]
 fn test_error_unknown_char() {
-    let mut lexer = Lexer::new("\"var\" BEGIN 0 1 + 2 * \n{ END append }");
+    let mut lexer =
+        Lexer::new("\"var\" BEGIN 0 1 + 2 * \n{ END append }# comment");
     let expected = vec![
         (1, Ok(Token::String(String::from("var")))),
         (1, Ok(Token::Begin)),
