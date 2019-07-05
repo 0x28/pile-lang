@@ -198,7 +198,7 @@ fn test_identifier() {
     let mut lexer = Lexer::new(
         "quote var 100 def
          begin VAR 200 + end loop
-         definition_var looped while_not",
+         definition_var looped while_not# variable",
     );
     let expected = vec![
         (1, Ok(Token::Quote)),
