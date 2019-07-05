@@ -262,3 +262,24 @@ fn test_error_unknown_escape() {
 
     compare_token_lists(&mut lexer, expected);
 }
+
+#[test]
+fn test_error_unknown_char() {
+    let mut lexer = Lexer::new("\"var\" BEGIN 0 1 + 2 * \n{ END append }");
+    let expected = vec![
+        (1, Ok(Token::String(String::from("var")))),
+        (1, Ok(Token::Begin)),
+        (1, Ok(Token::Number(Number::Natural(0)))),
+        (1, Ok(Token::Number(Number::Natural(1)))),
+        (1, Ok(Token::Plus)),
+        (1, Ok(Token::Number(Number::Natural(2)))),
+        (1, Ok(Token::Mul)),
+        (2, Err(String::from("Unknown char '{'"))),
+        (2, Ok(Token::End)),
+        (2, Ok(Token::Identifier(String::from("append")))),
+        (2, Err(String::from("Unknown char '}'"))),
+    ];
+
+    compare_token_lists(&mut lexer, expected);
+}
+
