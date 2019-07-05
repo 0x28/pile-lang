@@ -302,3 +302,20 @@ fn test_error_invalid_number() {
     compare_token_lists(&mut lexer, expected);
 }
 
+#[test]
+fn test_error_unknown_operator() {
+    let mut lexer = Lexer::new("BEGIN x ++ y \n -- /= * \n END append");
+    let expected = vec![
+        (1, Ok(Token::Begin)),
+        (1, Ok(Token::Identifier(String::from("x")))),
+        (1, Err(String::from("Unknown operator '++'"))),
+        (1, Ok(Token::Identifier(String::from("y")))),
+        (2, Err(String::from("Unknown operator '--'"))),
+        (2, Err(String::from("Unknown operator '/='"))),
+        (2, Ok(Token::Mul)),
+        (3, Ok(Token::End)),
+        (3, Ok(Token::Identifier(String::from("append")))),
+    ];
+
+    compare_token_lists(&mut lexer, expected);
+}
