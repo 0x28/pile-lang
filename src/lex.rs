@@ -10,6 +10,7 @@ pub enum Number {
 
 #[derive(Debug, PartialEq)]
 pub enum Token {
+    If,
     Begin,
     End,
     Def,
@@ -91,6 +92,7 @@ impl<'a> Lexer<'a> {
             .to_lowercase();
 
         Ok(match ident.as_ref() {
+            "if" => Token::If,
             "begin" => Token::Begin,
             "end" => Token::End,
             "def" => Token::Def,
