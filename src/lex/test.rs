@@ -89,7 +89,7 @@ fn test_unknown_char() {
 fn test_numbers_natural() {
     let mut lexer = Lexer::new(
         "100 2000 3000 123 4543 123 21393
-         203 040 05060 70 80 002 1203004 003"
+         203 040 05060 70 80 002 1203004 003",
     );
     let expected = vec![
         (1, Ok(Token::Number(Number::Natural(100)))),
@@ -116,7 +116,7 @@ fn test_numbers_natural() {
 fn test_numbers_integer() {
     let mut lexer = Lexer::new(
         "-1\n-2\n-3\n-4000\n-0044
-        -1000 -200 -42 -42"
+        -1000 -200 -42 -42",
     );
     let expected = vec![
         (1, Ok(Token::Number(Number::Integer(-1)))),
@@ -137,7 +137,7 @@ fn test_numbers_integer() {
 fn test_numbers_float() {
     let mut lexer = Lexer::new(
         "1.1\n2.2\n3.3\n-10e20\n-inf +inf
-         3.1415 7777.7777 -3e-10"
+         3.1415 7777.7777 -3e-10",
     );
     let expected = vec![
         (1, Ok(Token::Number(Number::Float(1.1)))),
@@ -163,7 +163,7 @@ fn test_keywords() {
           100 *
         end
 
-        while def dotimes LOOP DEF DOTIMES END BEGIN QUOTE quote "
+        while def dotimes LOOP DEF DOTIMES END BEGIN QUOTE quote ",
     );
     let expected = vec![
         (2, Ok(Token::Begin)),
@@ -192,7 +192,7 @@ fn test_identifier() {
     let mut lexer = Lexer::new(
         "quote var 100 def
          begin VAR 200 + end loop
-         definition_var looped while_not"
+         definition_var looped while_not",
     );
     let expected = vec![
         (1, Ok(Token::Quote)),
@@ -215,9 +215,8 @@ fn test_identifier() {
 
 #[test]
 fn test_whitespace() {
-    let mut lexer = Lexer::new(
-        "\r\t100 200\t\r\n + \n\n 200 100 +\n\n\n\"hallo\"\t\t\t"
-    );
+    let mut lexer =
+        Lexer::new("\r\t100 200\t\r\n + \n\n 200 100 +\n\n\n\"hallo\"\t\t\t");
     let expected = vec![
         (1, Ok(Token::Number(Number::Natural(100)))),
         (1, Ok(Token::Number(Number::Natural(200)))),
@@ -233,9 +232,7 @@ fn test_whitespace() {
 
 #[test]
 fn test_error_missing_backspace() {
-    let mut lexer = Lexer::new(
-        "1 2 3 * + \"cool string\\"
-    );
+    let mut lexer = Lexer::new("1 2 3 * + \"cool string\\");
     let expected = vec![
         (1, Ok(Token::Number(Number::Natural(1)))),
         (1, Ok(Token::Number(Number::Natural(2)))),
@@ -251,12 +248,17 @@ fn test_error_missing_backspace() {
 #[test]
 fn test_error_unknown_escape() {
     let mut lexer = Lexer::new(
-        "\"cool string\\t\\z\" 3.14 \"some string\\a\\b\\c \\\"test\" 100"
+        "\"cool string\\t\\z\" 3.14 \"some string\\a\\b\\c \\\"test\" 100",
     );
     let expected = vec![
         (1, Err(String::from("Unknown escape chars: \'\\z\'"))),
         (1, Ok(Token::Number(Number::Float(3.14)))),
-        (1, Err(String::from("Unknown escape chars: \'\\a\' \'\\b\' \'\\c\'"))),
+        (
+            1,
+            Err(String::from(
+                "Unknown escape chars: \'\\a\' \'\\b\' \'\\c\'",
+            )),
+        ),
         (1, Ok(Token::Number(Number::Natural(100)))),
     ];
 
