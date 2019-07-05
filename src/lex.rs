@@ -164,13 +164,13 @@ impl<'a> Lexer<'a> {
     }
 
     fn number(&mut self) -> Result<Token, String> {
-        let number = self.collect_while(|c| !c.is_whitespace());
+        let number = self.collect_while(|c| !c.is_whitespace() && c != '#');
 
         Lexer::parse_number(number.as_ref())
     }
 
     fn operator(&mut self) -> Result<Token, String> {
-        let operator = self.collect_while(|c| !c.is_whitespace());
+        let operator = self.collect_while(|c| !c.is_whitespace() && c != '#');
 
         match operator.as_ref() {
             "+" => Ok(Token::Plus),
