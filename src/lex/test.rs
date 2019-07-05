@@ -283,3 +283,22 @@ fn test_error_unknown_char() {
     compare_token_lists(&mut lexer, expected);
 }
 
+#[test]
+fn test_error_invalid_number() {
+    let mut lexer = Lexer::new("BEGIN 002 122 + 2f \n 3d 3y * \n END append");
+    let expected = vec![
+        (1, Ok(Token::Begin)),
+        (1, Ok(Token::Number(Number::Natural(2)))),
+        (1, Ok(Token::Number(Number::Natural(122)))),
+        (1, Ok(Token::Plus)),
+        (1, Err(String::from("'2f' isn't a number"))),
+        (2, Err(String::from("'3d' isn't a number"))),
+        (2, Err(String::from("'3y' isn't a number"))),
+        (2, Ok(Token::Mul)),
+        (3, Ok(Token::End)),
+        (3, Ok(Token::Identifier(String::from("append")))),
+    ];
+
+    compare_token_lists(&mut lexer, expected);
+}
+
