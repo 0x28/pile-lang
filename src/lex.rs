@@ -1,3 +1,4 @@
+use std::fmt;
 use std::iter::Peekable;
 use std::str::Chars;
 
@@ -26,6 +27,31 @@ pub enum Token {
     Identifier(String),
     String(String),
     Fin,
+}
+
+impl fmt::Display for Token {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Token::Number(Number::Natural(n)) => write!(f, "natural '{}'", n),
+            Token::Number(Number::Integer(n)) => write!(f, "integer '{}'", n),
+            Token::Number(Number::Float(n)) => write!(f, "float '{}'", n),
+            Token::Identifier(ident) => write!(f, "identifier '{}'", ident),
+            Token::String(s) => write!(f, "\"{}\"", s),
+            Token::If => write!(f, "'if'"),
+            Token::Begin => write!(f, "'begin'"),
+            Token::End => write!(f, "'end'"),
+            Token::Def => write!(f, "'def'"),
+            Token::Dotimes => write!(f, "'dotimes'"),
+            Token::While => write!(f, "'while'"),
+            Token::Loop => write!(f, "'loop'"),
+            Token::Quote => write!(f, "'quote'"),
+            Token::Plus => write!(f, "'+'"),
+            Token::Minus => write!(f, "'-'"),
+            Token::Div => write!(f, "'/'"),
+            Token::Mul => write!(f, "'*'"),
+            Token::Fin => write!(f, "'EOF'"),
+        }
+    }
 }
 
 pub struct Lexer<'a> {
