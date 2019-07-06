@@ -166,7 +166,7 @@ impl<'a> Lexer<'a> {
             }
         }
 
-        if unknown_escapes.len() > 0 {
+        if !unknown_escapes.is_empty() {
             let mut error = String::from("Unknown escape chars:");
             for unknown in unknown_escapes {
                 error.push_str(format!(" '\\{}'", unknown).as_ref());
