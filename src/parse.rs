@@ -3,41 +3,102 @@ use crate::lex::Token;
 
 #[derive(Debug)]
 pub enum Ast {
-    Program(Vec<Expr>)
+    Program(Vec<Expr>),
 }
 
 #[derive(Debug)]
 pub enum Expr {
-    Atom(Token),
+    Atom { line: u64, token: Token },
     Block(Vec<Expr>),
 }
 
 pub struct Parser<'a> {
     lexer: Lexer<'a>,
-    // TODO lookahead: Token,
+    lookahead: Option<(u64, Token)>,
 }
 
 impl<'a> Parser<'a> {
     pub fn new(lexer: Lexer) -> Parser {
-        Parser { lexer }
+        Parser {
+            lexer,
+            lookahead: None,
+        }
     }
 
-    pub fn parse(&mut self) -> Result<Ast, String> {
-        // TODO self.expect(Token::Begin)?;
-        Ok(Ast::Program(vec![]))
+    pub fn parse(mut self) -> Result<Ast, String> {
+        let mut program = vec![];
+
+        loop {
+            self.consume()?;
+
+            match self.lookahead {
+                Some((_, Token::Fin)) => break,
+                Some((line, Token::End)) => {
+                    return Err(format!("Line {}: Unmatched 'end'.", line))
+                }
+                Some((_, Token::Begin)) => program.push(self.block()?),
+                Some((line, _)) => program.push(Expr::Atom {
+                    line,
+                    token: self.lookahead.take().unwrap().1,
+                }),
+                None => continue,
+            }
+        }
+
+        Ok(Ast::Program(program))
     }
 
-    fn expect(&mut self, expected: Token) -> Result<(), String> {
+    fn block(&mut self) -> Result<Expr, String> {
+        self.expect(Token::Begin)?;
+
+        let mut block = vec![];
+
+        loop {
+            self.consume()?;
+
+            match self.lookahead {
+                Some((line, Token::Fin)) => {
+                    return Err(format!(
+                        "Line {}: Expected 'end' found {}.",
+                        line,
+                        Token::Fin
+                    ))
+                }
+                Some((_, Token::End)) => break,
+                Some((_, Token::Begin)) => block.push(self.block()?),
+                Some((line, _)) => block.push(Expr::Atom {
+                    line,
+                    token: self.lookahead.take().unwrap().1,
+                }),
+                None => continue,
+            }
+        }
+
+        Ok(Expr::Block(block))
+    }
+
+    fn consume(&mut self) -> Result<(), String> {
         let (line, current_token) = self.lexer.next();
         let current_token = current_token?;
 
-        if current_token != expected {
-            Err(format!(
-                "Line {}: expected {} found {}.",
-                line, expected, current_token
-            ))
-        } else {
-            Ok(())
+        self.lookahead = Some((line, current_token));
+
+        Ok(())
+    }
+
+    fn expect(&mut self, expected: Token) -> Result<(), String> {
+        match &self.lookahead {
+            Some((line, current_token)) => {
+                if *current_token != expected {
+                    Err(format!(
+                        "Line {}: expected {} found {}.",
+                        line, expected, current_token
+                    ))
+                } else {
+                    Ok(())
+                }
+            }
+            None => Err(String::from("No lookahead found.")),
         }
     }
 }
