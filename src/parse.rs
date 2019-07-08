@@ -1,12 +1,12 @@
 use crate::lex::Lexer;
 use crate::lex::Token;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Ast {
     Program(Vec<Expr>),
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Expr {
     Atom { line: u64, token: Token },
     Block(Vec<Expr>),
@@ -102,3 +102,6 @@ impl<'a> Parser<'a> {
         }
     }
 }
+
+#[cfg(test)]
+mod test;
