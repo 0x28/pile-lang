@@ -73,3 +73,53 @@ fn test_simple3() {
         },
     )
 }
+
+#[test]
+fn test_simple4() {
+    expect_ast(
+        "quote var 100 def",
+        Ast {
+            expressions: vec![
+                Expr::Atom {
+                    line: 1,
+                    token: Token::Quote,
+                },
+                Expr::Atom {
+                    line: 1,
+                    token: Token::Identifier(String::from("var")),
+                },
+                Expr::Atom {
+                    line: 1,
+                    token: Token::Number(Number::Natural(100)),
+                },
+                Expr::Atom {
+                    line: 1,
+                    token: Token::Def,
+                },
+            ],
+        },
+    )
+}
+
+#[test]
+fn test_block1() {
+    expect_ast(
+        "begin 100 end 20 dotimes",
+        Ast {
+            expressions: vec![
+                Expr::Block(vec![Expr::Atom {
+                    line: 1,
+                    token: Token::Number(Number::Natural(100)),
+                }]),
+                Expr::Atom {
+                    line: 1,
+                    token: Token::Number(Number::Natural(20)),
+                },
+                Expr::Atom {
+                    line: 1,
+                    token: Token::Dotimes,
+                },
+            ],
+        },
+    )
+}
