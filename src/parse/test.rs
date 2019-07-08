@@ -1,11 +1,21 @@
 use super::*;
 use crate::lex::Number;
 
+fn ast_assert_eq(left: &Ast, right: &Ast) {
+    let left_iter = left.expressions.iter();
+    let right_iter = right.expressions.iter();
+
+    for (expr_left, expr_right) in left_iter.zip(right_iter) {
+        assert_eq!(expr_left, expr_right)
+    }
+}
+
 fn expect_ast(input: &str, ast: Ast) {
     let lex = Lexer::new(input);
     let parser = Parser::new(lex);
+    let result_ast = parser.parse().unwrap();
 
-    assert_eq!(ast, parser.parse().unwrap());
+    ast_assert_eq(&ast, &result_ast);
 }
 
 #[test]
