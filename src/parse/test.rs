@@ -10,27 +10,34 @@ fn expect_ast(input: &str, ast: Ast) {
 
 #[test]
 fn test_simple1() {
-    expect_ast("", Ast::Program(vec![]))
+    expect_ast(
+        "",
+        Ast {
+            expressions: vec![],
+        },
+    )
 }
 
 #[test]
 fn test_simple2() {
     expect_ast(
         "100 200 +",
-        Ast::Program(vec![
-            Expr::Atom {
-                line: 1,
-                token: Token::Number(Number::Natural(100)),
-            },
-            Expr::Atom {
-                line: 1,
-                token: Token::Number(Number::Natural(200)),
-            },
-            Expr::Atom {
-                line: 1,
-                token: Token::Plus,
-            },
-        ]),
+        Ast {
+            expressions: vec![
+                Expr::Atom {
+                    line: 1,
+                    token: Token::Number(Number::Natural(100)),
+                },
+                Expr::Atom {
+                    line: 1,
+                    token: Token::Number(Number::Natural(200)),
+                },
+                Expr::Atom {
+                    line: 1,
+                    token: Token::Plus,
+                },
+            ],
+        },
     )
 }
 
@@ -38,19 +45,21 @@ fn test_simple2() {
 fn test_simple3() {
     expect_ast(
         "\"hello world\" \" test\" append",
-        Ast::Program(vec![
-            Expr::Atom {
-                line: 1,
-                token: Token::String(String::from("hello world")),
-            },
-            Expr::Atom {
-                line: 1,
-                token: Token::String(String::from(" test")),
-            },
-            Expr::Atom {
-                line: 1,
-                token: Token::Identifier(String::from("append")),
-            },
-        ]),
+        Ast {
+            expressions: vec![
+                Expr::Atom {
+                    line: 1,
+                    token: Token::String(String::from("hello world")),
+                },
+                Expr::Atom {
+                    line: 1,
+                    token: Token::String(String::from(" test")),
+                },
+                Expr::Atom {
+                    line: 1,
+                    token: Token::Identifier(String::from("append")),
+                },
+            ],
+        },
     )
 }

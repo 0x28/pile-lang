@@ -2,8 +2,8 @@ use crate::lex::Lexer;
 use crate::lex::Token;
 
 #[derive(Debug, PartialEq)]
-pub enum Ast {
-    Program(Vec<Expr>),
+pub struct Ast {
+    expressions: Vec<Expr>,
 }
 
 #[derive(Debug, PartialEq)]
@@ -45,7 +45,9 @@ impl<'a> Parser<'a> {
             }
         }
 
-        Ok(Ast::Program(program))
+        Ok(Ast {
+            expressions: program,
+        })
     }
 
     fn block(&mut self) -> Result<Expr, String> {
