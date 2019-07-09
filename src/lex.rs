@@ -11,6 +11,7 @@ pub enum Number {
 
 #[derive(Debug, PartialEq)]
 pub enum Token {
+    // keywords
     If,
     Begin,
     End,
@@ -19,13 +20,22 @@ pub enum Token {
     While,
     Loop,
     Quote,
+    // arithmetic
     Plus,
     Minus,
     Div,
     Mul,
+    // predicates
+    Greater,
+    GreaterEqual,
+    Equal,
+    LessEqual,
+    Less,
+    // values
     Number(Number),
     Identifier(String),
     String(String),
+    // eof
     Fin,
 }
 
@@ -49,6 +59,11 @@ impl fmt::Display for Token {
             Token::Minus => write!(f, "'-'"),
             Token::Div => write!(f, "'/'"),
             Token::Mul => write!(f, "'*'"),
+            Token::Greater => write!(f, "'>'"),
+            Token::GreaterEqual => write!(f, "'>='"),
+            Token::Equal => write!(f, "'='"),
+            Token::LessEqual => write!(f, "'<='"),
+            Token::Less => write!(f, "'<'"),
             Token::Fin => write!(f, "'EOF'"),
         }
     }
@@ -203,6 +218,11 @@ impl<'a> Lexer<'a> {
             "-" => Ok(Token::Minus),
             "*" => Ok(Token::Mul),
             "/" => Ok(Token::Div),
+            ">" => Ok(Token::Greater),
+            ">=" => Ok(Token::GreaterEqual),
+            "=" => Ok(Token::Equal),
+            "<=" => Ok(Token::LessEqual),
+            "<" => Ok(Token::Less),
             n => Lexer::parse_number(operator.as_ref())
                 .map_err(|_err| format!("Unknown operator '{}'", n)),
         }
@@ -226,7 +246,7 @@ impl<'a> Lexer<'a> {
                 }
                 '"' => self.string(),
                 '0'...'9' => self.number(),
-                '+' | '-' | '*' | '/' => self.operator(),
+                '+' | '-' | '*' | '/' | '=' | '<' | '>' => self.operator(),
                 c if c.is_alphabetic() || c == '_' => self.identifier(),
                 c => {
                     self.consume();
