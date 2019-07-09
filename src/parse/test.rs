@@ -123,3 +123,30 @@ fn test_block1() {
         },
     )
 }
+
+#[test]
+fn test_block2() {
+    expect_ast(
+        "begin 100 end begin -100 end 1 if",
+        Ast {
+            expressions: vec![
+                Expr::Block(vec![Expr::Atom {
+                    line: 1,
+                    token: Token::Number(Number::Natural(100)),
+                }]),
+                Expr::Block(vec![Expr::Atom {
+                    line: 1,
+                    token: Token::Number(Number::Integer(-100)),
+                }]),
+                Expr::Atom {
+                    line: 1,
+                    token: Token::Number(Number::Natural(1)),
+                },
+                Expr::Atom {
+                    line: 1,
+                    token: Token::If,
+                },
+            ],
+        },
+    )
+}
