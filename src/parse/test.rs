@@ -217,3 +217,40 @@ end
         Err(String::from("Line 5: Unmatched 'end'.")),
     )
 }
+
+#[test]
+fn test_error_no_end1() {
+    expect_error(
+        "
+begin
+    1
+    begin
+        2
+    end
+    +
+    *
+",
+        Err(String::from("Line 9: Expected 'end' found 'EOF'.")),
+    )
+}
+
+#[test]
+fn test_error_no_end2() {
+    expect_error(
+        "
+begin 1
+  begin 2
+    begin 1
+      begin 2
+        begin 1
+          begin 2
+            begin 1
+              begin 2
+                begin 1
+                  begin 2
+                    begin 1
+                      begin 2
+",
+        Err(String::from("Line 14: Expected 'end' found 'EOF'.")),
+    )
+}
