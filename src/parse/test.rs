@@ -18,6 +18,14 @@ fn expect_ast(input: &str, ast: Ast) {
     ast_assert_eq(&ast, &result_ast);
 }
 
+fn expect_error(input: &str, err: Result<Ast, String>) {
+    let lex = Lexer::new(input);
+    let parser = Parser::new(lex);
+    let result_err = parser.parse();
+
+    assert_eq!(err, result_err);
+}
+
 #[test]
 fn test_simple1() {
     expect_ast(
@@ -195,4 +203,17 @@ end",
             ])],
         },
     );
+}
+
+#[test]
+fn test_error_unmatched_end() {
+    expect_error(
+        "
+begin
+    +
+end
+end
+",
+        Err(String::from("Line 5: Unmatched 'end'.")),
+    )
 }
