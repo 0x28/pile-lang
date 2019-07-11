@@ -158,3 +158,41 @@ fn test_block2() {
         },
     )
 }
+
+#[test]
+fn test_block3() {
+    expect_ast(
+        "
+begin
+    begin
+        \"a\"
+    end
+
+    begin
+        \"b\" 3.14 +
+    end
+end",
+        Ast {
+            expressions: vec![Expr::Block(vec![
+                Expr::Block(vec![Expr::Atom {
+                    line: 4,
+                    token: Token::String(String::from("a")),
+                }]),
+                Expr::Block(vec![
+                    Expr::Atom {
+                        line: 8,
+                        token: Token::String(String::from("b")),
+                    },
+                    Expr::Atom {
+                        line: 8,
+                        token: Token::Number(Number::Float(3.14)),
+                    },
+                    Expr::Atom {
+                        line: 8,
+                        token: Token::Plus,
+                    },
+                ]),
+            ])],
+        },
+    );
+}
