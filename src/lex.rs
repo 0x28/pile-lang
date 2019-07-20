@@ -10,11 +10,9 @@ pub enum Number {
 }
 
 #[derive(Debug, PartialEq)]
-pub enum Token {
-    // keywords
+pub enum Operator {
+    // control flow
     If,
-    Begin,
-    End,
     Def,
     Dotimes,
     While,
@@ -31,6 +29,14 @@ pub enum Token {
     Equal,
     LessEqual,
     Less,
+}
+
+#[derive(Debug, PartialEq)]
+pub enum Token {
+    // keywords
+    Begin,
+    End,
+    Operator(Operator),
     // values
     Number(Number),
     Identifier(String),
@@ -47,23 +53,23 @@ impl fmt::Display for Token {
             Token::Number(Number::Float(n)) => write!(f, "float '{}'", n),
             Token::Identifier(ident) => write!(f, "identifier '{}'", ident),
             Token::String(s) => write!(f, "\"{}\"", s),
-            Token::If => write!(f, "'if'"),
             Token::Begin => write!(f, "'begin'"),
             Token::End => write!(f, "'end'"),
-            Token::Def => write!(f, "'def'"),
-            Token::Dotimes => write!(f, "'dotimes'"),
-            Token::While => write!(f, "'while'"),
-            Token::Loop => write!(f, "'loop'"),
-            Token::Quote => write!(f, "'quote'"),
-            Token::Plus => write!(f, "'+'"),
-            Token::Minus => write!(f, "'-'"),
-            Token::Div => write!(f, "'/'"),
-            Token::Mul => write!(f, "'*'"),
-            Token::Greater => write!(f, "'>'"),
-            Token::GreaterEqual => write!(f, "'>='"),
-            Token::Equal => write!(f, "'='"),
-            Token::LessEqual => write!(f, "'<='"),
-            Token::Less => write!(f, "'<'"),
+            Token::Operator(Operator::If) => write!(f, "'if'"),
+            Token::Operator(Operator::Def) => write!(f, "'def'"),
+            Token::Operator(Operator::Dotimes) => write!(f, "'dotimes'"),
+            Token::Operator(Operator::While) => write!(f, "'while'"),
+            Token::Operator(Operator::Loop) => write!(f, "'loop'"),
+            Token::Operator(Operator::Quote) => write!(f, "'quote'"),
+            Token::Operator(Operator::Plus) => write!(f, "'+'"),
+            Token::Operator(Operator::Minus) => write!(f, "'-'"),
+            Token::Operator(Operator::Div) => write!(f, "'/'"),
+            Token::Operator(Operator::Mul) => write!(f, "'*'"),
+            Token::Operator(Operator::Greater) => write!(f, "'>'"),
+            Token::Operator(Operator::GreaterEqual) => write!(f, "'>='"),
+            Token::Operator(Operator::Equal) => write!(f, "'='"),
+            Token::Operator(Operator::LessEqual) => write!(f, "'<='"),
+            Token::Operator(Operator::Less) => write!(f, "'<'"),
             Token::Fin => write!(f, "'EOF'"),
         }
     }
@@ -133,14 +139,14 @@ impl<'a> Lexer<'a> {
             .to_lowercase();
 
         Ok(match ident.as_ref() {
-            "if" => Token::If,
             "begin" => Token::Begin,
             "end" => Token::End,
-            "def" => Token::Def,
-            "dotimes" => Token::Dotimes,
-            "while" => Token::While,
-            "loop" => Token::Loop,
-            "quote" => Token::Quote,
+            "if" => Token::Operator(Operator::If),
+            "def" => Token::Operator(Operator::Def),
+            "dotimes" => Token::Operator(Operator::Dotimes),
+            "while" => Token::Operator(Operator::While),
+            "loop" => Token::Operator(Operator::Loop),
+            "quote" => Token::Operator(Operator::Quote),
             _ => Token::Identifier(ident),
         })
     }
@@ -214,15 +220,15 @@ impl<'a> Lexer<'a> {
         let operator = self.collect_while(|c| !c.is_whitespace() && c != '#');
 
         match operator.as_ref() {
-            "+" => Ok(Token::Plus),
-            "-" => Ok(Token::Minus),
-            "*" => Ok(Token::Mul),
-            "/" => Ok(Token::Div),
-            ">" => Ok(Token::Greater),
-            ">=" => Ok(Token::GreaterEqual),
-            "=" => Ok(Token::Equal),
-            "<=" => Ok(Token::LessEqual),
-            "<" => Ok(Token::Less),
+            "+" => Ok(Token::Operator(Operator::Plus)),
+            "-" => Ok(Token::Operator(Operator::Minus)),
+            "*" => Ok(Token::Operator(Operator::Mul)),
+            "/" => Ok(Token::Operator(Operator::Div)),
+            ">" => Ok(Token::Operator(Operator::Greater)),
+            ">=" => Ok(Token::Operator(Operator::GreaterEqual)),
+            "=" => Ok(Token::Operator(Operator::Equal)),
+            "<=" => Ok(Token::Operator(Operator::LessEqual)),
+            "<" => Ok(Token::Operator(Operator::Less)),
             n => Lexer::parse_number(operator.as_ref())
                 .map_err(|_err| format!("Unknown operator '{}'", n)),
         }

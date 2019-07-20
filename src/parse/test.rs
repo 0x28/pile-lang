@@ -1,5 +1,6 @@
 use super::*;
 use crate::lex::Number;
+use crate::lex::Operator;
 
 fn ast_assert_eq(left: &Ast, right: &Ast) {
     let left_iter = left.expressions.iter();
@@ -52,7 +53,7 @@ fn test_simple2() {
                 },
                 Expr::Atom {
                     line: 1,
-                    token: Token::Plus,
+                    token: Token::Operator(Operator::Plus),
                 },
             ],
         },
@@ -90,7 +91,7 @@ fn test_simple4() {
             expressions: vec![
                 Expr::Atom {
                     line: 1,
-                    token: Token::Quote,
+                    token: Token::Operator(Operator::Quote),
                 },
                 Expr::Atom {
                     line: 1,
@@ -102,7 +103,7 @@ fn test_simple4() {
                 },
                 Expr::Atom {
                     line: 1,
-                    token: Token::Def,
+                    token: Token::Operator(Operator::Def),
                 },
             ],
         },
@@ -125,7 +126,7 @@ fn test_block1() {
                 },
                 Expr::Atom {
                     line: 1,
-                    token: Token::Dotimes,
+                    token: Token::Operator(Operator::Dotimes),
                 },
             ],
         },
@@ -156,11 +157,11 @@ fn test_block2() {
                 },
                 Expr::Atom {
                     line: 1,
-                    token: Token::Greater,
+                    token: Token::Operator(Operator::Greater),
                 },
                 Expr::Atom {
                     line: 1,
-                    token: Token::If,
+                    token: Token::Operator(Operator::If),
                 },
             ],
         },
@@ -197,7 +198,7 @@ end",
                     },
                     Expr::Atom {
                         line: 8,
-                        token: Token::Plus,
+                        token: Token::Operator(Operator::Plus),
                     },
                 ]),
             ])],

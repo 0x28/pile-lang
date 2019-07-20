@@ -39,10 +39,10 @@ fn test_comment_simple() {
     let expected = vec![
         (1, Ok(Token::Number(Number::Natural(2)))),
         (1, Ok(Token::Number(Number::Natural(3)))),
-        (1, Ok(Token::Mul)),
+        (1, Ok(Token::Operator(Operator::Mul))),
         (2, Ok(Token::Number(Number::Natural(1)))),
         (2, Ok(Token::Number(Number::Natural(1)))),
-        (2, Ok(Token::Plus)),
+        (2, Ok(Token::Operator(Operator::Plus))),
     ];
 
     compare_token_lists(&mut lexer, expected);
@@ -172,22 +172,22 @@ fn test_keywords() {
     let expected = vec![
         (2, Ok(Token::Begin)),
         (3, Ok(Token::Number(Number::Natural(10)))),
-        (3, Ok(Token::Plus)),
+        (3, Ok(Token::Operator(Operator::Plus))),
         (4, Ok(Token::Number(Number::Natural(100)))),
-        (4, Ok(Token::Mul)),
+        (4, Ok(Token::Operator(Operator::Mul))),
         (5, Ok(Token::End)),
-        (7, Ok(Token::While)),
-        (7, Ok(Token::Def)),
-        (7, Ok(Token::Dotimes)),
-        (7, Ok(Token::Loop)),
-        (7, Ok(Token::Def)),
-        (7, Ok(Token::Dotimes)),
+        (7, Ok(Token::Operator(Operator::While))),
+        (7, Ok(Token::Operator(Operator::Def))),
+        (7, Ok(Token::Operator(Operator::Dotimes))),
+        (7, Ok(Token::Operator(Operator::Loop))),
+        (7, Ok(Token::Operator(Operator::Def))),
+        (7, Ok(Token::Operator(Operator::Dotimes))),
         (7, Ok(Token::End)),
         (7, Ok(Token::Begin)),
-        (7, Ok(Token::Quote)),
-        (7, Ok(Token::Quote)),
-        (7, Ok(Token::If)),
-        (7, Ok(Token::If)),
+        (7, Ok(Token::Operator(Operator::Quote))),
+        (7, Ok(Token::Operator(Operator::Quote))),
+        (7, Ok(Token::Operator(Operator::If))),
+        (7, Ok(Token::Operator(Operator::If))),
     ];
 
     compare_token_lists(&mut lexer, expected);
@@ -201,16 +201,16 @@ fn test_identifier() {
          definition_var looped while_not# variable",
     );
     let expected = vec![
-        (1, Ok(Token::Quote)),
+        (1, Ok(Token::Operator(Operator::Quote))),
         (1, Ok(Token::Identifier(String::from("var")))),
         (1, Ok(Token::Number(Number::Natural(100)))),
-        (1, Ok(Token::Def)),
+        (1, Ok(Token::Operator(Operator::Def))),
         (2, Ok(Token::Begin)),
         (2, Ok(Token::Identifier(String::from("var")))),
         (2, Ok(Token::Number(Number::Natural(200)))),
-        (2, Ok(Token::Plus)),
+        (2, Ok(Token::Operator(Operator::Plus))),
         (2, Ok(Token::End)),
-        (2, Ok(Token::Loop)),
+        (2, Ok(Token::Operator(Operator::Loop))),
         (3, Ok(Token::Identifier(String::from("definition_var")))),
         (3, Ok(Token::Identifier(String::from("looped")))),
         (3, Ok(Token::Identifier(String::from("while_not")))),
@@ -227,10 +227,10 @@ fn test_whitespace() {
     let expected = vec![
         (1, Ok(Token::Number(Number::Natural(100)))),
         (1, Ok(Token::Number(Number::Natural(200)))),
-        (2, Ok(Token::Plus)),
+        (2, Ok(Token::Operator(Operator::Plus))),
         (4, Ok(Token::Number(Number::Natural(200)))),
         (4, Ok(Token::Number(Number::Natural(100)))),
-        (4, Ok(Token::Plus)),
+        (4, Ok(Token::Operator(Operator::Plus))),
         (7, Ok(Token::String(String::from("hallo")))),
     ];
 
@@ -242,15 +242,15 @@ fn test_operators() {
     let mut lexer =
         Lexer::new("\r\t+ -\t\r\n * /\n\n > >=\n\n\n< <=\t\t\t=");
     let expected = vec![
-        (1, Ok(Token::Plus)),
-        (1, Ok(Token::Minus)),
-        (2, Ok(Token::Mul)),
-        (2, Ok(Token::Div)),
-        (4, Ok(Token::Greater)),
-        (4, Ok(Token::GreaterEqual)),
-        (7, Ok(Token::Less)),
-        (7, Ok(Token::LessEqual)),
-        (7, Ok(Token::Equal)),
+        (1, Ok(Token::Operator(Operator::Plus))),
+        (1, Ok(Token::Operator(Operator::Minus))),
+        (2, Ok(Token::Operator(Operator::Mul))),
+        (2, Ok(Token::Operator(Operator::Div))),
+        (4, Ok(Token::Operator(Operator::Greater))),
+        (4, Ok(Token::Operator(Operator::GreaterEqual))),
+        (7, Ok(Token::Operator(Operator::Less))),
+        (7, Ok(Token::Operator(Operator::LessEqual))),
+        (7, Ok(Token::Operator(Operator::Equal))),
     ];
 
     compare_token_lists(&mut lexer, expected);
@@ -263,8 +263,8 @@ fn test_error_missing_backspace() {
         (1, Ok(Token::Number(Number::Natural(1)))),
         (1, Ok(Token::Number(Number::Natural(2)))),
         (1, Ok(Token::Number(Number::Natural(3)))),
-        (1, Ok(Token::Mul)),
-        (1, Ok(Token::Plus)),
+        (1, Ok(Token::Operator(Operator::Mul))),
+        (1, Ok(Token::Operator(Operator::Plus))),
         (1, Err(String::from("Missing character after backspace."))),
     ];
 
@@ -300,9 +300,9 @@ fn test_error_unknown_char() {
         (1, Ok(Token::Begin)),
         (1, Ok(Token::Number(Number::Natural(0)))),
         (1, Ok(Token::Number(Number::Natural(1)))),
-        (1, Ok(Token::Plus)),
+        (1, Ok(Token::Operator(Operator::Plus))),
         (1, Ok(Token::Number(Number::Natural(2)))),
-        (1, Ok(Token::Mul)),
+        (1, Ok(Token::Operator(Operator::Mul))),
         (2, Err(String::from("Unknown char '{'"))),
         (2, Ok(Token::End)),
         (2, Ok(Token::Identifier(String::from("append")))),
@@ -319,11 +319,11 @@ fn test_error_invalid_number() {
         (1, Ok(Token::Begin)),
         (1, Ok(Token::Number(Number::Natural(2)))),
         (1, Ok(Token::Number(Number::Natural(122)))),
-        (1, Ok(Token::Plus)),
+        (1, Ok(Token::Operator(Operator::Plus))),
         (1, Err(String::from("'2f' isn't a number"))),
         (2, Err(String::from("'3d' isn't a number"))),
         (2, Err(String::from("'3y' isn't a number"))),
-        (2, Ok(Token::Mul)),
+        (2, Ok(Token::Operator(Operator::Mul))),
         (3, Ok(Token::End)),
         (3, Ok(Token::Identifier(String::from("append")))),
     ];
@@ -341,7 +341,7 @@ fn test_error_unknown_operator() {
         (1, Ok(Token::Identifier(String::from("y")))),
         (2, Err(String::from("Unknown operator '--'"))),
         (2, Err(String::from("Unknown operator '/='"))),
-        (2, Ok(Token::Mul)),
+        (2, Ok(Token::Operator(Operator::Mul))),
         (3, Ok(Token::End)),
         (3, Ok(Token::Identifier(String::from("append")))),
     ];
