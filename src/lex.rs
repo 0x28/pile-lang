@@ -2,7 +2,7 @@ use std::fmt;
 use std::iter::Peekable;
 use std::str::Chars;
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Number {
     Natural(u32),
     Integer(i32),

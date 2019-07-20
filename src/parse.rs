@@ -3,7 +3,7 @@ use crate::lex::Token;
 
 #[derive(Debug, PartialEq)]
 pub struct Ast {
-    expressions: Vec<Expr>,
+    pub expressions: Vec<Expr>,
 }
 
 #[derive(Debug, PartialEq)]
