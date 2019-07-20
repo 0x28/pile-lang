@@ -67,18 +67,12 @@ impl Interpreter {
         stack: &mut Vec<RuntimeValue>,
     ) -> Result<(), String>
     where
-        N: Fn(u32, u32) -> Option<u32>,
-        I: Fn(i32, i32) -> Option<i32>,
+        N: Fn(u32, u32) -> Result<u32, String>,
+        I: Fn(i32, i32) -> Result<i32, String>,
         F: Fn(f32, f32) -> f32,
     {
-        let right = match stack.pop() {
-            Some(value) => value,
-            None => return Err(String::from("Stack underflow"))
-        };
-        let left = match stack.pop() {
-            Some(value) => value,
-            None => return Err(String::from("Stack underflow"))
-        };
+        let right = stack.pop().ok_or("Stack underflow".to_owned())?;
+        let left = stack.pop().ok_or("Stack underflow".to_owned())?;
 
         let (left, right) = match (left, right) {
             (RuntimeValue::Number(lhs), RuntimeValue::Number(rhs)) => {
@@ -91,18 +85,10 @@ impl Interpreter {
 
         let result = match (left, right) {
             (Number::Natural(lhs), Number::Natural(rhs)) => {
-                let value = match op_natural(lhs, rhs) {
-                    Some(value) => value,
-                    None => return Err(format!("Numeric overflow"))
-                };
-                Number::Natural(value)
+                Number::Natural(op_natural(lhs, rhs)?)
             }
             (Number::Integer(lhs), Number::Integer(rhs)) => {
-                let value = match op_integer(lhs, rhs) {
-                    Some(value) => value,
-                    None => return Err(format!("Numeric overflow"))
-                };
-                Number::Integer(value)
+                Number::Integer(op_integer(lhs, rhs)?)
             }
             (Number::Float(lhs), Number::Float(rhs)) => {
                 Number::Float(op_float(lhs, rhs))
@@ -127,32 +113,48 @@ impl Interpreter {
         match op {
             Operator::Plus => {
                 return Interpreter::apply_numeric(
-                    |a, b| a.checked_add(b),
-                    |a, b| a.checked_add(b),
+                    |a, b| {
+                        a.checked_add(b).ok_or("Numeric overflow".to_owned())
+                    },
+                    |a, b| {
+                        a.checked_add(b).ok_or("Numeric overflow".to_owned())
+                    },
                     |a, b| a + b,
                     stack,
                 )
             }
             Operator::Minus => {
                 return Interpreter::apply_numeric(
-                    |a, b| a.checked_sub(b),
-                    |a, b| a.checked_sub(b),
+                    |a, b| {
+                        a.checked_sub(b).ok_or("Numeric overflow".to_owned())
+                    },
+                    |a, b| {
+                        a.checked_sub(b).ok_or("Numeric overflow".to_owned())
+                    },
                     |a, b| a - b,
                     stack,
                 )
             }
             Operator::Mul => {
                 return Interpreter::apply_numeric(
-                    |a, b| a.checked_mul(b),
-                    |a, b| a.checked_mul(b),
+                    |a, b| {
+                        a.checked_mul(b).ok_or("Numeric overflow".to_owned())
+                    },
+                    |a, b| {
+                        a.checked_mul(b).ok_or("Numeric overflow".to_owned())
+                    },
                     |a, b| a * b,
                     stack,
                 )
             }
             Operator::Div => {
                 return Interpreter::apply_numeric(
-                    |a, b| a.checked_div(b),
-                    |a, b| a.checked_div(b),
+                    |a, b| {
+                        a.checked_div(b).ok_or("Division by zero".to_owned())
+                    },
+                    |a, b| {
+                        a.checked_div(b).ok_or("Division by zero".to_owned())
+                    },
                     |a, b| a / b,
                     stack,
                 )
