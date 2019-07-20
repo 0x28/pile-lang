@@ -110,57 +110,33 @@ impl Interpreter {
         op: &Operator,
         stack: &mut Vec<RuntimeValue>,
     ) -> Result<(), String> {
-        match op {
-            Operator::Plus => {
-                return Interpreter::apply_numeric(
-                    |a, b| {
-                        a.checked_add(b).ok_or("Numeric overflow".to_owned())
-                    },
-                    |a, b| {
-                        a.checked_add(b).ok_or("Numeric overflow".to_owned())
-                    },
-                    |a, b| a + b,
-                    stack,
-                )
-            }
-            Operator::Minus => {
-                return Interpreter::apply_numeric(
-                    |a, b| {
-                        a.checked_sub(b).ok_or("Numeric overflow".to_owned())
-                    },
-                    |a, b| {
-                        a.checked_sub(b).ok_or("Numeric overflow".to_owned())
-                    },
-                    |a, b| a - b,
-                    stack,
-                )
-            }
-            Operator::Mul => {
-                return Interpreter::apply_numeric(
-                    |a, b| {
-                        a.checked_mul(b).ok_or("Numeric overflow".to_owned())
-                    },
-                    |a, b| {
-                        a.checked_mul(b).ok_or("Numeric overflow".to_owned())
-                    },
-                    |a, b| a * b,
-                    stack,
-                )
-            }
-            Operator::Div => {
-                return Interpreter::apply_numeric(
-                    |a, b| {
-                        a.checked_div(b).ok_or("Division by zero".to_owned())
-                    },
-                    |a, b| {
-                        a.checked_div(b).ok_or("Division by zero".to_owned())
-                    },
-                    |a, b| a / b,
-                    stack,
-                )
-            }
+        return match op {
+            Operator::Plus => Interpreter::apply_numeric(
+                |a, b| a.checked_add(b).ok_or("Numeric overflow".to_owned()),
+                |a, b| a.checked_add(b).ok_or("Numeric overflow".to_owned()),
+                |a, b| a + b,
+                stack,
+            ),
+            Operator::Minus => Interpreter::apply_numeric(
+                |a, b| a.checked_sub(b).ok_or("Numeric overflow".to_owned()),
+                |a, b| a.checked_sub(b).ok_or("Numeric overflow".to_owned()),
+                |a, b| a - b,
+                stack,
+            ),
+            Operator::Mul => Interpreter::apply_numeric(
+                |a, b| a.checked_mul(b).ok_or("Numeric overflow".to_owned()),
+                |a, b| a.checked_mul(b).ok_or("Numeric overflow".to_owned()),
+                |a, b| a * b,
+                stack,
+            ),
+            Operator::Div => Interpreter::apply_numeric(
+                |a, b| a.checked_div(b).ok_or("Division by zero".to_owned()),
+                |a, b| a.checked_div(b).ok_or("Division by zero".to_owned()),
+                |a, b| a / b,
+                stack,
+            ),
 
             _ => Err(String::from("Unknown operation")),
-        }
+        };
     }
 }
