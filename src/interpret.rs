@@ -5,56 +5,56 @@ use crate::parse::Ast;
 use crate::parse::Expr;
 
 #[derive(Debug)]
-pub enum RuntimeValue {
-    Function(usize),
+pub enum RuntimeValue<'a> {
+    Function(&'a [Expr]),
     Operator(Operator),
     Number(Number),
     Identifier(String),
     String(String),
 }
 
-pub struct Interpreter {
+pub struct Interpreter<'a> {
     program: Ast,
-    stack: Vec<RuntimeValue>,
-    position: usize,
+    stack: Vec<RuntimeValue<'a>>,
 }
 
-impl Interpreter {
-    pub fn new(program: Ast) -> Interpreter {
+impl<'a> Interpreter<'a> {
+    pub fn new(program: Ast) -> Interpreter<'a> {
         Interpreter {
             program,
             stack: vec![],
-            position: 0,
         }
     }
 
-    pub fn run(&mut self) -> Result<&RuntimeValue, String> {
-        while self.position < self.program.expressions.len() {
-            match &self.program.expressions[self.position] {
+    pub fn run(&mut self) -> Result<&'a RuntimeValue, String> {
+        Interpreter::call(&mut self.stack, &self.program.expressions)
+    }
+
+    fn call(
+        stack: &'a mut Vec<RuntimeValue<'a>>,
+        expressions: &'a [Expr],
+    ) -> Result<&'a RuntimeValue<'a>, String> {
+        for expr in expressions {
+            match expr {
                 Expr::Atom { token: atom, .. } => match atom {
-                    Token::Operator(op) => {
-                        Interpreter::apply(op, &mut self.stack)?
-                    }
+                    Token::Operator(op) => Interpreter::apply(op, stack)?,
                     Token::Number(num) => {
-                        self.stack.push(RuntimeValue::Number(num.clone()));
+                        stack.push(RuntimeValue::Number(num.clone()));
                     }
                     Token::Identifier(ident) => (),
                     Token::String(string) => {
-                        self.stack.push(RuntimeValue::String(string.clone()))
+                        stack.push(RuntimeValue::String(string.clone()))
                     }
                     token => {
                         return Err(format!("Unexpected token \'{}\'", token))
                     }
                 },
-                Expr::Block(_) => {
-                    self.stack.push(RuntimeValue::Function(self.position))
-                }
+                Expr::Block(expr) => stack.push(RuntimeValue::Function(&expr)),
             }
-            self.position += 1;
-            println!("stack: {:?}", self.stack);
+            println!("stack: {:?}", stack);
         }
 
-        match self.stack.last() {
+        match stack.last() {
             Some(value) => Ok(value),
             None => Err(String::from("Stack underflow")),
         }
