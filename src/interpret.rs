@@ -9,7 +9,7 @@ pub enum RuntimeValue {
     Function(usize),
     Operator(Operator),
     Number(Number),
-    Identfiier(String),
+    Identifier(String),
     String(String),
 }
 
@@ -67,8 +67,8 @@ impl Interpreter {
         stack: &mut Vec<RuntimeValue>,
     ) -> Result<(), String>
     where
-        N: Fn(u32, u32) -> u32,
-        I: Fn(i32, i32) -> i32,
+        N: Fn(u32, u32) -> Option<u32>,
+        I: Fn(i32, i32) -> Option<i32>,
         F: Fn(f32, f32) -> f32,
     {
         let right = match stack.pop() {
@@ -91,10 +91,18 @@ impl Interpreter {
 
         let result = match (left, right) {
             (Number::Natural(lhs), Number::Natural(rhs)) => {
-                Number::Natural(op_natural(lhs, rhs))
+                let value = match op_natural(lhs, rhs) {
+                    Some(value) => value,
+                    None => return Err(format!("Numeric overflow"))
+                };
+                Number::Natural(value)
             }
             (Number::Integer(lhs), Number::Integer(rhs)) => {
-                Number::Integer(op_integer(lhs, rhs))
+                let value = match op_integer(lhs, rhs) {
+                    Some(value) => value,
+                    None => return Err(format!("Numeric overflow"))
+                };
+                Number::Integer(value)
             }
             (Number::Float(lhs), Number::Float(rhs)) => {
                 Number::Float(op_float(lhs, rhs))
@@ -119,32 +127,32 @@ impl Interpreter {
         match op {
             Operator::Plus => {
                 return Interpreter::apply_numeric(
-                    |a, b| a + b,
-                    |a, b| a + b,
+                    |a, b| a.checked_add(b),
+                    |a, b| a.checked_add(b),
                     |a, b| a + b,
                     stack,
                 )
             }
             Operator::Minus => {
                 return Interpreter::apply_numeric(
-                    |a, b| a - b,
-                    |a, b| a - b,
+                    |a, b| a.checked_sub(b),
+                    |a, b| a.checked_sub(b),
                     |a, b| a - b,
                     stack,
                 )
             }
             Operator::Mul => {
                 return Interpreter::apply_numeric(
-                    |a, b| a * b,
-                    |a, b| a * b,
+                    |a, b| a.checked_mul(b),
+                    |a, b| a.checked_mul(b),
                     |a, b| a * b,
                     stack,
                 )
             }
             Operator::Div => {
                 return Interpreter::apply_numeric(
-                    |a, b| a / b,
-                    |a, b| a / b,
+                    |a, b| a.checked_div(b),
+                    |a, b| a.checked_div(b),
                     |a, b| a / b,
                     stack,
                 )
