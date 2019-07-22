@@ -4,7 +4,7 @@ use crate::lex::Token;
 use crate::parse::Ast;
 use crate::parse::Expr;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum RuntimeValue<'a> {
     Function(&'a [Expr]),
     Operator(Operator),
@@ -140,3 +140,6 @@ impl<'a> Interpreter<'a> {
         };
     }
 }
+
+#[cfg(test)]
+mod test;
