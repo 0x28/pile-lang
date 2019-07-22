@@ -41,6 +41,7 @@ pub enum Token {
     Number(Number),
     Identifier(String),
     String(String),
+    Boolean(bool),
     // eof
     Fin,
 }
@@ -53,6 +54,8 @@ impl fmt::Display for Token {
             Token::Number(Number::Float(n)) => write!(f, "float '{}'", n),
             Token::Identifier(ident) => write!(f, "identifier '{}'", ident),
             Token::String(s) => write!(f, "\"{}\"", s),
+            Token::Boolean(true) => write!(f, "true"),
+            Token::Boolean(false) => write!(f, "false"),
             Token::Begin => write!(f, "'begin'"),
             Token::End => write!(f, "'end'"),
             Token::Operator(Operator::If) => write!(f, "'if'"),
@@ -147,6 +150,8 @@ impl<'a> Lexer<'a> {
             "while" => Token::Operator(Operator::While),
             "loop" => Token::Operator(Operator::Loop),
             "quote" => Token::Operator(Operator::Quote),
+            "true" => Token::Boolean(true),
+            "false" => Token::Boolean(false),
             _ => Token::Identifier(ident),
         })
     }

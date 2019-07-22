@@ -159,6 +159,24 @@ fn test_numbers_float() {
 }
 
 #[test]
+fn test_boolean() {
+    let mut lexer = Lexer::new(
+        "true false true
+         false true false",
+    );
+    let expected = vec![
+        (1, Ok(Token::Boolean(true))),
+        (1, Ok(Token::Boolean(false))),
+        (1, Ok(Token::Boolean(true))),
+        (2, Ok(Token::Boolean(false))),
+        (2, Ok(Token::Boolean(true))),
+        (2, Ok(Token::Boolean(false))),
+    ];
+
+    compare_token_lists(&mut lexer, expected);
+}
+
+#[test]
 fn test_keywords() {
     let mut lexer = Lexer::new(
         "
