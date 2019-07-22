@@ -3,7 +3,7 @@ use crate::lex::Lexer;
 use crate::lex::Number;
 use crate::parse::Parser;
 
-fn expect_value(prog: &str, value: Result<&RuntimeValue, String>) {
+fn expect_value(prog: &str, value: Result<RuntimeValue, String>) {
     let lexer = Lexer::new(prog);
     let parser = Parser::new(lexer);
     let mut interpreter =
@@ -14,30 +14,38 @@ fn expect_value(prog: &str, value: Result<&RuntimeValue, String>) {
 
 #[test]
 fn test_arith1() {
-    expect_value("1 2 +", Ok(&RuntimeValue::Number(Number::Natural(3))));
+    expect_value("1 2 +", Ok(RuntimeValue::Number(Number::Natural(3))));
 }
 
 #[test]
 fn test_arith2() {
-    expect_value("2 0 *", Ok(&RuntimeValue::Number(Number::Natural(0))));
+    expect_value("2 0 *", Ok(RuntimeValue::Number(Number::Natural(0))));
 }
 
 #[test]
 fn test_arith3() {
-    expect_value("10 5 /", Ok(&RuntimeValue::Number(Number::Natural(2))));
+    expect_value("10 5 /", Ok(RuntimeValue::Number(Number::Natural(2))));
 }
 
 #[test]
 fn test_arith4() {
-    expect_value("200 100 -", Ok(&RuntimeValue::Number(Number::Natural(100))));
+    expect_value("200 100 -", Ok(RuntimeValue::Number(Number::Natural(100))));
 }
 
 #[test]
 fn test_arith5() {
-    expect_value("1 2 3 + +", Ok(&RuntimeValue::Number(Number::Natural(6))));
+    expect_value("1 2 3 + +", Ok(RuntimeValue::Number(Number::Natural(6))));
 }
 
 #[test]
 fn test_arith6() {
-    expect_value("1 2 3 * *", Ok(&RuntimeValue::Number(Number::Natural(6))));
+    expect_value("1 2 3 * *", Ok(RuntimeValue::Number(Number::Natural(6))));
+}
+
+#[test]
+fn test_if1() {
+    expect_value(
+        "begin 1 end begin 2 end true if",
+        Ok(RuntimeValue::Number(Number::Natural(1))),
+    );
 }

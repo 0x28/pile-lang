@@ -26,14 +26,14 @@ impl<'a> Interpreter<'a> {
         }
     }
 
-    pub fn run(&mut self) -> Result<&'a RuntimeValue, String> {
+    pub fn run(&'a mut self) -> Result<RuntimeValue<'a>, String> {
         Interpreter::call(&mut self.stack, &self.program.expressions)
     }
 
     fn call(
         stack: &'a mut Vec<RuntimeValue<'a>>,
         expressions: &'a [Expr],
-    ) -> Result<&'a RuntimeValue<'a>, String> {
+    ) -> Result<RuntimeValue<'a>, String> {
         for expr in expressions {
             match expr {
                 Expr::Atom { token: atom, .. } => match atom {
@@ -54,10 +54,7 @@ impl<'a> Interpreter<'a> {
             println!("stack: {:?}", stack);
         }
 
-        match stack.last() {
-            Some(value) => Ok(value),
-            None => Err(String::from("Stack underflow")),
-        }
+        Interpreter::ensure_element(stack.pop())
     }
 
     fn apply_numeric<N, I, F>(
@@ -71,8 +68,8 @@ impl<'a> Interpreter<'a> {
         I: Fn(i32, i32) -> Result<i32, String>,
         F: Fn(f32, f32) -> f32,
     {
-        let right = stack.pop().ok_or("Stack underflow".to_owned())?;
-        let left = stack.pop().ok_or("Stack underflow".to_owned())?;
+        let right = Interpreter::ensure_element(stack.pop())?;
+        let left = Interpreter::ensure_element(stack.pop())?;
 
         let (left, right) = match (left, right) {
             (RuntimeValue::Number(lhs), RuntimeValue::Number(rhs)) => {
@@ -106,6 +103,16 @@ impl<'a> Interpreter<'a> {
         Ok(())
     }
 
+    fn ensure_element<T>(stack_element: Option<T>) -> Result<T, String> {
+        stack_element.ok_or("Stack underflow".to_owned())
+    }
+
+    fn apply_if(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
+        let if_branch = Interpreter::ensure_element(stack.pop())?;
+        let else_branch = Interpreter::ensure_element(stack.pop())?;
+        Ok(())
+    }
+
     fn apply(
         op: &Operator,
         stack: &mut Vec<RuntimeValue>,
@@ -135,7 +142,7 @@ impl<'a> Interpreter<'a> {
                 |a, b| a / b,
                 stack,
             ),
-
+            Operator::If => Interpreter::apply_if(stack),
             _ => Err(String::from("Unknown operation")),
         };
     }
