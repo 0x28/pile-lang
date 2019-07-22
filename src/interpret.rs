@@ -54,7 +54,7 @@ impl<'a> Interpreter<'a> {
             println!("stack: {:?}", stack);
         }
 
-        Interpreter::ensure_element(stack.pop())
+        Interpreter::ensure_element(stack)
     }
 
     fn apply_numeric<N, I, F>(
@@ -68,8 +68,8 @@ impl<'a> Interpreter<'a> {
         I: Fn(i32, i32) -> Result<i32, String>,
         F: Fn(f32, f32) -> f32,
     {
-        let right = Interpreter::ensure_element(stack.pop())?;
-        let left = Interpreter::ensure_element(stack.pop())?;
+        let right = Interpreter::ensure_element(stack)?;
+        let left = Interpreter::ensure_element(stack)?;
 
         let (left, right) = match (left, right) {
             (RuntimeValue::Number(lhs), RuntimeValue::Number(rhs)) => {
@@ -103,13 +103,14 @@ impl<'a> Interpreter<'a> {
         Ok(())
     }
 
-    fn ensure_element<T>(stack_element: Option<T>) -> Result<T, String> {
-        stack_element.ok_or("Stack underflow".to_owned())
+    fn ensure_element<T>(stack: &mut Vec<T>) -> Result<T, String> {
+        stack.pop().ok_or("Stack underflow".to_owned())
     }
 
     fn apply_if(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
-        let if_branch = Interpreter::ensure_element(stack.pop())?;
-        let else_branch = Interpreter::ensure_element(stack.pop())?;
+        let if_branch = Interpreter::ensure_element(stack)?;
+        let else_branch = Interpreter::ensure_element(stack)?;
+        let condition = Interpreter::ensure_element(stack)?;
         Ok(())
     }
 
