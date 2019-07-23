@@ -11,6 +11,7 @@ pub enum RuntimeValue<'a> {
     Number(Number),
     Identifier(String),
     String(String),
+    Boolean(bool),
 }
 
 pub struct Interpreter<'a> {
@@ -30,10 +31,10 @@ impl<'a> Interpreter<'a> {
         Interpreter::call(&mut self.stack, &self.program.expressions)
     }
 
-    fn call(
-        stack: &'a mut Vec<RuntimeValue<'a>>,
-        expressions: &'a [Expr],
-    ) -> Result<RuntimeValue<'a>, String> {
+    fn call<'s, 'e: 's>(
+        stack: &'s mut Vec<RuntimeValue<'e>>,
+        expressions: &'e [Expr],
+    ) -> Result<RuntimeValue<'s>, String> {
         for expr in expressions {
             match expr {
                 Expr::Atom { token: atom, .. } => match atom {
@@ -107,16 +108,40 @@ impl<'a> Interpreter<'a> {
         stack.pop().ok_or("Stack underflow".to_owned())
     }
 
-    fn apply_if(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
+    fn apply_if<'s, 'e: 's>(
+        stack: &'s mut Vec<RuntimeValue<'e>>,
+    ) -> Result<(), String> {
         let if_branch = Interpreter::ensure_element(stack)?;
         let else_branch = Interpreter::ensure_element(stack)?;
         let condition = Interpreter::ensure_element(stack)?;
+
+        let if_branch = match if_branch {
+            RuntimeValue::Function(body) => body,
+            v => return Err(format!("Expected function found {:?}", v)),
+        };
+
+        let else_branch = match else_branch {
+            RuntimeValue::Function(body) => body,
+            v => return Err(format!("Expected function found {:?}", v)),
+        };
+
+        let condition = match condition {
+            RuntimeValue::Boolean(b) => b,
+            v => return Err(format!("Expected boolean found {:?}", v)),
+        };
+
+        if condition {
+            Interpreter::call(stack, if_branch)?;
+        } else {
+            Interpreter::call(stack, else_branch)?;
+        }
+
         Ok(())
     }
 
-    fn apply(
-        op: &Operator,
-        stack: &mut Vec<RuntimeValue>,
+    fn apply<'s, 'e: 's>(
+        op: &'s Operator,
+        stack: &'s mut Vec<RuntimeValue<'e>>,
     ) -> Result<(), String> {
         return match op {
             Operator::Plus => Interpreter::apply_numeric(
