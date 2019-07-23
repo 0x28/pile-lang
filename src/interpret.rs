@@ -28,13 +28,14 @@ impl<'a> Interpreter<'a> {
     }
 
     pub fn run(&'a mut self) -> Result<RuntimeValue<'a>, String> {
-        Interpreter::call(&mut self.stack, &self.program.expressions)
+        Interpreter::call(&mut self.stack, &self.program.expressions)?;
+        Interpreter::ensure_element(&mut self.stack)
     }
 
     fn call<'s, 'e: 's>(
         stack: &'s mut Vec<RuntimeValue<'e>>,
         expressions: &'e [Expr],
-    ) -> Result<RuntimeValue<'s>, String> {
+    ) -> Result<(), String> {
         for expr in expressions {
             match expr {
                 Expr::Atom { token: atom, .. } => match atom {
@@ -46,6 +47,7 @@ impl<'a> Interpreter<'a> {
                     Token::String(string) => {
                         stack.push(RuntimeValue::String(string.clone()))
                     }
+                    Token::Boolean(b) => stack.push(RuntimeValue::Boolean(*b)),
                     token => {
                         return Err(format!("Unexpected token \'{}\'", token))
                     }
@@ -55,7 +57,7 @@ impl<'a> Interpreter<'a> {
             println!("stack: {:?}", stack);
         }
 
-        Interpreter::ensure_element(stack)
+        Ok(())
     }
 
     fn apply_numeric<N, I, F>(
