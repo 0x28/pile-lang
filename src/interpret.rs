@@ -111,9 +111,9 @@ impl<'a> Interpreter<'a> {
     fn apply_if<'s, 'e: 's>(
         stack: &'s mut Vec<RuntimeValue<'e>>,
     ) -> Result<(), String> {
-        let if_branch = Interpreter::ensure_element(stack)?;
-        let else_branch = Interpreter::ensure_element(stack)?;
         let condition = Interpreter::ensure_element(stack)?;
+        let else_branch = Interpreter::ensure_element(stack)?;
+        let if_branch = Interpreter::ensure_element(stack)?;
 
         let if_branch = match if_branch {
             RuntimeValue::Function(body) => body,
