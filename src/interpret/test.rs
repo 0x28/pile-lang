@@ -70,3 +70,28 @@ fn test_if3() {
         Ok(RuntimeValue::Number(Number::Natural(4))),
     );
 }
+
+#[test]
+fn test_if4() {
+    expect_value(
+        "
+3 5
+begin
+  begin
+    -123
+  end
+  begin
+    2 + *
+  end
+  false
+  if
+end
+begin
+  0
+end
+true
+if
+",
+        Ok(RuntimeValue::Number(Number::Natural(21))),
+    )
+}
