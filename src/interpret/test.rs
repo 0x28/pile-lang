@@ -49,3 +49,24 @@ fn test_if1() {
         Ok(RuntimeValue::Number(Number::Natural(1))),
     );
 }
+
+#[test]
+fn test_if2() {
+    expect_value(
+        "
+10
+5
+begin - end
+begin + end
+false
+if",
+        Ok(RuntimeValue::Number(Number::Natural(15))),
+    );
+}
+#[test]
+fn test_if3() {
+    expect_value(
+        "begin 2 2 * end begin 4 4 * end true if",
+        Ok(RuntimeValue::Number(Number::Natural(4))),
+    );
+}
