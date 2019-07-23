@@ -141,6 +141,49 @@ impl<'a> Interpreter<'a> {
         Ok(())
     }
 
+    fn apply_bool<N, I, F, S>(
+        nat_nat_cmp: N,
+        int_int_cmp: I,
+        float_float_cmp: F,
+        str_str_cmp: S,
+        stack: &mut Vec<RuntimeValue>,
+    ) -> Result<(), String>
+    where
+        N: Fn(u32, u32) -> bool,
+        I: Fn(i32, i32) -> bool,
+        F: Fn(f32, f32) -> bool,
+        S: Fn(&str, &str) -> bool,
+    {
+        let right = Interpreter::ensure_element(stack)?;
+        let left = Interpreter::ensure_element(stack)?;
+
+        let compare_result = match (left, right) {
+            (
+                RuntimeValue::Number(Number::Natural(num_left)),
+                RuntimeValue::Number(Number::Natural(num_right)),
+            ) => nat_nat_cmp(num_left, num_right),
+            (
+                RuntimeValue::Number(Number::Integer(num_left)),
+                RuntimeValue::Number(Number::Integer(num_right)),
+            ) => int_int_cmp(num_left, num_right),
+            (
+                RuntimeValue::Number(Number::Float(num_left)),
+                RuntimeValue::Number(Number::Float(num_right)),
+            ) => float_float_cmp(num_left, num_right),
+            (
+                RuntimeValue::String(str_left),
+                RuntimeValue::String(str_right),
+            ) => str_str_cmp(str_left.as_ref(), str_right.as_ref()),
+            (left, right) => {
+                return Err(format!("Can't compare {:?} and {:?}", left, right))
+            }
+        };
+
+        stack.push(RuntimeValue::Boolean(compare_result));
+
+        Ok(())
+    }
+
     fn apply<'s, 'e: 's>(
         op: &'s Operator,
         stack: &'s mut Vec<RuntimeValue<'e>>,
