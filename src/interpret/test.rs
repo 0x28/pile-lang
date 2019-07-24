@@ -145,3 +145,11 @@ fn test_equal() {
     expect_value("-10 -20 =", Ok(RuntimeValue::Boolean(false)));
     expect_value("\"abc\" \"abc\" =", Ok(RuntimeValue::Boolean(true)));
 }
+
+#[test]
+fn test_greater() {
+    expect_value("12 13 >", Ok(RuntimeValue::Boolean(false)));
+    expect_value("-1 -2 >", Ok(RuntimeValue::Boolean(true)));
+    expect_value("12.0 13.0 >", Ok(RuntimeValue::Boolean(false)));
+    expect_value("\"abc\" \"xyz\" >", Ok(RuntimeValue::Boolean(false)));
+}
