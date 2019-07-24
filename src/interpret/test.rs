@@ -135,3 +135,13 @@ fn test_less_equal() {
     expect_value("4.0 3.14 <=", Ok(RuntimeValue::Boolean(false)));
     expect_value("\"world\" \"world\" <=", Ok(RuntimeValue::Boolean(true)));
 }
+
+#[test]
+fn test_equal() {
+    expect_value("42 21 =", Ok(RuntimeValue::Boolean(false)));
+    expect_value("21 21 =", Ok(RuntimeValue::Boolean(true)));
+    // don't do this at home
+    expect_value("1.1 1.1 =", Ok(RuntimeValue::Boolean(true)));
+    expect_value("-10 -20 =", Ok(RuntimeValue::Boolean(false)));
+    expect_value("\"abc\" \"abc\" =", Ok(RuntimeValue::Boolean(true)));
+}
