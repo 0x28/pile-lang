@@ -204,6 +204,16 @@ impl<'a> Interpreter<'a> {
         );
     }
 
+    fn apply_equal(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
+        return Interpreter::apply_bool(
+            |n1, n2| n1 == n2,
+            |i1, i2| i1 == i2,
+            |f1, f2| f1 == f2,
+            |s1, s2| s1 == s2,
+            stack,
+        );
+    }
+
     fn apply<'s, 'e: 's>(
         op: &'s Operator,
         stack: &'s mut Vec<RuntimeValue<'e>>,
@@ -236,6 +246,7 @@ impl<'a> Interpreter<'a> {
             Operator::If => Interpreter::apply_if(stack),
             Operator::Less => Interpreter::apply_less(stack),
             Operator::LessEqual => Interpreter::apply_less_equal(stack),
+            Operator::Equal => Interpreter::apply_equal(stack),
             _ => Err(String::from("Unknown operation")), // TODO all operations
         };
     }
