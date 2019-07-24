@@ -123,3 +123,11 @@ fn test_less4() {
     expect_value("\"world\" \"hello\" <", Ok(RuntimeValue::Boolean(false)));
     expect_value("\"world\" \"world\" <", Ok(RuntimeValue::Boolean(false)));
 }
+
+#[test]
+fn test_less_equal() {
+    expect_value("1 2 <=", Ok(RuntimeValue::Boolean(true)));
+    expect_value("-2 -1 <=", Ok(RuntimeValue::Boolean(true)));
+    expect_value("4.0 3.14 <=", Ok(RuntimeValue::Boolean(false)));
+    expect_value("\"world\" \"world\" <=", Ok(RuntimeValue::Boolean(true)));
+}
