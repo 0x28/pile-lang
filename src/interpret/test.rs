@@ -9,7 +9,11 @@ fn expect_value(prog: &str, value: Result<RuntimeValue, String>) {
     let mut interpreter =
         Interpreter::new(parser.parse().expect("invalid program"));
 
-    assert_eq!(value, interpreter.run());
+    let result = interpreter.run();
+    if value != result {
+        eprintln!("program: {}", prog);
+        assert_eq!(value, result);
+    }
 }
 
 #[test]
