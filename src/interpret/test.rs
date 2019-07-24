@@ -95,3 +95,31 @@ if
         Ok(RuntimeValue::Number(Number::Natural(21))),
     )
 }
+
+#[test]
+fn test_less1() {
+    expect_value("1 2 <", Ok(RuntimeValue::Boolean(true)));
+    expect_value("2 1 <", Ok(RuntimeValue::Boolean(false)));
+    expect_value("1 1 <", Ok(RuntimeValue::Boolean(false)));
+}
+
+#[test]
+fn test_less2() {
+    expect_value("-1 -2 <", Ok(RuntimeValue::Boolean(false)));
+    expect_value("-2 -1 <", Ok(RuntimeValue::Boolean(true)));
+    expect_value("-1 -1 <", Ok(RuntimeValue::Boolean(false)));
+}
+
+#[test]
+fn test_less3() {
+    expect_value("3.14 4.0 <", Ok(RuntimeValue::Boolean(true)));
+    expect_value("4.0 3.14 <", Ok(RuntimeValue::Boolean(false)));
+    expect_value("3.14 3.14 <", Ok(RuntimeValue::Boolean(false)));
+}
+
+#[test]
+fn test_less4() {
+    expect_value("\"hello\" \"world\" <", Ok(RuntimeValue::Boolean(true)));
+    expect_value("\"world\" \"hello\" <", Ok(RuntimeValue::Boolean(false)));
+    expect_value("\"world\" \"world\" <", Ok(RuntimeValue::Boolean(false)));
+}
