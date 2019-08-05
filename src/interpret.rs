@@ -1,18 +1,8 @@
-use crate::lex::Number;
-use crate::lex::Operator;
 use crate::lex::Token;
 use crate::parse::Ast;
-use crate::parse::Expr;
 
-#[derive(Debug, PartialEq)]
-pub enum RuntimeValue<'a> {
-    Function(&'a [Expr]),
-    Operator(Operator),
-    Number(Number),
-    Identifier(String),
-    String(String),
-    Boolean(bool),
-}
+mod runtime_value;
+use runtime_value::*;
 
 pub struct Interpreter<'a> {
     program: Ast,
