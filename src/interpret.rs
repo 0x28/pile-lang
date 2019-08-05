@@ -27,6 +27,13 @@ impl<'a> Interpreter<'a> {
         }
     }
 
+    pub fn reserve(program: Ast, initial_size: usize) -> Interpreter<'a> {
+        Interpreter {
+            program,
+            stack: Vec::with_capacity(initial_size),
+        }
+    }
+
     pub fn run(&'a mut self) -> Result<RuntimeValue<'a>, String> {
         Interpreter::call(&mut self.stack, &self.program.expressions)?;
         Interpreter::ensure_element(&mut self.stack)
