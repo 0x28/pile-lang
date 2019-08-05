@@ -366,3 +366,92 @@ fn test_error_unknown_operator() {
 
     compare_token_lists(&mut lexer, expected);
 }
+
+#[test]
+fn test_token_fmt() {
+    assert_eq!(
+        format!("{}", Token::Number(Number::Natural(10))),
+        "natural '10'"
+    );
+    assert_eq!(
+        format!("{}", Token::Number(Number::Integer(-10))),
+        "integer '-10'"
+    );
+    assert_eq!(
+        format!("{}", Token::Number(Number::Float(42.42))),
+        "float '42.42'"
+    );
+    assert_eq!(
+        format!("{}", Token::Identifier("var".to_owned())),
+        "identifier 'var'"
+    );
+    assert_eq!(
+        format!("{}", Token::String("hello".to_owned())),
+        "string \"hello\""
+    );
+    assert_eq!(format!("{}", Token::Boolean(true)), "boolean 'true'");
+    assert_eq!(format!("{}", Token::Boolean(false)), "boolean 'false'");
+    assert_eq!(format!("{}", Token::Begin), "token 'begin'");
+    assert_eq!(format!("{}", Token::End), "token 'end'");
+    assert_eq!(
+        format!("{}", Token::Operator(Operator::If)),
+        "operator 'if'"
+    );
+    assert_eq!(
+        format!("{}", Token::Operator(Operator::Def)),
+        "operator 'def'"
+    );
+    assert_eq!(
+        format!("{}", Token::Operator(Operator::Dotimes)),
+        "operator 'dotimes'"
+    );
+    assert_eq!(
+        format!("{}", Token::Operator(Operator::While)),
+        "operator 'while'"
+    );
+    assert_eq!(
+        format!("{}", Token::Operator(Operator::Loop)),
+        "operator 'loop'"
+    );
+    assert_eq!(
+        format!("{}", Token::Operator(Operator::Quote)),
+        "operator 'quote'"
+    );
+    assert_eq!(
+        format!("{}", Token::Operator(Operator::Plus)),
+        "operator '+'"
+    );
+    assert_eq!(
+        format!("{}", Token::Operator(Operator::Minus)),
+        "operator '-'"
+    );
+    assert_eq!(
+        format!("{}", Token::Operator(Operator::Div)),
+        "operator '/'"
+    );
+    assert_eq!(
+        format!("{}", Token::Operator(Operator::Mul)),
+        "operator '*'"
+    );
+    assert_eq!(
+        format!("{}", Token::Operator(Operator::Greater)),
+        "operator '>'"
+    );
+    assert_eq!(
+        format!("{}", Token::Operator(Operator::GreaterEqual)),
+        "operator '>='"
+    );
+    assert_eq!(
+        format!("{}", Token::Operator(Operator::Equal)),
+        "operator '='"
+    );
+    assert_eq!(
+        format!("{}", Token::Operator(Operator::LessEqual)),
+        "operator '<='"
+    );
+    assert_eq!(
+        format!("{}", Token::Operator(Operator::Less)),
+        "operator '<'"
+    );
+    assert_eq!(format!("{}", Token::Fin), "'EOF'");
+}
