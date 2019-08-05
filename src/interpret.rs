@@ -105,7 +105,7 @@ impl<'a> Interpreter<'a> {
     }
 
     fn ensure_element<T>(stack: &mut Vec<T>) -> Result<T, String> {
-        stack.pop().ok_or("Stack underflow".to_owned())
+        stack.pop().ok_or_else(|| "Stack underflow".to_owned())
     }
 
     fn apply_if<'s, 'e: 's>(
@@ -193,83 +193,107 @@ impl<'a> Interpreter<'a> {
     }
 
     fn apply_less(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
-        return Interpreter::apply_bool(
+        Interpreter::apply_bool(
             |n1, n2| n1 < n2,
             |i1, i2| i1 < i2,
             |f1, f2| f1 < f2,
             |s1, s2| s1 < s2,
             stack,
-        );
+        )
     }
 
     fn apply_less_equal(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
-        return Interpreter::apply_bool(
+        Interpreter::apply_bool(
             |n1, n2| n1 <= n2,
             |i1, i2| i1 <= i2,
             |f1, f2| f1 <= f2,
             |s1, s2| s1 <= s2,
             stack,
-        );
+        )
     }
 
     fn apply_equal(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
-        return Interpreter::apply_bool(
+        Interpreter::apply_bool(
             |n1, n2| n1 == n2,
             |i1, i2| i1 == i2,
             |f1, f2| f1 == f2,
             |s1, s2| s1 == s2,
             stack,
-        );
+        )
     }
 
     fn apply_greater(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
-        return Interpreter::apply_bool(
+        Interpreter::apply_bool(
             |n1, n2| n1 > n2,
             |i1, i2| i1 > i2,
             |f1, f2| f1 > f2,
             |s1, s2| s1 > s2,
             stack,
-        );
+        )
     }
 
     fn apply_greater_equal(
         stack: &mut Vec<RuntimeValue>,
     ) -> Result<(), String> {
-        return Interpreter::apply_bool(
+        Interpreter::apply_bool(
             |n1, n2| n1 >= n2,
             |i1, i2| i1 >= i2,
             |f1, f2| f1 >= f2,
             |s1, s2| s1 >= s2,
             stack,
-        );
+        )
     }
 
     fn apply<'s, 'e: 's>(
         op: &'s Operator,
         stack: &'s mut Vec<RuntimeValue<'e>>,
     ) -> Result<(), String> {
-        return match op {
+        match op {
             Operator::Plus => Interpreter::apply_numeric(
-                |a, b| a.checked_add(b).ok_or("Numeric overflow".to_owned()),
-                |a, b| a.checked_add(b).ok_or("Numeric overflow".to_owned()),
+                |a, b| {
+                    a.checked_add(b)
+                        .ok_or_else(|| "Numeric overflow".to_owned())
+                },
+                |a, b| {
+                    a.checked_add(b)
+                        .ok_or_else(|| "Numeric overflow".to_owned())
+                },
                 |a, b| a + b,
                 stack,
             ),
             Operator::Minus => Interpreter::apply_numeric(
-                |a, b| a.checked_sub(b).ok_or("Numeric overflow".to_owned()),
-                |a, b| a.checked_sub(b).ok_or("Numeric overflow".to_owned()),
+                |a, b| {
+                    a.checked_sub(b)
+                        .ok_or_else(|| "Numeric overflow".to_owned())
+                },
+                |a, b| {
+                    a.checked_sub(b)
+                        .ok_or_else(|| "Numeric overflow".to_owned())
+                },
                 |a, b| a - b,
                 stack,
             ),
             Operator::Mul => Interpreter::apply_numeric(
-                |a, b| a.checked_mul(b).ok_or("Numeric overflow".to_owned()),
-                |a, b| a.checked_mul(b).ok_or("Numeric overflow".to_owned()),
+                |a, b| {
+                    a.checked_mul(b)
+                        .ok_or_else(|| "Numeric overflow".to_owned())
+                },
+                |a, b| {
+                    a.checked_mul(b)
+                        .ok_or_else(|| "Numeric overflow".to_owned())
+                },
                 |a, b| a * b,
                 stack,
             ),
             Operator::Div => Interpreter::apply_numeric(
-                |a, b| a.checked_div(b).ok_or("Division by zero".to_owned()),
-                |a, b| a.checked_div(b).ok_or("Division by zero".to_owned()),
+                |a, b| {
+                    a.checked_div(b)
+                        .ok_or_else(|| "Division by zero".to_owned())
+                },
+                |a, b| {
+                    a.checked_div(b)
+                        .ok_or_else(|| "Division by zero".to_owned())
+                },
                 |a, b| a / b,
                 stack,
             ),
@@ -280,7 +304,7 @@ impl<'a> Interpreter<'a> {
             Operator::Greater => Interpreter::apply_greater(stack),
             Operator::GreaterEqual => Interpreter::apply_greater_equal(stack),
             _ => Err(String::from("Unknown operation")), // TODO all operations
-        };
+        }
     }
 }
 
