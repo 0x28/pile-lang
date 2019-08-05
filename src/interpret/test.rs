@@ -153,3 +153,13 @@ fn test_greater() {
     expect_value("12.0 13.0 >", Ok(RuntimeValue::Boolean(false)));
     expect_value("\"abc\" \"xyz\" >", Ok(RuntimeValue::Boolean(false)));
 }
+
+#[test]
+fn test_greater_equal() {
+    expect_value("1 1 >=", Ok(RuntimeValue::Boolean(true)));
+    expect_value("2 1 >=", Ok(RuntimeValue::Boolean(true)));
+    expect_value("-1 -1 >=", Ok(RuntimeValue::Boolean(true)));
+    expect_value("-2 -1 >=", Ok(RuntimeValue::Boolean(false)));
+    expect_value("12.0 13.0 >=", Ok(RuntimeValue::Boolean(false)));
+    expect_value("\"abc\" \"xyz\" >=", Ok(RuntimeValue::Boolean(false)));
+}
