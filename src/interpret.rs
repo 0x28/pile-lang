@@ -49,7 +49,8 @@ impl<'a> Interpreter<'a> {
                         return Err(format!("Unexpected token \'{}\'", token))
                     }
                 },
-                Expr::Block(expr) => stack.push(RuntimeValue::Function(&expr)),
+                Expr::Block(expr) => stack
+                    .push(RuntimeValue::Function(Function::Composite(&expr))),
             }
             println!("stack: {:?}", stack);
         }
@@ -130,9 +131,19 @@ impl<'a> Interpreter<'a> {
         };
 
         if condition {
-            Interpreter::call(stack, if_branch)?;
+            match if_branch {
+                Function::Composite(block) => Interpreter::call(stack, block)?,
+                Function::Builtin(operator) => {
+                    Interpreter::apply(&operator, stack)?
+                }
+            }
         } else {
-            Interpreter::call(stack, else_branch)?;
+            match else_branch {
+                Function::Composite(block) => Interpreter::call(stack, block)?,
+                Function::Builtin(operator) => {
+                    Interpreter::apply(&operator, stack)?
+                }
+            }
         }
 
         Ok(())

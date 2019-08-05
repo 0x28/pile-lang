@@ -5,9 +5,14 @@ pub use crate::lex::Operator;
 pub use crate::parse::Expr;
 
 #[derive(Debug, PartialEq)]
+pub enum Function<'a> {
+    Composite(&'a [Expr]),
+    Builtin(Operator),
+}
+
+#[derive(Debug, PartialEq)]
 pub enum RuntimeValue<'a> {
-    Function(&'a [Expr]),
-    Operator(Operator),
+    Function(Function<'a>),
     Number(Number),
     Identifier(String),
     String(String),
@@ -17,12 +22,14 @@ pub enum RuntimeValue<'a> {
 impl<'a> fmt::Display for RuntimeValue<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            RuntimeValue::Function(block) => {
+            RuntimeValue::Function(Function::Composite(block)) => {
                 let address = block as *const _ as usize;
 
                 write!(f, "function @ 0x{}", address)
             }
-            RuntimeValue::Operator(o) => write!(f, "function '{}'", o),
+            RuntimeValue::Function(Function::Builtin(o)) => {
+                write!(f, "function '{}'", o)
+            }
             RuntimeValue::Number(Number::Natural(n)) => write!(f, "{}", n),
             RuntimeValue::Number(Number::Integer(i)) => write!(f, "{}", i),
             RuntimeValue::Number(Number::Float(fl)) => write!(f, "{}", fl),
