@@ -31,6 +31,29 @@ pub enum Operator {
     Less,
 }
 
+
+impl fmt::Display for Operator {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Operator::If => write!(f, "if"),
+            Operator::Def => write!(f, "def"),
+            Operator::Dotimes => write!(f, "dotimes"),
+            Operator::While => write!(f, "while"),
+            Operator::Loop => write!(f, "loop"),
+            Operator::Quote => write!(f, "quote"),
+            Operator::Plus => write!(f, "+"),
+            Operator::Minus => write!(f, "-"),
+            Operator::Div => write!(f, "/"),
+            Operator::Mul => write!(f, "*"),
+            Operator::Greater => write!(f, ">"),
+            Operator::GreaterEqual => write!(f, ">="),
+            Operator::Equal => write!(f, "="),
+            Operator::LessEqual => write!(f, "<="),
+            Operator::Less => write!(f, "<"),
+        }
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub enum Token {
     // keywords
@@ -58,21 +81,7 @@ impl fmt::Display for Token {
             Token::Boolean(false) => write!(f, "boolean 'false'"),
             Token::Begin => write!(f, "token 'begin'"),
             Token::End => write!(f, "token 'end'"),
-            Token::Operator(Operator::If) => write!(f, "operator 'if'"),
-            Token::Operator(Operator::Def) => write!(f, "operator 'def'"),
-            Token::Operator(Operator::Dotimes) => write!(f, "operator 'dotimes'"),
-            Token::Operator(Operator::While) => write!(f, "operator 'while'"),
-            Token::Operator(Operator::Loop) => write!(f, "operator 'loop'"),
-            Token::Operator(Operator::Quote) => write!(f, "operator 'quote'"),
-            Token::Operator(Operator::Plus) => write!(f, "operator '+'"),
-            Token::Operator(Operator::Minus) => write!(f, "operator '-'"),
-            Token::Operator(Operator::Div) => write!(f, "operator '/'"),
-            Token::Operator(Operator::Mul) => write!(f, "operator '*'"),
-            Token::Operator(Operator::Greater) => write!(f, "operator '>'"),
-            Token::Operator(Operator::GreaterEqual) => write!(f, "operator '>='"),
-            Token::Operator(Operator::Equal) => write!(f, "operator '='"),
-            Token::Operator(Operator::LessEqual) => write!(f, "operator '<='"),
-            Token::Operator(Operator::Less) => write!(f, "operator '<'"),
+            Token::Operator(o) => write!(f, "operator '{}'", o),
             Token::Fin => write!(f, "'EOF'"),
         }
     }
