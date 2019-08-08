@@ -185,7 +185,7 @@ fn test_keywords() {
           100 *# this is a operator
         end
 
-        while def dotimes LOOP DEF DOTIMES END BEGIN QUOTE quote if IF",
+        while def dotimes LOOP DEF DOTIMES END BEGIN QUOTE quote if IF print",
     );
     let expected = vec![
         (2, Ok(Token::Begin)),
@@ -206,6 +206,7 @@ fn test_keywords() {
         (7, Ok(Token::Operator(Operator::Quote))),
         (7, Ok(Token::Operator(Operator::If))),
         (7, Ok(Token::Operator(Operator::If))),
+        (7, Ok(Token::Operator(Operator::Print))),
     ];
 
     compare_token_lists(&mut lexer, expected);
@@ -452,6 +453,10 @@ fn test_token_fmt() {
     assert_eq!(
         format!("{}", Token::Operator(Operator::Less)),
         "operator '<'"
+    );
+    assert_eq!(
+        format!("{}", Token::Operator(Operator::Print)),
+        "operator 'print'"
     );
     assert_eq!(format!("{}", Token::Fin), "'EOF'");
 }
