@@ -1,5 +1,5 @@
 use super::runtime_value::RuntimeValue;
-use super::Interpreter;
+use super::runtime_error;
 use crate::lex::Number;
 
 fn apply_bool<N, I, F, S>(
@@ -15,8 +15,8 @@ where
     F: Fn(f32, f32) -> bool,
     S: Fn(&str, &str) -> bool,
 {
-    let right = Interpreter::ensure_element(stack)?;
-    let left = Interpreter::ensure_element(stack)?;
+    let right = runtime_error::ensure_element(stack)?;
+    let left = runtime_error::ensure_element(stack)?;
 
     let compare_result = match (left, right) {
         (

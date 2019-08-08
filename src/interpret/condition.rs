@@ -1,13 +1,14 @@
 use super::runtime_value::RuntimeValue;
 use super::runtime_value::Function;
 use super::Interpreter;
+use super::runtime_error;
 
 pub fn apply_if<'s, 'e: 's>(
     stack: &'s mut Vec<RuntimeValue<'e>>,
 ) -> Result<(), String> {
-    let condition = Interpreter::ensure_element(stack)?;
-    let else_branch = Interpreter::ensure_element(stack)?;
-    let if_branch = Interpreter::ensure_element(stack)?;
+    let condition = runtime_error::ensure_element(stack)?;
+    let else_branch = runtime_error::ensure_element(stack)?;
+    let if_branch = runtime_error::ensure_element(stack)?;
 
     let if_branch = match if_branch {
         RuntimeValue::Function(body) => body,

@@ -1,5 +1,5 @@
 use super::runtime_value::RuntimeValue;
-use super::Interpreter;
+use super::runtime_error;
 use crate::lex::Number;
 
 fn apply_numeric<N, I, F>(
@@ -13,8 +13,8 @@ where
     I: Fn(i32, i32) -> Result<i32, String>,
     F: Fn(f32, f32) -> f32,
 {
-    let right = Interpreter::ensure_element(stack)?;
-    let left = Interpreter::ensure_element(stack)?;
+    let right = runtime_error::ensure_element(stack)?;
+    let left = runtime_error::ensure_element(stack)?;
 
     let (left, right) = match (left, right) {
         (RuntimeValue::Number(lhs), RuntimeValue::Number(rhs)) => (lhs, rhs),

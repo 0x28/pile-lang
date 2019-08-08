@@ -3,12 +3,10 @@ use crate::parse::Ast;
 
 mod runtime_value;
 use runtime_value::*;
+mod runtime_error;
 mod numeric;
-use numeric::*;
 mod condition;
-use condition::apply_if;
 mod boolean;
-use boolean::*;
 
 pub struct Interpreter<'a> {
     program: Ast,
@@ -32,7 +30,7 @@ impl<'a> Interpreter<'a> {
 
     pub fn run(&'a mut self) -> Result<RuntimeValue<'a>, String> {
         Interpreter::call(&mut self.stack, &self.program.expressions)?;
-        Interpreter::ensure_element(&mut self.stack)
+        runtime_error::ensure_element(&mut self.stack)
     }
 
     fn call<'s, 'e: 's>(
@@ -64,25 +62,21 @@ impl<'a> Interpreter<'a> {
         Ok(())
     }
 
-    fn ensure_element<T>(stack: &mut Vec<T>) -> Result<T, String> {
-        stack.pop().ok_or_else(|| "Stack underflow".to_owned())
-    }
-
     fn apply<'s, 'e: 's>(
         op: &'s Operator,
         stack: &'s mut Vec<RuntimeValue<'e>>,
     ) -> Result<(), String> {
         match op {
-            Operator::Plus => apply_plus(stack),
-            Operator::Minus => apply_minus(stack),
-            Operator::Mul => apply_mul(stack),
-            Operator::Div => apply_div(stack),
-            Operator::If => apply_if(stack),
-            Operator::Less => apply_less(stack),
-            Operator::LessEqual => apply_less_equal(stack),
-            Operator::Equal => apply_equal(stack),
-            Operator::Greater => apply_greater(stack),
-            Operator::GreaterEqual => apply_greater_equal(stack),
+            Operator::Plus => numeric::apply_plus(stack),
+            Operator::Minus => numeric::apply_minus(stack),
+            Operator::Mul => numeric::apply_mul(stack),
+            Operator::Div => numeric::apply_div(stack),
+            Operator::If => condition::apply_if(stack),
+            Operator::Less => boolean::apply_less(stack),
+            Operator::LessEqual => boolean::apply_less_equal(stack),
+            Operator::Equal => boolean::apply_equal(stack),
+            Operator::Greater => boolean::apply_greater(stack),
+            Operator::GreaterEqual => boolean::apply_greater_equal(stack),
             _ => Err(String::from("Unknown operation")), // TODO all operations
         }
     }
