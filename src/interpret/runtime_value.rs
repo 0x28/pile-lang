@@ -33,9 +33,9 @@ impl<'a> fmt::Display for RuntimeValue<'a> {
             RuntimeValue::Number(Number::Natural(n)) => write!(f, "{}", n),
             RuntimeValue::Number(Number::Integer(i)) => write!(f, "{}", i),
             RuntimeValue::Number(Number::Float(fl)) => write!(f, "{}", fl),
-            RuntimeValue::String(s) => writeln!(f, "{}", s),
-            RuntimeValue::Boolean(true) => writeln!(f, "true"),
-            RuntimeValue::Boolean(false) => writeln!(f, "false"),
+            RuntimeValue::String(s) => write!(f, "{}", s),
+            RuntimeValue::Boolean(true) => write!(f, "true"),
+            RuntimeValue::Boolean(false) => write!(f, "false"),
             RuntimeValue::Identifier(_) => Err(std::fmt::Error),
         }
     }
