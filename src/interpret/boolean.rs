@@ -64,6 +64,7 @@ pub fn apply_less_equal(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
     )
 }
 
+#[allow(clippy::float_cmp)]
 pub fn apply_equal(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
     apply_bool(
         |n1, n2| n1 == n2,
