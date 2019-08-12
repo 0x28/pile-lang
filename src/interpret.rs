@@ -8,6 +8,7 @@ mod numeric;
 mod condition;
 mod boolean;
 mod print;
+mod dotimes;
 
 pub struct Interpreter<'a> {
     program: Ast,
@@ -79,6 +80,7 @@ impl<'a> Interpreter<'a> {
             Operator::Greater => boolean::apply_greater(stack),
             Operator::GreaterEqual => boolean::apply_greater_equal(stack),
             Operator::Print => print::apply_print(stack),
+            Operator::Dotimes => dotimes::apply_dotimes(stack),
             _ => Err(String::from("Unknown operation")), // TODO all operations
         }
     }
