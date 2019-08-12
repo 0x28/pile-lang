@@ -163,3 +163,38 @@ fn test_greater_equal() {
     expect_value("12.0 13.0 >=", Ok(RuntimeValue::Boolean(false)));
     expect_value("\"abc\" \"xyz\" >=", Ok(RuntimeValue::Boolean(false)));
 }
+
+#[test]
+fn test_dotimes() {
+    expect_value(
+        "0 begin 1 + end 10 dotimes",
+        Ok(RuntimeValue::Number(Number::Natural(10))),
+    );
+    expect_value(
+        "1 begin 2 * end 5 dotimes",
+        Ok(RuntimeValue::Number(Number::Natural(32))),
+    );
+    expect_value(
+        "1 begin 2 * end 0 dotimes",
+        Ok(RuntimeValue::Number(Number::Natural(1))),
+    );
+    expect_value(
+        "100 begin 2 - end 10 dotimes",
+        Ok(RuntimeValue::Number(Number::Natural(80))),
+    );
+    expect_value(
+        "
+0
+begin
+  1
+  begin
+    5
+    *
+  end
+  3 dotimes
+  +
+end
+10 dotimes",
+        Ok(RuntimeValue::Number(Number::Natural(1250))),
+    );
+}
