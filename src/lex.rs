@@ -269,7 +269,7 @@ impl<'a> Lexer<'a> {
                     continue;
                 }
                 '"' => self.string(),
-                '0'...'9' => self.number(),
+                '0'..='9' => self.number(),
                 '+' | '-' | '*' | '/' | '=' | '<' | '>' => self.operator(),
                 c if c.is_alphabetic() || c == '_' => self.identifier(),
                 c => {
