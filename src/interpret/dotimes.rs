@@ -1,10 +1,12 @@
 use super::runtime_error;
 use super::Interpreter;
+use super::State;
 use super::runtime_value::Function;
 use super::runtime_value::RuntimeValue;
 use crate::lex::Number;
 
-pub fn apply_dotimes(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
+pub fn apply_dotimes(state: &mut State) -> Result<(), String> {
+    let stack = &mut state.stack;
     let count = runtime_error::ensure_element(stack)?;
     let body = runtime_error::ensure_element(stack)?;
 
@@ -22,12 +24,12 @@ pub fn apply_dotimes(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
     match body {
         Function::Composite(block) => {
             for _ in 0..count {
-                Interpreter::call(stack, block)?
+                Interpreter::call(state, block)?
             }
         }
         Function::Builtin(operator) => {
             for _ in 0..count {
-                Interpreter::apply(&operator, stack)?
+                Interpreter::apply(&operator, state)?
             }
         }
     }

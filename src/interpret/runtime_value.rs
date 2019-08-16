@@ -4,13 +4,13 @@ pub use crate::lex::Number;
 pub use crate::lex::Operator;
 pub use crate::parse::Expr;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Function<'a> {
     Composite(&'a [Expr]),
-    Builtin(Operator),
+    Builtin(&'a Operator),
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum RuntimeValue<'a> {
     Function(Function<'a>),
     Number(Number),

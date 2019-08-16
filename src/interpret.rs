@@ -3,59 +3,80 @@ use crate::parse::Ast;
 
 mod runtime_value;
 use runtime_value::*;
-mod runtime_error;
-mod numeric;
-mod condition;
 mod boolean;
-mod print;
+mod condition;
 mod dotimes;
+mod numeric;
+mod print;
+mod runtime_error;
+
+use std::collections::HashMap;
+
+pub struct State<'a> {
+    stack: Vec<RuntimeValue<'a>>,
+    lookup: HashMap<String, RuntimeValue<'a>>,
+}
 
 pub struct Interpreter<'a> {
     program: Ast,
-    stack: Vec<RuntimeValue<'a>>,
+    state: State<'a>,
 }
 
 impl<'a> Interpreter<'a> {
     pub fn new(program: Ast) -> Interpreter<'a> {
         Interpreter {
             program,
-            stack: vec![],
+            state: State {
+                stack: vec![],
+                lookup: HashMap::new(),
+            },
         }
     }
 
     pub fn reserve(program: Ast, initial_size: usize) -> Interpreter<'a> {
         Interpreter {
             program,
-            stack: Vec::with_capacity(initial_size),
+            state: State {
+                stack: Vec::with_capacity(initial_size),
+                lookup: HashMap::new(),
+            },
         }
     }
 
     pub fn run(&'a mut self) -> Result<RuntimeValue<'a>, String> {
-        Interpreter::call(&mut self.stack, &self.program.expressions)?;
-        runtime_error::ensure_element(&mut self.stack)
+        Interpreter::call(&mut self.state, &self.program.expressions)?;
+        runtime_error::ensure_element(&mut self.state.stack)
     }
 
     fn call<'s, 'e: 's>(
-        stack: &'s mut Vec<RuntimeValue<'e>>,
+        state: &'s mut State<'e>,
         expressions: &'e [Expr],
     ) -> Result<(), String> {
         for expr in expressions {
             match expr {
                 Expr::Atom { token: atom, .. } => match atom {
-                    Token::Operator(op) => Interpreter::apply(op, stack)?,
+                    Token::Operator(op) => Interpreter::apply(op, state)?,
                     Token::Number(num) => {
-                        stack.push(RuntimeValue::Number(num.clone()));
+                        state.stack.push(RuntimeValue::Number(num.clone()));
                     }
-                    Token::Identifier(ident) => (),
+                    Token::Identifier(ident) => match state.lookup.get(ident) {
+                        Some(value) => state.stack.push(value.clone()),
+                        None => {
+                            return Err(format!("Unknown variable '{}'", ident))
+                        }
+                    },
                     Token::String(string) => {
-                        stack.push(RuntimeValue::String(string.clone()))
+                        state.stack.push(RuntimeValue::String(string.clone()))
                     }
-                    Token::Boolean(b) => stack.push(RuntimeValue::Boolean(*b)),
+                    Token::Boolean(b) => {
+                        state.stack.push(RuntimeValue::Boolean(*b))
+                    }
                     token => {
-                        return Err(format!("Unexpected token \'{}\'", token))
+                        return Err(format!("Unexpected token '{}'", token))
                     }
                 },
-                Expr::Block(expr) => stack
+                Expr::Block(expr) => state
+                    .stack
                     .push(RuntimeValue::Function(Function::Composite(&expr))),
             }
             println!("stack: {:?}", stack);
@@ -66,21 +87,22 @@ impl<'a> Interpreter<'a> {
 
     fn apply<'s, 'e: 's>(
         op: &'s Operator,
-        stack: &'s mut Vec<RuntimeValue<'e>>,
+        state: &'s mut State<'e>,
     ) -> Result<(), String> {
+        let stack = &mut state.stack;
         match op {
             Operator::Plus => numeric::apply_plus(stack),
             Operator::Minus => numeric::apply_minus(stack),
             Operator::Mul => numeric::apply_mul(stack),
             Operator::Div => numeric::apply_div(stack),
-            Operator::If => condition::apply_if(stack),
+            Operator::If => condition::apply_if(state),
             Operator::Less => boolean::apply_less(stack),
             Operator::LessEqual => boolean::apply_less_equal(stack),
             Operator::Equal => boolean::apply_equal(stack),
             Operator::Greater => boolean::apply_greater(stack),
             Operator::GreaterEqual => boolean::apply_greater_equal(stack),
             Operator::Print => print::apply_print(stack),
-            Operator::Dotimes => dotimes::apply_dotimes(stack),
+            Operator::Dotimes => dotimes::apply_dotimes(state),
             _ => Err(String::from("Unknown operation")), // TODO all operations
         }
     }

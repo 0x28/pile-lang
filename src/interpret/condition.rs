@@ -1,11 +1,13 @@
 use super::runtime_value::RuntimeValue;
 use super::runtime_value::Function;
 use super::Interpreter;
+use super::State;
 use super::runtime_error;
 
 pub fn apply_if<'s, 'e: 's>(
-    stack: &'s mut Vec<RuntimeValue<'e>>,
+    state: &'s mut State<'e>,
 ) -> Result<(), String> {
+    let stack = &mut state.stack;
     let condition = runtime_error::ensure_element(stack)?;
     let else_branch = runtime_error::ensure_element(stack)?;
     let if_branch = runtime_error::ensure_element(stack)?;
@@ -27,16 +29,16 @@ pub fn apply_if<'s, 'e: 's>(
 
     if condition {
         match if_branch {
-            Function::Composite(block) => Interpreter::call(stack, block)?,
+            Function::Composite(block) => Interpreter::call(state, block)?,
             Function::Builtin(operator) => {
-                Interpreter::apply(&operator, stack)?
+                Interpreter::apply(&operator, state)?
             }
         }
     } else {
         match else_branch {
-            Function::Composite(block) => Interpreter::call(stack, block)?,
+            Function::Composite(block) => Interpreter::call(state, block)?,
             Function::Builtin(operator) => {
-                Interpreter::apply(&operator, stack)?
+                Interpreter::apply(&operator, state)?
             }
         }
     }
