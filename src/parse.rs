@@ -72,6 +72,7 @@ impl<'a> Parser<'a> {
                 }
                 Some((_, Token::End)) => break,
                 Some((_, Token::Begin)) => block.push(self.block()?),
+                Some((_, Token::Quote)) => block.push(self.quote()?),
                 Some((line, _)) => block.push(Expr::Atom {
                     line,
                     token: self.lookahead.take().unwrap().1,
