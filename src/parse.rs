@@ -9,6 +9,7 @@ pub struct Ast {
 #[derive(Debug, PartialEq)]
 pub enum Expr {
     Atom { line: u64, token: Token },
+    Quoted { line: u64, token: Token },
     Block(Vec<Expr>),
 }
 
@@ -37,6 +38,9 @@ impl<'a> Parser<'a> {
                     return Err(format!("Line {}: Unmatched 'end'.", line))
                 }
                 Some((_, Token::Begin)) => program.push(self.block()?),
+                Some((_, Token::Quote)) => {
+                    program.push(self.quote()?)
+                }
                 Some((line, _)) => program.push(Expr::Atom {
                     line,
                     token: self.lookahead.take().unwrap().1,
@@ -77,6 +81,29 @@ impl<'a> Parser<'a> {
         }
 
         Ok(Expr::Block(block))
+    }
+
+    fn quote(&mut self) -> Result<Expr, String> {
+        self.expect(Token::Quote)?;
+
+        self.consume()?;
+
+        match &self.lookahead {
+            Some((line, Token::Fin)) => {
+                return Err(format!("Line {}: Unexpected {}", line, Token::Fin))
+            }
+            Some((_, Token::Begin)) => return self.block(),
+            Some((line, Token::End)) => {
+                return Err(format!("Line {}: Unexpected {}", line, Token::End))
+            }
+            Some((line, _)) => {
+                return Ok(Expr::Quoted {
+                    line: *line,
+                    token: self.lookahead.take().unwrap().1,
+                })
+            }
+            None => return Err(String::from("No lookahead found.")),
+        };
     }
 
     fn consume(&mut self) -> Result<(), String> {

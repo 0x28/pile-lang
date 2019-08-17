@@ -89,11 +89,7 @@ fn test_simple4() {
         "quote var 100 def",
         Ast {
             expressions: vec![
-                Expr::Atom {
-                    line: 1,
-                    token: Token::Operator(Operator::Quote),
-                },
-                Expr::Atom {
+                Expr::Quoted {
                     line: 1,
                     token: Token::Identifier(String::from("var")),
                 },

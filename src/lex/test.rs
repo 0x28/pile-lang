@@ -202,8 +202,8 @@ fn test_keywords() {
         (7, Ok(Token::Operator(Operator::Dotimes))),
         (7, Ok(Token::End)),
         (7, Ok(Token::Begin)),
-        (7, Ok(Token::Operator(Operator::Quote))),
-        (7, Ok(Token::Operator(Operator::Quote))),
+        (7, Ok(Token::Quote)),
+        (7, Ok(Token::Quote)),
         (7, Ok(Token::Operator(Operator::If))),
         (7, Ok(Token::Operator(Operator::If))),
         (7, Ok(Token::Operator(Operator::Print))),
@@ -220,7 +220,7 @@ fn test_identifier() {
          definition_var looped while_not# variable",
     );
     let expected = vec![
-        (1, Ok(Token::Operator(Operator::Quote))),
+        (1, Ok(Token::Quote)),
         (1, Ok(Token::Identifier(String::from("var")))),
         (1, Ok(Token::Number(Number::Natural(100)))),
         (1, Ok(Token::Operator(Operator::Def))),
@@ -415,8 +415,8 @@ fn test_token_fmt() {
         "operator 'loop'"
     );
     assert_eq!(
-        format!("{}", Token::Operator(Operator::Quote)),
-        "operator 'quote'"
+        format!("{}", Token::Quote),
+        "token 'quote'"
     );
     assert_eq!(
         format!("{}", Token::Operator(Operator::Plus)),

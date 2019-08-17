@@ -75,6 +75,28 @@ impl<'a> Interpreter<'a> {
                         return Err(format!("Unexpected token '{}'", token))
                     }
                 },
+                Expr::Quoted { token: atom, .. } => match atom {
+                    Token::Operator(op) => state
+                        .stack
+                        .push(RuntimeValue::Function(Function::Builtin(op))),
+                    Token::Number(num) => {
+                        state.stack.push(RuntimeValue::Number(num.clone()));
+                    }
+                    Token::Identifier(ident) => {
+                        state
+                            .stack
+                            .push(RuntimeValue::Identifier(ident.clone()));
+                    }
+                    Token::String(string) => {
+                        state.stack.push(RuntimeValue::String(string.clone()))
+                    }
+                    Token::Boolean(b) => {
+                        state.stack.push(RuntimeValue::Boolean(*b))
+                    }
+                    token => {
+                        return Err(format!("Unexpected token '{}'", token))
+                    }
+                },
                 Expr::Block(expr) => state
                     .stack
                     .push(RuntimeValue::Function(Function::Composite(&expr))),
