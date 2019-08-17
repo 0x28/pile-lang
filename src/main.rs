@@ -6,7 +6,7 @@ use std::fs;
 use std::io::{self, Read};
 use std::process;
 
-fn read_program(args: &Vec<String>) -> String {
+fn read_program(args: &[String]) -> String {
     if args.len() == 1 {
         let mut buffer = String::new();
         match io::stdin().read_to_string(&mut buffer) {

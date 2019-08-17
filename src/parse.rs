@@ -91,20 +91,20 @@ impl<'a> Parser<'a> {
 
         match &self.lookahead {
             Some((line, Token::Fin)) => {
-                return Err(format!("Line {}: Unexpected {}", line, Token::Fin))
+                Err(format!("Line {}: Unexpected {}", line, Token::Fin))
             }
-            Some((_, Token::Begin)) => return self.block(),
+            Some((_, Token::Begin)) => self.block(),
             Some((line, Token::End)) => {
-                return Err(format!("Line {}: Unexpected {}", line, Token::End))
+                Err(format!("Line {}: Unexpected {}", line, Token::End))
             }
             Some((line, _)) => {
-                return Ok(Expr::Quoted {
+                Ok(Expr::Quoted {
                     line: *line,
                     token: self.lookahead.take().unwrap().1,
                 })
             }
-            None => return Err(String::from("No lookahead found.")),
-        };
+            None => Err(String::from("No lookahead found.")),
+        }
     }
 
     fn consume(&mut self) -> Result<(), String> {
