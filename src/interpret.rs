@@ -5,6 +5,7 @@ mod runtime_value;
 use runtime_value::*;
 mod boolean;
 mod condition;
+mod def;
 mod dotimes;
 mod numeric;
 mod print;
@@ -52,19 +53,16 @@ impl<'a> Interpreter<'a> {
         state: &'s mut State<'e>,
         expressions: &'e [Expr],
     ) -> Result<(), String> {
-        for expr in expressions {
+        for expr in expressions.iter() {
             match expr {
                 Expr::Atom { token: atom, .. } => match atom {
                     Token::Operator(op) => Interpreter::apply(op, state)?,
                     Token::Number(num) => {
                         state.stack.push(RuntimeValue::Number(num.clone()));
                     }
-                    Token::Identifier(ident) => match state.lookup.get(ident) {
-                        Some(value) => state.stack.push(value.clone()),
-                        None => {
-                            return Err(format!("Unknown variable '{}'", ident))
-                        }
-                    },
+                    Token::Identifier(ident) => {
+                        Interpreter::resolve(ident, state)?;
+                    }
                     Token::String(string) => {
                         state.stack.push(RuntimeValue::String(string.clone()))
                     }
@@ -107,10 +105,7 @@ impl<'a> Interpreter<'a> {
         Ok(())
     }
 
-    fn apply<'s, 'e: 's>(
-        op: &'s Operator,
-        state: &'s mut State<'e>,
-    ) -> Result<(), String> {
+    fn apply(op: &Operator, state: &mut State) -> Result<(), String> {
         let stack = &mut state.stack;
         match op {
             Operator::Plus => numeric::apply_plus(stack),
@@ -125,7 +120,27 @@ impl<'a> Interpreter<'a> {
             Operator::GreaterEqual => boolean::apply_greater_equal(stack),
             Operator::Print => print::apply_print(stack),
             Operator::Dotimes => dotimes::apply_dotimes(state),
+            Operator::Def => def::apply_def(state),
             _ => Err(String::from("Unknown operation")), // TODO all operations
+        }
+    }
+
+    fn resolve(ident: &str, state: &mut State) -> Result<(), String> {
+        if let Some(value) = state.lookup.get(ident) {
+            match value.clone() {
+                RuntimeValue::Function(func) => match func {
+                    Function::Composite(block) => {
+                        Interpreter::call(state, block)?;
+                    }
+                    Function::Builtin(op) => {
+                        Interpreter::apply(op, state)?;
+                    }
+                },
+                value => state.stack.push(value),
+            }
+            Ok(())
+        } else {
+            Err(format!("Unknown variable '{}'", ident))
         }
     }
 }
