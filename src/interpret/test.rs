@@ -1,6 +1,7 @@
 use super::*;
 use crate::lex::Lexer;
 use crate::lex::Number;
+use crate::lex::Operator;
 use crate::parse::Parser;
 
 fn expect_value(prog: &str, value: Result<RuntimeValue, String>) {
@@ -197,4 +198,25 @@ end
 10 dotimes",
         Ok(RuntimeValue::Number(Number::Natural(1250))),
     );
+}
+
+#[test]
+fn test_quote() {
+    expect_value("quote 100", Ok(RuntimeValue::Number(Number::Natural(100))));
+
+    let block = vec![];
+    expect_value(
+        "quote begin end",
+        Ok(RuntimeValue::Function(Function::Composite(&block))),
+    );
+
+    expect_value(
+        "quote +",
+        Ok(RuntimeValue::Function(Function::Builtin(&Operator::Plus))),
+    );
+
+    expect_value(
+        "10 20 quote + quote - 3 2 > if",
+        Ok(RuntimeValue::Number(Number::Natural(30))),
+    )
 }
