@@ -220,3 +220,34 @@ fn test_quote() {
         Ok(RuntimeValue::Number(Number::Natural(30))),
     )
 }
+
+#[test]
+fn test_def() {
+    expect_value(
+        "42 quote answer def answer answer +",
+        Ok(RuntimeValue::Number(Number::Natural(84))),
+    );
+
+    expect_value(
+        "
+0 quote x def
+begin
+  x 2 +
+  quote x def
+end
+10 dotimes
+x",
+        Ok(RuntimeValue::Number(Number::Natural(20))),
+    );
+
+    expect_value(
+        "
+begin
+  1 +
+end
+quote inc def
+100 inc
+",
+        Ok(RuntimeValue::Number(Number::Natural(101))),
+    );
+}
