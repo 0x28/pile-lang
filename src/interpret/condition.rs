@@ -4,9 +4,7 @@ use super::Interpreter;
 use super::State;
 use super::runtime_error;
 
-pub fn apply_if<'s, 'e: 's>(
-    state: &'s mut State<'e>,
-) -> Result<(), String> {
+pub fn apply_if(state: &mut State) -> Result<(), String> {
     let stack = &mut state.stack;
     let condition = runtime_error::ensure_element(stack)?;
     let else_branch = runtime_error::ensure_element(stack)?;

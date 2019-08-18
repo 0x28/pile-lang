@@ -49,8 +49,8 @@ impl<'a> Interpreter<'a> {
         runtime_error::ensure_element(&mut self.state.stack)
     }
 
-    fn call<'s, 'e: 's>(
-        state: &'s mut State<'e>,
+    fn call<'e>(
+        state: &mut State<'e>,
         expressions: &'e [Expr],
     ) -> Result<(), String> {
         for expr in expressions.iter() {
@@ -99,7 +99,6 @@ impl<'a> Interpreter<'a> {
                     .stack
                     .push(RuntimeValue::Function(Function::Composite(&expr))),
             }
-            println!("stack: {:?}", stack);
         }
 
         Ok(())
