@@ -36,7 +36,7 @@ impl<'a> fmt::Display for RuntimeValue<'a> {
             RuntimeValue::String(s) => write!(f, "{}", s),
             RuntimeValue::Boolean(true) => write!(f, "true"),
             RuntimeValue::Boolean(false) => write!(f, "false"),
-            RuntimeValue::Identifier(_) => Err(std::fmt::Error),
+            RuntimeValue::Identifier(ident) => write!(f, "{}", ident),
         }
     }
 }
