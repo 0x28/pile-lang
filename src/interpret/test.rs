@@ -250,4 +250,14 @@ quote inc def
 ",
         Ok(RuntimeValue::Number(Number::Natural(101))),
     );
+
+    expect_value(
+        "
+3
+begin 100 * end quote x def
+quote x
+begin 200 * end
+2 1 > if",
+        Ok(RuntimeValue::Number(Number::Natural(300))),
+    )
 }

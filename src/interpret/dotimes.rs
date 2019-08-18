@@ -8,17 +8,12 @@ use crate::lex::Number;
 pub fn apply_dotimes(state: &mut State) -> Result<(), String> {
     let stack = &mut state.stack;
     let count = runtime_error::ensure_element(stack)?;
-    let body = runtime_error::ensure_element(stack)?;
+    let body = runtime_error::ensure_function(state)?;
 
     let count = match count {
         RuntimeValue::Number(Number::Natural(n)) => n,
         RuntimeValue::Number(Number::Integer(i)) if i >= 0 => i as u32,
-        val => return Err(format!("Expected positive number found {}", val)),
-    };
-
-    let body = match body {
-        RuntimeValue::Function(func) => func,
-        val => return Err(format!("Expected function found {}", val)),
+        val => return Err(format!("Expected positive number found '{}'", val)),
     };
 
     match body {
