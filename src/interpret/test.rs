@@ -10,7 +10,11 @@ fn expect_value(prog: &str, value: Result<RuntimeValue, String>) {
     let mut interpreter =
         Interpreter::new(parser.parse().expect("invalid program"));
 
-    let result = interpreter.run();
+    let result = match interpreter.run() {
+        Ok(Some(value)) => Ok(value),
+        Ok(None) => Err("No value returned!".to_owned()),
+        Err(e) => Err(e),
+    };
     if value != result {
         eprintln!("program: {}", prog);
         assert_eq!(value, result);

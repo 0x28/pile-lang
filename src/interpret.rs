@@ -44,9 +44,9 @@ impl<'a> Interpreter<'a> {
         }
     }
 
-    pub fn run(&'a mut self) -> Result<RuntimeValue<'a>, String> {
+    pub fn run(&'a mut self) -> Result<Option<RuntimeValue<'a>>, String> {
         Interpreter::call(&mut self.state, &self.program.expressions)?;
-        runtime_error::ensure_element(&mut self.state.stack)
+        Ok(self.state.stack.pop())
     }
 
     fn call<'e>(
