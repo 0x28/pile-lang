@@ -1,5 +1,5 @@
-use super::runtime_value::RuntimeValue;
 use super::runtime_error;
+use super::runtime_value::RuntimeValue;
 use crate::lex::Number;
 
 fn apply_numeric<N, I, F>(
@@ -18,7 +18,13 @@ where
 
     let (left, right) = match (left, right) {
         (RuntimeValue::Number(lhs), RuntimeValue::Number(rhs)) => (lhs, rhs),
-        (lhs, rhs) => return Err(format!("Type error: {:?}, {:?}", lhs, rhs)),
+        (lhs, rhs) => {
+            return Err(format!(
+                "Type error: {}, {}",
+                lhs.type_fmt(),
+                rhs.type_fmt()
+            ))
+        }
     };
 
     let result = match (left, right) {
@@ -32,7 +38,7 @@ where
             Number::Float(op_float(lhs, rhs))
         }
         (lhs, rhs) => {
-            return Err(format!("Numeric type mismatch: {:?}, {:?}", lhs, rhs))
+            return Err(format!("Numeric type mismatch: {}, {}", lhs, rhs))
         }
     };
 

@@ -10,6 +10,15 @@ pub enum Function<'a> {
     Builtin(&'a Operator),
 }
 
+impl<'a> fmt::Display for Function<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Function::Composite(block) => write!(f, "function @ {:p}", block),
+            Function::Builtin(o) => write!(f, "function '{}'", o),
+        }
+    }
+}
+
 #[derive(Debug, PartialEq, Clone)]
 pub enum RuntimeValue<'a> {
     Function(Function<'a>),
@@ -19,17 +28,25 @@ pub enum RuntimeValue<'a> {
     Boolean(bool),
 }
 
+impl<'a> RuntimeValue<'a> {
+    pub fn type_fmt(&self) -> String {
+        match self {
+            RuntimeValue::Function(func) => format!("{}", func),
+            RuntimeValue::Number(n) => format!("{}", n),
+            RuntimeValue::String(s) => format!("string '{}'", s),
+            RuntimeValue::Boolean(true) => format!("boolean '{}'", true),
+            RuntimeValue::Boolean(false) => format!("boolean '{}'", false),
+            RuntimeValue::Identifier(ident) => {
+                format!("identifier '{}'", ident)
+            }
+        }
+    }
+}
+
 impl<'a> fmt::Display for RuntimeValue<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            RuntimeValue::Function(Function::Composite(block)) => {
-                let address = block as *const _ as usize;
-
-                write!(f, "function @ 0x{}", address)
-            }
-            RuntimeValue::Function(Function::Builtin(o)) => {
-                write!(f, "function '{}'", o)
-            }
+            RuntimeValue::Function(func) => write!(f, "{}", func),
             RuntimeValue::Number(Number::Natural(n)) => write!(f, "{}", n),
             RuntimeValue::Number(Number::Integer(i)) => write!(f, "{}", i),
             RuntimeValue::Number(Number::Float(fl)) => write!(f, "{}", fl),

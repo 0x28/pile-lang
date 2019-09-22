@@ -9,6 +9,16 @@ pub enum Number {
     Float(f32),
 }
 
+impl fmt::Display for Number {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Number::Natural(n) => write!(f, "natural '{}'", n),
+            Number::Integer(n) => write!(f, "integer '{}'", n),
+            Number::Float(n) => write!(f, "float '{}'", n),
+        }
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub enum Operator {
     // control flow
@@ -73,9 +83,7 @@ pub enum Token {
 impl fmt::Display for Token {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Token::Number(Number::Natural(n)) => write!(f, "natural '{}'", n),
-            Token::Number(Number::Integer(n)) => write!(f, "integer '{}'", n),
-            Token::Number(Number::Float(n)) => write!(f, "float '{}'", n),
+            Token::Number(n) => write!(f, "{}", n),
             Token::Identifier(ident) => write!(f, "identifier '{}'", ident),
             Token::String(s) => write!(f, "string \"{}\"", s),
             Token::Boolean(true) => write!(f, "boolean 'true'"),

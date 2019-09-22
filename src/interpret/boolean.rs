@@ -1,5 +1,5 @@
-use super::runtime_value::RuntimeValue;
 use super::runtime_error;
+use super::runtime_value::RuntimeValue;
 use crate::lex::Number;
 
 fn apply_bool<N, I, F, S>(
@@ -35,7 +35,11 @@ where
             str_str_cmp(str_left.as_ref(), str_right.as_ref())
         }
         (left, right) => {
-            return Err(format!("Can't compare {:?} and {:?}", left, right))
+            return Err(format!(
+                "Can't compare {} and {}",
+                left.type_fmt(),
+                right.type_fmt()
+            ))
         }
     };
 
@@ -85,7 +89,9 @@ pub fn apply_greater(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
     )
 }
 
-pub fn apply_greater_equal(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
+pub fn apply_greater_equal(
+    stack: &mut Vec<RuntimeValue>,
+) -> Result<(), String> {
     apply_bool(
         |n1, n2| n1 >= n2,
         |i1, i2| i1 >= i2,
