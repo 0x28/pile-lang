@@ -11,11 +11,13 @@ mod numeric;
 mod print;
 mod runtime_error;
 
+use runtime_error::RuntimeError;
 use std::collections::HashMap;
 
 pub struct State<'a> {
     stack: Vec<RuntimeValue<'a>>,
     lookup: HashMap<String, RuntimeValue<'a>>,
+    current_lines: (u64, u64),
 }
 
 pub struct Interpreter<'a> {
@@ -30,6 +32,7 @@ impl<'a> Interpreter<'a> {
             state: State {
                 stack: vec![],
                 lookup: HashMap::new(),
+                current_lines: (1, 1),
             },
         }
     }
@@ -40,12 +43,14 @@ impl<'a> Interpreter<'a> {
             state: State {
                 stack: Vec::with_capacity(initial_size),
                 lookup: HashMap::new(),
+                current_lines: (1, 1),
             },
         }
     }
 
-    pub fn run(&'a mut self) -> Result<Option<RuntimeValue<'a>>, String> {
-        Interpreter::call(&mut self.state, &self.program.expressions)?;
+    pub fn run(&'a mut self) -> Result<Option<RuntimeValue<'a>>, RuntimeError> {
+        Interpreter::call(&mut self.state, &self.program.expressions)
+            .map_err(|msg| RuntimeError::new(self.state.current_lines, msg))?;
         Ok(self.state.stack.pop())
     }
 
@@ -54,6 +59,7 @@ impl<'a> Interpreter<'a> {
         expressions: &'e [Expr],
     ) -> Result<(), String> {
         for expr in expressions.iter() {
+            state.current_lines = expr.lines();
             match expr {
                 Expr::Atom { token: atom, .. } => match atom {
                     Token::Operator(op) => Interpreter::apply(op, state)?,
@@ -61,7 +67,7 @@ impl<'a> Interpreter<'a> {
                         state.stack.push(RuntimeValue::Number(num.clone()));
                     }
                     Token::Identifier(ident) => {
-                        Interpreter::resolve(ident, state)?;
+                        Interpreter::resolve(ident, state)?
                     }
                     Token::String(string) => {
                         state.stack.push(RuntimeValue::String(string.clone()))
@@ -95,9 +101,9 @@ impl<'a> Interpreter<'a> {
                         return Err(format!("Unexpected token '{}'", token))
                     }
                 },
-                Expr::Block { expressions, .. } => state
-                    .stack
-                    .push(RuntimeValue::Function(Function::Composite(expressions))),
+                Expr::Block { expressions, .. } => state.stack.push(
+                    RuntimeValue::Function(Function::Composite(expressions)),
+                ),
             }
         }
 

@@ -48,4 +48,12 @@ fn main() {
 
     let mut interpreter = interpret::Interpreter::new(ast);
     let value = interpreter.run();
+
+    match value {
+        Err(runtime_error) => {
+            eprintln!("{}", runtime_error);
+            std::process::exit(1);
+        }
+        _ => (),
+    }
 }

@@ -4,7 +4,7 @@ use crate::lex::Number;
 use crate::lex::Operator;
 use crate::parse::Parser;
 
-fn expect_value(prog: &str, value: Result<RuntimeValue, String>) {
+fn expect_value(prog: &str, value: Result<RuntimeValue, RuntimeError>) {
     let lexer = Lexer::new(prog);
     let parser = Parser::new(lexer);
     let mut interpreter =
@@ -12,7 +12,9 @@ fn expect_value(prog: &str, value: Result<RuntimeValue, String>) {
 
     let result = match interpreter.run() {
         Ok(Some(value)) => Ok(value),
-        Ok(None) => Err("No value returned!".to_owned()),
+        Ok(None) => {
+            Err(RuntimeError::new((0, 0), "No value returned!".to_owned()))
+        }
         Err(e) => Err(e),
     };
     if value != result {
