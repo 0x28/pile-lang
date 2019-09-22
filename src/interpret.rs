@@ -95,9 +95,9 @@ impl<'a> Interpreter<'a> {
                         return Err(format!("Unexpected token '{}'", token))
                     }
                 },
-                Expr::Block(expr) => state
+                Expr::Block { expressions, .. } => state
                     .stack
-                    .push(RuntimeValue::Function(Function::Composite(&expr))),
+                    .push(RuntimeValue::Function(Function::Composite(expressions))),
             }
         }
 

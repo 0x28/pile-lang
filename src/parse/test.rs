@@ -112,10 +112,14 @@ fn test_block1() {
         "begin 100 end 20 dotimes",
         Ast {
             expressions: vec![
-                Expr::Block(vec![Expr::Atom {
-                    line: 1,
-                    token: Token::Number(Number::Natural(100)),
-                }]),
+                Expr::Block {
+                    begin: 1,
+                    end: 1,
+                    expressions: vec![Expr::Atom {
+                        line: 1,
+                        token: Token::Number(Number::Natural(100)),
+                    }],
+                },
                 Expr::Atom {
                     line: 1,
                     token: Token::Number(Number::Natural(20)),
@@ -135,14 +139,22 @@ fn test_block2() {
         "begin 100 end begin -100 end 1 2 > if",
         Ast {
             expressions: vec![
-                Expr::Block(vec![Expr::Atom {
-                    line: 1,
-                    token: Token::Number(Number::Natural(100)),
-                }]),
-                Expr::Block(vec![Expr::Atom {
-                    line: 1,
-                    token: Token::Number(Number::Integer(-100)),
-                }]),
+                Expr::Block {
+                    begin: 1,
+                    end: 1,
+                    expressions: vec![Expr::Atom {
+                        line: 1,
+                        token: Token::Number(Number::Natural(100)),
+                    }],
+                },
+                Expr::Block {
+                    begin: 1,
+                    end: 1,
+                    expressions: vec![Expr::Atom {
+                        line: 1,
+                        token: Token::Number(Number::Integer(-100)),
+                    }],
+                },
                 Expr::Atom {
                     line: 1,
                     token: Token::Number(Number::Natural(1)),
@@ -178,26 +190,38 @@ begin
     end
 end",
         Ast {
-            expressions: vec![Expr::Block(vec![
-                Expr::Block(vec![Expr::Atom {
-                    line: 4,
-                    token: Token::String(String::from("a")),
-                }]),
-                Expr::Block(vec![
-                    Expr::Atom {
-                        line: 8,
-                        token: Token::String(String::from("b")),
+            expressions: vec![Expr::Block {
+                begin: 2,
+                end: 10,
+                expressions: vec![
+                    Expr::Block {
+                        begin: 3,
+                        end: 5,
+                        expressions: vec![Expr::Atom {
+                            line: 4,
+                            token: Token::String(String::from("a")),
+                        }],
                     },
-                    Expr::Atom {
-                        line: 8,
-                        token: Token::Number(Number::Float(3.14)),
+                    Expr::Block {
+                        begin: 7,
+                        end: 9,
+                        expressions: vec![
+                            Expr::Atom {
+                                line: 8,
+                                token: Token::String(String::from("b")),
+                            },
+                            Expr::Atom {
+                                line: 8,
+                                token: Token::Number(Number::Float(3.14)),
+                            },
+                            Expr::Atom {
+                                line: 8,
+                                token: Token::Operator(Operator::Plus),
+                            },
+                        ],
                     },
-                    Expr::Atom {
-                        line: 8,
-                        token: Token::Operator(Operator::Plus),
-                    },
-                ]),
-            ])],
+                ],
+            }],
         },
     );
 }
