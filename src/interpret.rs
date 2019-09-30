@@ -50,14 +50,14 @@ impl<'a> Interpreter<'a> {
     }
 
     pub fn run(&'a mut self) -> Result<Option<RuntimeValue<'a>>, RuntimeError> {
-        Interpreter::call(&mut self.state, &self.program.expressions)
+        Interpreter::call(&self.program.expressions, &mut self.state)
             .map_err(|msg| RuntimeError::new(self.state.current_lines, msg))?;
         Ok(self.state.stack.pop())
     }
 
     fn call<'e>(
-        state: &mut State<'e>,
         expressions: &'e [Expr],
+        state: &mut State<'e>,
     ) -> Result<(), String> {
         for expr in expressions.iter() {
             state.current_lines = expr.lines();
@@ -137,7 +137,7 @@ impl<'a> Interpreter<'a> {
             match value.clone() {
                 RuntimeValue::Function(func) => match func {
                     Function::Composite(block) => {
-                        Interpreter::call(state, block)?;
+                        Interpreter::call(block, state)?;
                     }
                     Function::Builtin(op) => {
                         Interpreter::apply(op, state)?;

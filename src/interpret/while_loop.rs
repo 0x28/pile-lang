@@ -9,13 +9,13 @@ pub fn apply_while(state: &mut State) -> Result<(), String> {
 
     loop {
         match condition {
-            Function::Composite(expr) => Interpreter::call(state, expr)?,
+            Function::Composite(expr) => Interpreter::call(expr, state)?,
             Function::Builtin(op) => Interpreter::apply(op, state)?,
         };
 
         if runtime_error::ensure_bool(state)? {
             match body {
-                Function::Composite(expr) => Interpreter::call(state, expr)?,
+                Function::Composite(expr) => Interpreter::call(expr, state)?,
                 Function::Builtin(op) => Interpreter::apply(op, state)?,
             };
         } else {

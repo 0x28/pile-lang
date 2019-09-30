@@ -19,7 +19,7 @@ pub fn apply_dotimes(state: &mut State) -> Result<(), String> {
     match body {
         Function::Composite(block) => {
             for _ in 0..count {
-                Interpreter::call(state, block)?
+                Interpreter::call(block, state)?
             }
         }
         Function::Builtin(operator) => {
