@@ -10,6 +10,7 @@ mod dotimes;
 mod numeric;
 mod print;
 mod runtime_error;
+mod while_loop;
 
 use runtime_error::RuntimeError;
 use std::collections::HashMap;
@@ -126,6 +127,7 @@ impl<'a> Interpreter<'a> {
             Operator::Print => print::apply_print(stack),
             Operator::Dotimes => dotimes::apply_dotimes(state),
             Operator::Def => def::apply_def(state),
+            Operator::While => while_loop::apply_while(state),
             _ => Err(String::from("Unknown operation")), // TODO all operations
         }
     }

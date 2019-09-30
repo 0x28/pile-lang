@@ -47,3 +47,14 @@ pub fn ensure_function<'e>(
         v => Err(format!("Expected function found '{}'", v)),
     }
 }
+
+pub fn ensure_bool(
+    state: &mut State,
+) -> Result<bool, String> {
+    let boolean = ensure_element(&mut state.stack)?;
+
+    match boolean {
+        RuntimeValue::Boolean(b) => Ok(b),
+        v => Err(format!("Expected bool found '{}'", v)),
+    }
+}

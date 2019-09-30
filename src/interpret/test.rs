@@ -267,3 +267,31 @@ begin 200 * end
         Ok(RuntimeValue::Number(Number::Natural(300))),
     )
 }
+
+#[test]
+fn test_while() {
+    expect_value(
+        "
+1 quote x def
+begin
+  x 2 * quote x def
+end
+begin
+  x 10 <
+end
+while
+x",
+        Ok(RuntimeValue::Number(Number::Natural(16))),
+    );
+
+    expect_value("
+1 2 3 862 73 954 62 38 363 939 9484 3
+begin
+end
+begin
+  62 = quote is62 def
+  begin false end begin true end is62 if
+end
+while
+", Ok(RuntimeValue::Number(Number::Natural(954))))
+}
