@@ -140,7 +140,7 @@ fn test_numbers_integer() {
 #[test]
 fn test_numbers_float() {
     let mut lexer = Lexer::new(
-        "1.1\n2.2\n3.3\n-10e20\n-inf +inf
+        "1.1\n2.2\n3.3\n-10e20\n 20E3
          3.1415 7777.7777 -3e-10#number :)",
     );
     let expected = vec![
@@ -148,11 +148,34 @@ fn test_numbers_float() {
         (2, Ok(Token::Number(Number::Float(2.2)))),
         (3, Ok(Token::Number(Number::Float(3.3)))),
         (4, Ok(Token::Number(Number::Float(-10e20)))),
-        (5, Ok(Token::Number(Number::Float(std::f32::NEG_INFINITY)))),
-        (5, Ok(Token::Number(Number::Float(std::f32::INFINITY)))),
+        (5, Ok(Token::Number(Number::Float(20e3)))),
         (6, Ok(Token::Number(Number::Float(3.1415)))),
         (6, Ok(Token::Number(Number::Float(7777.7777)))),
         (6, Ok(Token::Number(Number::Float(-3e-10)))),
+    ];
+
+    compare_token_lists(&mut lexer, expected);
+}
+
+#[test]
+fn test_numbers_overflow() {
+    let mut lexer = Lexer::new("8589934592 -8589934592 +8589934592");
+    let expected = vec![
+        (
+            1,
+            Err("'8589934592' is too large to be represented as a number"
+                .to_string()),
+        ),
+        (
+            1,
+            Err("'-8589934592' is too small to be represented as a number"
+                .to_string()),
+        ),
+        (
+            1,
+            Err("'+8589934592' is too large to be represented as a number"
+                .to_string()),
+        ),
     ];
 
     compare_token_lists(&mut lexer, expected);
@@ -201,14 +224,12 @@ fn test_keywords() {
         (7, Ok(Token::Operator(Operator::Def))),
         (7, Ok(Token::Operator(Operator::Dotimes))),
         (7, Ok(Token::End)),
-
         (7, Ok(Token::Begin)),
         (7, Ok(Token::Quote)),
         (7, Ok(Token::Quote)),
         (7, Ok(Token::Operator(Operator::If))),
         (7, Ok(Token::Operator(Operator::If))),
         (7, Ok(Token::Operator(Operator::Print))),
-
         (8, Ok(Token::Operator(Operator::And))),
         (8, Ok(Token::Operator(Operator::And))),
         (8, Ok(Token::Operator(Operator::Or))),
@@ -249,7 +270,6 @@ fn test_identifier() {
     compare_token_lists(&mut lexer, expected);
 }
 
-
 #[test]
 fn test_whitespace() {
     let mut lexer =
@@ -269,8 +289,7 @@ fn test_whitespace() {
 
 #[test]
 fn test_operators() {
-    let mut lexer =
-        Lexer::new("\r\t+ -\t\r\n * /\n\n > >=\n\n\n< <=\t\t\t=");
+    let mut lexer = Lexer::new("\r\t+ -\t\r\n * /\n\n > >=\n\n\n< <=\t\t\t=");
     let expected = vec![
         (1, Ok(Token::Operator(Operator::Plus))),
         (1, Ok(Token::Operator(Operator::Minus))),
@@ -421,10 +440,7 @@ fn test_token_fmt() {
         format!("{}", Token::Operator(Operator::While)),
         "operator 'while'"
     );
-    assert_eq!(
-        format!("{}", Token::Quote),
-        "token 'quote'"
-    );
+    assert_eq!(format!("{}", Token::Quote), "token 'quote'");
     assert_eq!(
         format!("{}", Token::Operator(Operator::Plus)),
         "operator '+'"

@@ -229,13 +229,33 @@ impl<'a> Lexer<'a> {
         }
     }
 
+    fn digits_only(s: &str) -> bool {
+        s.chars().all(|c| c.is_digit(10))
+    }
+
     fn parse_number(s: &str) -> Result<Token, String> {
-        if let Ok(nat) = s.parse() {
+        if s.contains('.') || s.contains('e') || s.contains('E') {
+            if let Ok(float) = s.parse() {
+                Ok(Token::Number(Number::Float(float)))
+            } else {
+                Err(format!("'{}' isn't a number", s))
+            }
+        } else if let Ok(nat) = s.parse() {
             Ok(Token::Number(Number::Natural(nat)))
         } else if let Ok(int) = s.parse() {
             Ok(Token::Number(Number::Integer(int)))
-        } else if let Ok(float) = s.parse() {
-            Ok(Token::Number(Number::Float(float)))
+        } else if Lexer::digits_only(s)
+            || s.starts_with('+') && Lexer::digits_only(&s[1..])
+        {
+            Err(format!(
+                "'{}' is too large to be represented as a number",
+                s
+            ))
+        } else if s.starts_with('-') && Lexer::digits_only(&s[1..]) {
+            Err(format!(
+                "'{}' is too small to be represented as a number",
+                s
+            ))
         } else {
             Err(format!("'{}' isn't a number", s))
         }
@@ -250,6 +270,10 @@ impl<'a> Lexer<'a> {
     fn operator(&mut self) -> Result<Token, String> {
         let operator = self.collect_while(|c| !c.is_whitespace() && c != '#');
 
+        if operator.chars().any(|c| c.is_digit(10)) {
+            return Lexer::parse_number(operator.as_ref());
+        }
+
         match operator.as_ref() {
             "+" => Ok(Token::Operator(Operator::Plus)),
             "-" => Ok(Token::Operator(Operator::Minus)),
@@ -260,8 +284,7 @@ impl<'a> Lexer<'a> {
             "=" => Ok(Token::Operator(Operator::Equal)),
             "<=" => Ok(Token::Operator(Operator::LessEqual)),
             "<" => Ok(Token::Operator(Operator::Less)),
-            n => Lexer::parse_number(operator.as_ref())
-                .map_err(|_err| format!("Unknown operator '{}'", n)),
+            o => Err(format!("Unknown operator '{}'", o)),
         }
     }
 
