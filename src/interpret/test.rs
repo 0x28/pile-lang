@@ -453,4 +453,38 @@ fn test_type_errors() {
             "Expected positive number found \'...\'".to_string(),
         )),
     );
+
+    expect_value(
+        "10 quote x def
+         quote x 10 dotimes",
+        Err(RuntimeError::new(
+            (2, 2),
+            "Expected function found \'10\'".to_string(),
+        )),
+    );
+
+    expect_value(
+        "10 10 dotimes",
+        Err(RuntimeError::new(
+            (1, 1),
+            "Expected function found \'10\'".to_string(),
+        )),
+    );
+
+    expect_value(
+        "quote unknown_func 10 dotimes",
+        Err(RuntimeError::new(
+            (1, 1),
+            "Unknown variable 'unknown_func'".to_string(),
+        )),
+    );
+
+    expect_value(
+        "begin end begin end \"true\" if",
+        Err(RuntimeError::new(
+            (1, 1),
+            "Expected boolean found 'true'".to_string(),
+        )),
+    );
+}
 }
