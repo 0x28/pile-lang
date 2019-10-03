@@ -229,35 +229,30 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    fn digits_only(s: &str) -> bool {
-        s.chars().all(|c| c.is_digit(10))
-    }
-
     fn parse_number(s: &str) -> Result<Token, String> {
-        if s.contains('.') || s.contains('e') || s.contains('E') {
-            if let Ok(float) = s.parse() {
-                Ok(Token::Number(Number::Float(float)))
-            } else {
-                Err(format!("'{}' isn't a number", s))
+        let digits_only = |s: &str| s.chars().all(|c| c.is_digit(10));
+
+        if digits_only(s) || s.starts_with('+') && digits_only(&s[1..]) {
+            match s.parse() {
+                Ok(nat) => Ok(Token::Number(Number::Natural(nat))),
+                Err(_) => Err(format!(
+                    "'{}' is too large to be represented as a number",
+                    s
+                )),
             }
-        } else if let Ok(nat) = s.parse() {
-            Ok(Token::Number(Number::Natural(nat)))
-        } else if let Ok(int) = s.parse() {
-            Ok(Token::Number(Number::Integer(int)))
-        } else if Lexer::digits_only(s)
-            || s.starts_with('+') && Lexer::digits_only(&s[1..])
-        {
-            Err(format!(
-                "'{}' is too large to be represented as a number",
-                s
-            ))
-        } else if s.starts_with('-') && Lexer::digits_only(&s[1..]) {
-            Err(format!(
-                "'{}' is too small to be represented as a number",
-                s
-            ))
+        } else if s.starts_with('-') && digits_only(&s[1..]) {
+            match s.parse() {
+                Ok(int) => Ok(Token::Number(Number::Integer(int))),
+                Err(_) => Err(format!(
+                    "'{}' is too small to be represented as a number",
+                    s
+                )),
+            }
         } else {
-            Err(format!("'{}' isn't a number", s))
+            match s.parse() {
+                Ok(float) => Ok(Token::Number(Number::Float(float))),
+                Err(_) => Err(format!("'{}' isn't a number", s)),
+            }
         }
     }
 
