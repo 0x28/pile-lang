@@ -289,9 +289,30 @@ x",
 begin
 end
 begin
-  62 = quote is62 def
-  begin false end begin true end is62 if
+  62 = not
 end
 while
 ", Ok(RuntimeValue::Number(Number::Natural(954))))
+}
+
+#[test]
+fn test_and() {
+    expect_value("true true and", Ok(RuntimeValue::Boolean(true)));
+    expect_value("true false and", Ok(RuntimeValue::Boolean(false)));
+    expect_value("false true and", Ok(RuntimeValue::Boolean(false)));
+    expect_value("false false and", Ok(RuntimeValue::Boolean(false)));
+}
+
+#[test]
+fn test_or() {
+    expect_value("true true or", Ok(RuntimeValue::Boolean(true)));
+    expect_value("true false or", Ok(RuntimeValue::Boolean(true)));
+    expect_value("false true or", Ok(RuntimeValue::Boolean(true)));
+    expect_value("false false or", Ok(RuntimeValue::Boolean(false)));
+}
+
+#[test]
+fn test_not() {
+    expect_value("true not", Ok(RuntimeValue::Boolean(false)));
+    expect_value("false not", Ok(RuntimeValue::Boolean(true)));
 }

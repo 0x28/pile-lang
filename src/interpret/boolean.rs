@@ -100,3 +100,29 @@ pub fn apply_greater_equal(
         stack,
     )
 }
+
+pub fn apply_and(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
+    let left = runtime_error::ensure_bool(stack)?;
+    let right = runtime_error::ensure_bool(stack)?;
+
+    stack.push(RuntimeValue::Boolean(left && right));
+
+    Ok(())
+}
+
+pub fn apply_or(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
+    let left = runtime_error::ensure_bool(stack)?;
+    let right = runtime_error::ensure_bool(stack)?;
+
+    stack.push(RuntimeValue::Boolean(left || right));
+
+    Ok(())
+}
+
+pub fn apply_not(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
+    let value = runtime_error::ensure_bool(stack)?;
+
+    stack.push(RuntimeValue::Boolean(!value));
+
+    Ok(())
+}

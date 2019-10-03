@@ -37,6 +37,9 @@ pub enum Operator {
     Equal,
     LessEqual,
     Less,
+    And,
+    Or,
+    Not,
     // builtins
     Print,
 }
@@ -56,6 +59,9 @@ impl fmt::Display for Operator {
             Operator::GreaterEqual => write!(f, ">="),
             Operator::Equal => write!(f, "="),
             Operator::LessEqual => write!(f, "<="),
+            Operator::And => write!(f, "and"),
+            Operator::Or => write!(f, "or"),
+            Operator::Not => write!(f, "not"),
             Operator::Less => write!(f, "<"),
             Operator::Print => write!(f, "print"),
         }
@@ -168,6 +174,9 @@ impl<'a> Lexer<'a> {
             "quote" => Token::Quote,
             "true" => Token::Boolean(true),
             "false" => Token::Boolean(false),
+            "and" => Token::Operator(Operator::And),
+            "or" => Token::Operator(Operator::Or),
+            "not" => Token::Operator(Operator::Not),
             "print" => Token::Operator(Operator::Print),
             _ => Token::Identifier(ident),
         })

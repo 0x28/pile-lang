@@ -185,7 +185,8 @@ fn test_keywords() {
           100 *# this is a operator
         end
 
-        while def dotimes DEF DOTIMES END BEGIN QUOTE quote if IF print",
+        while def dotimes DEF DOTIMES END BEGIN QUOTE quote if IF print
+        and AND or OR not NOT",
     );
     let expected = vec![
         (2, Ok(Token::Begin)),
@@ -200,12 +201,20 @@ fn test_keywords() {
         (7, Ok(Token::Operator(Operator::Def))),
         (7, Ok(Token::Operator(Operator::Dotimes))),
         (7, Ok(Token::End)),
+
         (7, Ok(Token::Begin)),
         (7, Ok(Token::Quote)),
         (7, Ok(Token::Quote)),
         (7, Ok(Token::Operator(Operator::If))),
         (7, Ok(Token::Operator(Operator::If))),
         (7, Ok(Token::Operator(Operator::Print))),
+
+        (8, Ok(Token::Operator(Operator::And))),
+        (8, Ok(Token::Operator(Operator::And))),
+        (8, Ok(Token::Operator(Operator::Or))),
+        (8, Ok(Token::Operator(Operator::Or))),
+        (8, Ok(Token::Operator(Operator::Not))),
+        (8, Ok(Token::Operator(Operator::Not))),
     ];
 
     compare_token_lists(&mut lexer, expected);
@@ -451,6 +460,18 @@ fn test_token_fmt() {
     assert_eq!(
         format!("{}", Token::Operator(Operator::Less)),
         "operator '<'"
+    );
+    assert_eq!(
+        format!("{}", Token::Operator(Operator::And)),
+        "operator 'and'"
+    );
+    assert_eq!(
+        format!("{}", Token::Operator(Operator::Or)),
+        "operator 'or'"
+    );
+    assert_eq!(
+        format!("{}", Token::Operator(Operator::Not)),
+        "operator 'not'"
     );
     assert_eq!(
         format!("{}", Token::Operator(Operator::Print)),

@@ -13,7 +13,7 @@ pub fn apply_while(state: &mut State) -> Result<(), String> {
             Function::Builtin(op) => Interpreter::apply(op, state)?,
         };
 
-        if runtime_error::ensure_bool(state)? {
+        if runtime_error::ensure_bool(&mut state.stack)? {
             match body {
                 Function::Composite(expr) => Interpreter::call(expr, state)?,
                 Function::Builtin(op) => Interpreter::apply(op, state)?,

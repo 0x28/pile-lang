@@ -49,9 +49,9 @@ pub fn ensure_function<'e>(
 }
 
 pub fn ensure_bool(
-    state: &mut State,
+    stack: &mut Vec<RuntimeValue>,
 ) -> Result<bool, String> {
-    let boolean = ensure_element(&mut state.stack)?;
+    let boolean = ensure_element(stack)?;
 
     match boolean {
         RuntimeValue::Boolean(b) => Ok(b),
