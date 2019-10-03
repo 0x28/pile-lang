@@ -374,3 +374,30 @@ fn test_div_by_zero() {
         Err(RuntimeError::new((1, 1), "Division by zero".to_string())),
     );
 }
+
+#[test]
+fn test_type_errors() {
+    expect_value(
+        "42 \"hi\" *",
+        Err(RuntimeError::new(
+            (1, 1),
+            "Type error: natural \'42\', string \'hi\'".to_string(),
+        )),
+    );
+
+    expect_value(
+        "12.34 4 +",
+        Err(RuntimeError::new(
+            (1, 1),
+            "Numeric type mismatch: float \'12.34\', natural \'4\'".to_string(),
+        )),
+    );
+
+    expect_value(
+        "begin end begin end \"...\" if",
+        Err(RuntimeError::new(
+            (1, 1),
+            "Expected boolean found \'...\'".to_string(),
+        )),
+    );
+}
