@@ -362,3 +362,15 @@ fn test_numeric_overflow() {
         Err(RuntimeError::new((1, 1), "Numeric overflow".to_string())),
     );
 }
+
+#[test]
+fn test_div_by_zero() {
+    expect_value(
+        "0 0 /",
+        Err(RuntimeError::new((1, 1), "Division by zero".to_string())),
+    );
+    expect_value(
+        "-0 -0 /",
+        Err(RuntimeError::new((1, 1), "Division by zero".to_string())),
+    );
+}
