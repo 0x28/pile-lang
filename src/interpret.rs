@@ -77,7 +77,7 @@ impl<'a> Interpreter<'a> {
                         state.stack.push(RuntimeValue::Boolean(*b))
                     }
                     token => {
-                        return Err(format!("Unexpected token '{}'", token))
+                        return Err(format!("Unexpected {}", token))
                     }
                 },
                 Expr::Quoted { token: atom, .. } => match atom {
@@ -99,7 +99,7 @@ impl<'a> Interpreter<'a> {
                         state.stack.push(RuntimeValue::Boolean(*b))
                     }
                     token => {
-                        return Err(format!("Unexpected token '{}'", token))
+                        return Err(format!("Unexpected {}", token))
                     }
                 },
                 Expr::Block { expressions, .. } => state.stack.push(
