@@ -294,7 +294,15 @@ quote x
 begin 200 * end
 2 1 > if",
         Ok(RuntimeValue::Number(Number::Natural(300))),
-    )
+    );
+
+    expect_value(
+        "var var +",
+        Err(RuntimeError::new(
+            (1, 1),
+            "Unknown variable 'var'".to_string(),
+        )),
+    );
 }
 
 #[test]
