@@ -5,7 +5,7 @@ use super::State;
 pub fn apply_def(state: &mut State) -> Result<(), String> {
     let ident = match runtime_error::ensure_element(&mut state.stack)? {
         RuntimeValue::Identifier(ident) => ident,
-        v => return Err(format!("Expected identifier found '{}'", v))
+        v => return Err(format!("Expected identifier found {}", v.type_fmt()))
     };
     let value = runtime_error::ensure_element(&mut state.stack)?;
 

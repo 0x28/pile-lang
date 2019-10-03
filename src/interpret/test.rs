@@ -442,7 +442,7 @@ fn test_type_errors() {
         "begin end begin end \"...\" if",
         Err(RuntimeError::new(
             (1, 1),
-            "Expected boolean found \'...\'".to_string(),
+            "Expected boolean found string \'...\'".to_string(),
         )),
     );
 
@@ -450,7 +450,7 @@ fn test_type_errors() {
         "0 begin \"hi\" print end \"...\" dotimes",
         Err(RuntimeError::new(
             (1, 1),
-            "Expected positive number found \'...\'".to_string(),
+            "Expected positive number found string \'...\'".to_string(),
         )),
     );
 
@@ -459,7 +459,7 @@ fn test_type_errors() {
          quote x 10 dotimes",
         Err(RuntimeError::new(
             (2, 2),
-            "Expected function found \'10\'".to_string(),
+            "Expected function found natural \'10\'".to_string(),
         )),
     );
 
@@ -467,7 +467,7 @@ fn test_type_errors() {
         "10 10 dotimes",
         Err(RuntimeError::new(
             (1, 1),
-            "Expected function found \'10\'".to_string(),
+            "Expected function found natural \'10\'".to_string(),
         )),
     );
 
@@ -483,7 +483,7 @@ fn test_type_errors() {
         "begin end begin end \"true\" if",
         Err(RuntimeError::new(
             (1, 1),
-            "Expected boolean found 'true'".to_string(),
+            "Expected boolean found string 'true'".to_string(),
         )),
     );
 }
