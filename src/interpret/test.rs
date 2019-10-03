@@ -212,6 +212,17 @@ end
 10 dotimes",
         Ok(RuntimeValue::Number(Number::Natural(1250))),
     );
+
+    expect_value(
+        "1 1 1 1 1 1 1 1 1 1 quote - 9 dotimes",
+        Ok(RuntimeValue::Number(Number::Natural(0))),
+    );
+
+    // count is an integer instead of a natural
+    expect_value(
+        "0 begin \"hi\" print end -10 -20 - dotimes",
+        Ok(RuntimeValue::Number(Number::Natural(0))),
+    );
 }
 
 #[test]
