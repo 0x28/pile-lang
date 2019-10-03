@@ -185,7 +185,7 @@ fn test_keywords() {
           100 *# this is a operator
         end
 
-        while def dotimes LOOP DEF DOTIMES END BEGIN QUOTE quote if IF print",
+        while def dotimes DEF DOTIMES END BEGIN QUOTE quote if IF print",
     );
     let expected = vec![
         (2, Ok(Token::Begin)),
@@ -197,7 +197,6 @@ fn test_keywords() {
         (7, Ok(Token::Operator(Operator::While))),
         (7, Ok(Token::Operator(Operator::Def))),
         (7, Ok(Token::Operator(Operator::Dotimes))),
-        (7, Ok(Token::Operator(Operator::Loop))),
         (7, Ok(Token::Operator(Operator::Def))),
         (7, Ok(Token::Operator(Operator::Dotimes))),
         (7, Ok(Token::End)),
@@ -216,7 +215,7 @@ fn test_keywords() {
 fn test_identifier() {
     let mut lexer = Lexer::new(
         "quote var 100 def
-         begin VAR 200 + end loop
+         begin VAR 200 + end begin true end while
          definition_var looped while_not# variable",
     );
     let expected = vec![
@@ -229,7 +228,10 @@ fn test_identifier() {
         (2, Ok(Token::Number(Number::Natural(200)))),
         (2, Ok(Token::Operator(Operator::Plus))),
         (2, Ok(Token::End)),
-        (2, Ok(Token::Operator(Operator::Loop))),
+        (2, Ok(Token::Begin)),
+        (2, Ok(Token::Boolean(true))),
+        (2, Ok(Token::End)),
+        (2, Ok(Token::Operator(Operator::While))),
         (3, Ok(Token::Identifier(String::from("definition_var")))),
         (3, Ok(Token::Identifier(String::from("looped")))),
         (3, Ok(Token::Identifier(String::from("while_not")))),
@@ -409,10 +411,6 @@ fn test_token_fmt() {
     assert_eq!(
         format!("{}", Token::Operator(Operator::While)),
         "operator 'while'"
-    );
-    assert_eq!(
-        format!("{}", Token::Operator(Operator::Loop)),
-        "operator 'loop'"
     );
     assert_eq!(
         format!("{}", Token::Quote),

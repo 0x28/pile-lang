@@ -26,7 +26,6 @@ pub enum Operator {
     Def,
     Dotimes,
     While,
-    Loop,
     // arithmetic
     Plus,
     Minus,
@@ -49,7 +48,6 @@ impl fmt::Display for Operator {
             Operator::Def => write!(f, "def"),
             Operator::Dotimes => write!(f, "dotimes"),
             Operator::While => write!(f, "while"),
-            Operator::Loop => write!(f, "loop"),
             Operator::Plus => write!(f, "+"),
             Operator::Minus => write!(f, "-"),
             Operator::Div => write!(f, "/"),
@@ -167,7 +165,6 @@ impl<'a> Lexer<'a> {
             "def" => Token::Operator(Operator::Def),
             "dotimes" => Token::Operator(Operator::Dotimes),
             "while" => Token::Operator(Operator::While),
-            "loop" => Token::Operator(Operator::Loop),
             "quote" => Token::Quote,
             "true" => Token::Boolean(true),
             "false" => Token::Boolean(false),

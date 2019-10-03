@@ -128,7 +128,6 @@ impl<'a> Interpreter<'a> {
             Operator::Dotimes => dotimes::apply_dotimes(state),
             Operator::Def => def::apply_def(state),
             Operator::While => while_loop::apply_while(state),
-            _ => Err(String::from("Unknown operation")), // TODO all operations
         }
     }
 
