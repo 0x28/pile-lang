@@ -338,3 +338,27 @@ fn test_print() {
     expect_value("true false print", Ok(RuntimeValue::Boolean(true)));
     expect_value("true quote x print", Ok(RuntimeValue::Boolean(true)));
 }
+
+#[test]
+fn test_numeric_overflow() {
+    expect_value(
+        "4294967295 1 +",
+        Err(RuntimeError::new((1, 1), "Numeric overflow".to_string())),
+    );
+    expect_value(
+        "0 1 -",
+        Err(RuntimeError::new((1, 1), "Numeric overflow".to_string())),
+    );
+    expect_value(
+        "1000000000 100000 *",
+        Err(RuntimeError::new((1, 1), "Numeric overflow".to_string())),
+    );
+    expect_value(
+        "-2000000005 -2000000005 +",
+        Err(RuntimeError::new((1, 1), "Numeric overflow".to_string())),
+    );
+    expect_value(
+        "-2000000005 -2000000005 *",
+        Err(RuntimeError::new((1, 1), "Numeric overflow".to_string())),
+    );
+}
