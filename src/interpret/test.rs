@@ -429,4 +429,12 @@ fn test_type_errors() {
             "Expected boolean found \'...\'".to_string(),
         )),
     );
+
+    expect_value(
+        "0 begin \"hi\" print end \"...\" dotimes",
+        Err(RuntimeError::new(
+            (1, 1),
+            "Expected positive number found \'...\'".to_string(),
+        )),
+    );
 }
