@@ -240,6 +240,16 @@ fn test_quote() {
         Ok(RuntimeValue::Function(Function::Builtin(&Operator::Plus))),
     );
 
+    expect_value("quote \"hi\"", Ok(RuntimeValue::String("hi".to_string())));
+    expect_value("quote true", Ok(RuntimeValue::Boolean(true)));
+    expect_value(
+        "quote quote true",
+        Err(RuntimeError::new(
+            (1, 1),
+            "Unexpected token \'quote\'".to_string(),
+        )),
+    );
+
     expect_value(
         "10 20 quote + quote - 3 2 > if",
         Ok(RuntimeValue::Number(Number::Natural(30))),
