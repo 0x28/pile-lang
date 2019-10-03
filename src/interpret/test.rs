@@ -292,7 +292,8 @@ x",
         Ok(RuntimeValue::Number(Number::Natural(16))),
     );
 
-    expect_value("
+    expect_value(
+        "
 1 2 3 862 73 954 62 38 363 939 9484 3
 begin
 end
@@ -300,7 +301,9 @@ begin
   62 = not
 end
 while
-", Ok(RuntimeValue::Number(Number::Natural(954))))
+",
+        Ok(RuntimeValue::Number(Number::Natural(954))),
+    )
 }
 
 #[test]
@@ -323,4 +326,15 @@ fn test_or() {
 fn test_not() {
     expect_value("true not", Ok(RuntimeValue::Boolean(false)));
     expect_value("false not", Ok(RuntimeValue::Boolean(true)));
+}
+
+#[test]
+fn test_print() {
+    expect_value("true \"hello\" print", Ok(RuntimeValue::Boolean(true)));
+    expect_value("true 100 print", Ok(RuntimeValue::Boolean(true)));
+    expect_value("true -100 print", Ok(RuntimeValue::Boolean(true)));
+    expect_value("true 32.32 print", Ok(RuntimeValue::Boolean(true)));
+    expect_value("true true print", Ok(RuntimeValue::Boolean(true)));
+    expect_value("true false print", Ok(RuntimeValue::Boolean(true)));
+    expect_value("true quote x print", Ok(RuntimeValue::Boolean(true)));
 }
