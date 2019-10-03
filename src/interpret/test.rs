@@ -54,6 +54,14 @@ fn test_arith6() {
 }
 
 #[test]
+fn test_float_arith() {
+    expect_value("1.0 2.0 *", Ok(RuntimeValue::Number(Number::Float(2.0))));
+    expect_value("1.0 2.0 /", Ok(RuntimeValue::Number(Number::Float(0.5))));
+    expect_value("1.0 2.0 +", Ok(RuntimeValue::Number(Number::Float(3.0))));
+    expect_value("1.0 2.0 -", Ok(RuntimeValue::Number(Number::Float(-1.0))));
+}
+
+#[test]
 fn test_if1() {
     expect_value(
         "begin 1 end begin 2 end true if",
