@@ -487,4 +487,22 @@ fn test_type_errors() {
         )),
     );
 }
+
+#[test]
+fn test_runtime_error_fmt() {
+    assert_eq!(
+        format!(
+            "{}",
+            RuntimeError::new((1000, 1000), "Serious error!!!".to_string(),)
+        ),
+        "Line 1000: Serious error!!!"
+    );
+
+    assert_eq!(
+        format!(
+            "{}",
+            RuntimeError::new((10, 20), "This is really bad...".to_string(),)
+        ),
+        "Lines 10-20: This is really bad..."
+    );
 }
