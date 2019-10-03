@@ -340,6 +340,14 @@ end
 while
 ",
         Ok(RuntimeValue::Number(Number::Natural(954))),
+    );
+
+    expect_value(
+        "10 \"x\" \"y\" 1 1 1 1 1 1
+         quote print
+         quote =
+         while",
+        Ok(RuntimeValue::Number(Number::Natural(10))),
     )
 }
 

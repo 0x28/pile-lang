@@ -55,6 +55,6 @@ pub fn ensure_bool(
 
     match boolean {
         RuntimeValue::Boolean(b) => Ok(b),
-        v => Err(format!("Expected bool found '{}'", v)),
+        v => Err(format!("Expected boolean found '{}'", v)),
     }
 }
