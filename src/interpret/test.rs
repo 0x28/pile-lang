@@ -116,6 +116,14 @@ if
 }
 
 #[test]
+fn test_if5() {
+    expect_value(
+        "20 20 quote + quote - false if",
+        Ok(RuntimeValue::Number(Number::Natural(0))),
+    );
+}
+
+#[test]
 fn test_less1() {
     expect_value("1 2 <", Ok(RuntimeValue::Boolean(true)));
     expect_value("2 1 <", Ok(RuntimeValue::Boolean(false)));
