@@ -1,5 +1,5 @@
 [package]
-name = "stack_lang"
+name = "pile"
 version = "0.1.0"
 authors = ["0x28"]
 edition = "2018"
