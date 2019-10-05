@@ -275,3 +275,13 @@ begin 1
         Err(String::from("Line 14: Expected 'end' found 'EOF'.")),
     )
 }
+
+#[test]
+fn test_error_bad_quote1() {
+    expect_error("quote", Err("Line 1: Unexpected 'EOF'".to_string()))
+}
+
+#[test]
+fn test_error_bad_quote2() {
+    expect_error("quote end", Err("Line 1: Unexpected token 'end'".to_string()))
+}
