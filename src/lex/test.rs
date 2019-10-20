@@ -209,7 +209,8 @@ fn test_keywords() {
         end
 
         while def dotimes DEF DOTIMES END BEGIN QUOTE quote if IF print
-        and AND or OR not NOT",
+        and AND or OR not NOT
+        natural NATURAL integer INTEGER float FLOAT",
     );
     let expected = vec![
         (2, Ok(Token::Begin)),
@@ -236,6 +237,12 @@ fn test_keywords() {
         (8, Ok(Token::Operator(Operator::Or))),
         (8, Ok(Token::Operator(Operator::Not))),
         (8, Ok(Token::Operator(Operator::Not))),
+        (9, Ok(Token::Operator(Operator::Natural))),
+        (9, Ok(Token::Operator(Operator::Natural))),
+        (9, Ok(Token::Operator(Operator::Integer))),
+        (9, Ok(Token::Operator(Operator::Integer))),
+        (9, Ok(Token::Operator(Operator::Float))),
+        (9, Ok(Token::Operator(Operator::Float))),
     ];
 
     compare_token_lists(&mut lexer, expected);
@@ -492,6 +499,18 @@ fn test_token_fmt() {
     assert_eq!(
         format!("{}", Token::Operator(Operator::Print)),
         "operator 'print'"
+    );
+    assert_eq!(
+        format!("{}", Token::Operator(Operator::Natural)),
+        "operator 'natural'"
+    );
+    assert_eq!(
+        format!("{}", Token::Operator(Operator::Integer)),
+        "operator 'integer'"
+    );
+    assert_eq!(
+        format!("{}", Token::Operator(Operator::Float)),
+        "operator 'float'"
     );
     assert_eq!(format!("{}", Token::Fin), "'EOF'");
 }

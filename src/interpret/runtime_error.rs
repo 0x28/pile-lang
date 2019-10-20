@@ -1,5 +1,6 @@
 use super::runtime_value::Function;
 use super::runtime_value::RuntimeValue;
+pub use crate::lex::Number;
 use super::State;
 use std::fmt;
 
@@ -54,5 +55,14 @@ pub fn ensure_bool(stack: &mut Vec<RuntimeValue>) -> Result<bool, String> {
     match boolean {
         RuntimeValue::Boolean(b) => Ok(b),
         v => Err(format!("Expected boolean found {}", v.type_fmt())),
+    }
+}
+
+pub fn ensure_number(stack: &mut Vec<RuntimeValue>) -> Result<Number, String> {
+    let value = ensure_element(stack)?;
+
+    match value {
+        RuntimeValue::Number(n) => Ok(n),
+        v => Err(format!("Expected number found {}", v.type_fmt())),
     }
 }

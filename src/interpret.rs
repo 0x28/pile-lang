@@ -11,6 +11,7 @@ mod numeric;
 mod print;
 mod runtime_error;
 mod while_loop;
+mod cast;
 
 use runtime_error::RuntimeError;
 use std::collections::HashMap;
@@ -131,6 +132,9 @@ impl<'a> Interpreter<'a> {
             Operator::Dotimes => dotimes::apply_dotimes(state),
             Operator::Def => def::apply_def(state),
             Operator::While => while_loop::apply_while(state),
+            Operator::Natural => cast::apply_natural(stack),
+            Operator::Integer => cast::apply_integer(stack),
+            Operator::Float => cast::apply_float(stack),
         }
     }
 

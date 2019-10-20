@@ -385,6 +385,57 @@ fn test_print() {
 }
 
 #[test]
+fn test_cast_to_natural() {
+    expect_value("1 natural", Ok(RuntimeValue::Number(Number::Natural(1))));
+    expect_value(
+        "-1 -2 - natural",
+        Ok(RuntimeValue::Number(Number::Natural(1))),
+    );
+    expect_value("1.2 natural", Ok(RuntimeValue::Number(Number::Natural(1))));
+    expect_value(
+        "-1 natural",
+        Err(RuntimeError::new(
+            (1, 1),
+            "Conversion from integer '-1' to natural is invalid".to_string(),
+        )),
+    );
+}
+
+#[test]
+fn test_cast_to_integer() {
+    expect_value("-1 integer", Ok(RuntimeValue::Number(Number::Integer(-1))));
+    expect_value(
+        "100 integer",
+        Ok(RuntimeValue::Number(Number::Integer(100))),
+    );
+    expect_value(
+        "-32.12 integer",
+        Ok(RuntimeValue::Number(Number::Integer(-32))),
+    );
+    expect_value(
+        "4290000000 integer",
+        Err(RuntimeError::new(
+            (1, 1),
+            "Conversion from natural '4290000000' to integer is invalid"
+                .to_string(),
+        )),
+    )
+}
+
+#[test]
+fn test_cast_to_float() {
+    expect_value("100 float", Ok(RuntimeValue::Number(Number::Float(100.0))));
+    expect_value(
+        "-100 float",
+        Ok(RuntimeValue::Number(Number::Float(-100.0))),
+    );
+    expect_value(
+        "42.42 float",
+        Ok(RuntimeValue::Number(Number::Float(42.42))),
+    );
+}
+
+#[test]
 fn test_numeric_overflow() {
     expect_value(
         "4294967295 1 +",

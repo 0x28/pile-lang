@@ -42,6 +42,10 @@ pub enum Operator {
     Not,
     // builtins
     Print,
+    // casts
+    Natural,
+    Integer,
+    Float,
 }
 
 impl fmt::Display for Operator {
@@ -64,6 +68,9 @@ impl fmt::Display for Operator {
             Operator::Not => write!(f, "not"),
             Operator::Less => write!(f, "<"),
             Operator::Print => write!(f, "print"),
+            Operator::Natural => write!(f, "natural"),
+            Operator::Integer => write!(f, "integer"),
+            Operator::Float => write!(f, "float"),
         }
     }
 }
@@ -178,6 +185,9 @@ impl<'a> Lexer<'a> {
             "or" => Token::Operator(Operator::Or),
             "not" => Token::Operator(Operator::Not),
             "print" => Token::Operator(Operator::Print),
+            "natural" => Token::Operator(Operator::Natural),
+            "integer" => Token::Operator(Operator::Integer),
+            "float" => Token::Operator(Operator::Float),
             _ => Token::Identifier(ident),
         })
     }
