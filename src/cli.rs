@@ -11,9 +11,8 @@ pub fn read_program<T: AsRef<str>>(args: &[T]) -> Result<String, String> {
     } else if args.len() == 2 {
         let filename = &args[1];
 
-        return fs::read_to_string(filename.as_ref()).map_err(|err| {
-            format!("{}: {}", filename.as_ref(), err)
-        });
+        fs::read_to_string(filename.as_ref())
+            .map_err(|err| format!("{}: {}", filename.as_ref(), err))
     } else {
         Err(format!("Usage: {} [FILE]", args[0].as_ref()))
     }
