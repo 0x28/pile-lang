@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::fmt;
 
 pub use crate::lex::Number;
@@ -54,6 +55,29 @@ impl<'a> fmt::Display for RuntimeValue<'a> {
             RuntimeValue::Boolean(true) => write!(f, "true"),
             RuntimeValue::Boolean(false) => write!(f, "false"),
             RuntimeValue::Identifier(ident) => write!(f, "{}", ident),
+        }
+    }
+}
+
+impl<'a> PartialOrd for RuntimeValue<'a> {
+    fn partial_cmp(&self, other: &RuntimeValue) -> Option<Ordering> {
+        match (self, other) {
+            (
+                RuntimeValue::Number(Number::Natural(left)),
+                RuntimeValue::Number(Number::Natural(right)),
+            ) => Some(left.cmp(right)),
+            (
+                RuntimeValue::Number(Number::Integer(left)),
+                RuntimeValue::Number(Number::Integer(right)),
+            ) => Some(left.cmp(right)),
+            (
+                RuntimeValue::Number(Number::Float(left)),
+                RuntimeValue::Number(Number::Float(right)),
+            ) => left.partial_cmp(right),
+            (RuntimeValue::String(left), RuntimeValue::String(right)) => {
+                Some(left.cmp(right))
+            }
+            _ => None,
         }
     }
 }
