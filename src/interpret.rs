@@ -40,6 +40,19 @@ impl Interpreter {
         }
     }
 
+    pub fn empty() -> Interpreter {
+        Interpreter {
+            program: Ast {
+                expressions: vec![],
+            },
+            state: State {
+                stack: vec![],
+                lookup: HashMap::new(),
+                current_lines: (1, 1),
+            },
+        }
+    }
+
     pub fn reserve(program: Ast, initial_size: usize) -> Interpreter {
         Interpreter {
             program,
@@ -55,6 +68,21 @@ impl Interpreter {
         Interpreter::call(&self.program.expressions, &mut self.state)
             .map_err(|msg| RuntimeError::new(self.state.current_lines, msg))?;
         Ok(self.state.stack.pop())
+    }
+
+    pub fn eval(
+        &mut self,
+        mut expressions: Vec<Expr>,
+    ) -> Result<Option<&RuntimeValue>, RuntimeError> {
+        let old_size = self.program.expressions.len();
+        self.program.expressions.append(&mut expressions);
+
+        Interpreter::call(
+            &self.program.expressions[old_size..],
+            &mut self.state,
+        )
+        .map_err(|msg| RuntimeError::new(self.state.current_lines, msg))?;
+        Ok(self.state.stack.last())
     }
 
     fn call(expressions: &[Expr], state: &mut State) -> Result<(), String> {

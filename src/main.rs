@@ -2,6 +2,7 @@ mod cli;
 mod interpret;
 mod lex;
 mod parse;
+mod repl;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
