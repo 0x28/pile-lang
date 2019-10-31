@@ -240,12 +240,12 @@ fn test_quote() {
     let block = vec![];
     expect_value(
         "quote begin end",
-        Ok(RuntimeValue::Function(Function::Composite(&block))),
+        Ok(RuntimeValue::Function(Function::Composite(Rc::new(block)))),
     );
 
     expect_value(
         "quote +",
-        Ok(RuntimeValue::Function(Function::Builtin(&Operator::Plus))),
+        Ok(RuntimeValue::Function(Function::Builtin(Operator::Plus))),
     );
 
     expect_value("quote \"hi\"", Ok(RuntimeValue::String("hi".to_string())));

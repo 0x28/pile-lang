@@ -33,9 +33,9 @@ pub fn ensure_element<T>(stack: &mut Vec<T>) -> Result<T, String> {
     stack.pop().ok_or_else(|| "Stack underflow".to_owned())
 }
 
-pub fn ensure_function<'e>(
-    state: &mut State<'e>,
-) -> Result<Function<'e>, String> {
+pub fn ensure_function(
+    state: &mut State,
+) -> Result<Function, String> {
     let func = ensure_element(&mut state.stack)?;
 
     match func {

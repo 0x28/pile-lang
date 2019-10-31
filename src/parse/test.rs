@@ -115,10 +115,10 @@ fn test_block1() {
                 Expr::Block {
                     begin: 1,
                     end: 1,
-                    expressions: vec![Expr::Atom {
+                    expressions: Rc::new(vec![Expr::Atom {
                         line: 1,
                         token: Token::Number(Number::Natural(100)),
-                    }],
+                    }]),
                 },
                 Expr::Atom {
                     line: 1,
@@ -142,18 +142,18 @@ fn test_block2() {
                 Expr::Block {
                     begin: 1,
                     end: 1,
-                    expressions: vec![Expr::Atom {
+                    expressions: Rc::new(vec![Expr::Atom {
                         line: 1,
                         token: Token::Number(Number::Natural(100)),
-                    }],
+                    }]),
                 },
                 Expr::Block {
                     begin: 1,
                     end: 1,
-                    expressions: vec![Expr::Atom {
+                    expressions: Rc::new(vec![Expr::Atom {
                         line: 1,
                         token: Token::Number(Number::Integer(-100)),
-                    }],
+                    }]),
                 },
                 Expr::Atom {
                     line: 1,
@@ -193,19 +193,19 @@ end",
             expressions: vec![Expr::Block {
                 begin: 2,
                 end: 10,
-                expressions: vec![
+                expressions: Rc::new(vec![
                     Expr::Block {
                         begin: 3,
                         end: 5,
-                        expressions: vec![Expr::Atom {
+                        expressions: Rc::new(vec![Expr::Atom {
                             line: 4,
                             token: Token::String(String::from("a")),
-                        }],
+                        }]),
                     },
                     Expr::Block {
                         begin: 7,
                         end: 9,
-                        expressions: vec![
+                        expressions: Rc::new(vec![
                             Expr::Atom {
                                 line: 8,
                                 token: Token::String(String::from("b")),
@@ -218,9 +218,9 @@ end",
                                 line: 8,
                                 token: Token::Operator(Operator::Plus),
                             },
-                        ],
+                        ]),
                     },
-                ],
+                ]),
             }],
         },
     );
@@ -283,5 +283,8 @@ fn test_error_bad_quote1() {
 
 #[test]
 fn test_error_bad_quote2() {
-    expect_error("quote end", Err("Line 1: Unexpected token 'end'".to_string()))
+    expect_error(
+        "quote end",
+        Err("Line 1: Unexpected token 'end'".to_string()),
+    )
 }

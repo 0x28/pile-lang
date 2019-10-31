@@ -1,6 +1,8 @@
 use crate::lex::Lexer;
 use crate::lex::Token;
 
+use std::rc::Rc;
+
 #[derive(Debug, PartialEq)]
 pub struct Ast {
     pub expressions: Vec<Expr>,
@@ -19,7 +21,7 @@ pub enum Expr {
     Block {
         begin: u64,
         end: u64,
-        expressions: Vec<Expr>,
+        expressions: Rc<Vec<Expr>>,
     },
 }
 
@@ -108,7 +110,7 @@ impl<'a> Parser<'a> {
         Ok(Expr::Block {
             begin,
             end,
-            expressions: block,
+            expressions: Rc::new(block),
         })
     }
 

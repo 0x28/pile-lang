@@ -19,7 +19,7 @@ impl fmt::Display for Number {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Operator {
     // control flow
     If,

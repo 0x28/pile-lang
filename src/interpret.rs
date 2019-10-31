@@ -4,6 +4,7 @@ use crate::parse::Ast;
 mod runtime_value;
 use runtime_value::*;
 mod boolean;
+mod cast;
 mod condition;
 mod def;
 mod dotimes;
@@ -11,24 +12,24 @@ mod numeric;
 mod print;
 mod runtime_error;
 mod while_loop;
-mod cast;
 
 use runtime_error::RuntimeError;
 use std::collections::HashMap;
+use std::rc::Rc;
 
-pub struct State<'a> {
-    stack: Vec<RuntimeValue<'a>>,
-    lookup: HashMap<String, RuntimeValue<'a>>,
+pub struct State {
+    stack: Vec<RuntimeValue>,
+    lookup: HashMap<String, RuntimeValue>,
     current_lines: (u64, u64),
 }
 
-pub struct Interpreter<'a> {
+pub struct Interpreter {
     program: Ast,
-    state: State<'a>,
+    state: State,
 }
 
-impl<'a> Interpreter<'a> {
-    pub fn new(program: Ast) -> Interpreter<'a> {
+impl Interpreter {
+    pub fn new(program: Ast) -> Interpreter {
         Interpreter {
             program,
             state: State {
@@ -39,7 +40,7 @@ impl<'a> Interpreter<'a> {
         }
     }
 
-    pub fn reserve(program: Ast, initial_size: usize) -> Interpreter<'a> {
+    pub fn reserve(program: Ast, initial_size: usize) -> Interpreter {
         Interpreter {
             program,
             state: State {
@@ -50,16 +51,13 @@ impl<'a> Interpreter<'a> {
         }
     }
 
-    pub fn run(&'a mut self) -> Result<Option<RuntimeValue<'a>>, RuntimeError> {
+    pub fn run(&mut self) -> Result<Option<RuntimeValue>, RuntimeError> {
         Interpreter::call(&self.program.expressions, &mut self.state)
             .map_err(|msg| RuntimeError::new(self.state.current_lines, msg))?;
         Ok(self.state.stack.pop())
     }
 
-    fn call<'e>(
-        expressions: &'e [Expr],
-        state: &mut State<'e>,
-    ) -> Result<(), String> {
+    fn call(expressions: &[Expr], state: &mut State) -> Result<(), String> {
         for expr in expressions.iter() {
             state.current_lines = expr.lines();
             match expr {
@@ -77,14 +75,12 @@ impl<'a> Interpreter<'a> {
                     Token::Boolean(b) => {
                         state.stack.push(RuntimeValue::Boolean(*b))
                     }
-                    token => {
-                        return Err(format!("Unexpected {}", token))
-                    }
+                    token => return Err(format!("Unexpected {}", token)),
                 },
                 Expr::Quoted { token: atom, .. } => match atom {
-                    Token::Operator(op) => state
-                        .stack
-                        .push(RuntimeValue::Function(Function::Builtin(op))),
+                    Token::Operator(op) => state.stack.push(
+                        RuntimeValue::Function(Function::Builtin(op.clone())),
+                    ),
                     Token::Number(num) => {
                         state.stack.push(RuntimeValue::Number(num.clone()));
                     }
@@ -99,13 +95,13 @@ impl<'a> Interpreter<'a> {
                     Token::Boolean(b) => {
                         state.stack.push(RuntimeValue::Boolean(*b))
                     }
-                    token => {
-                        return Err(format!("Unexpected {}", token))
-                    }
+                    token => return Err(format!("Unexpected {}", token)),
                 },
-                Expr::Block { expressions, .. } => state.stack.push(
-                    RuntimeValue::Function(Function::Composite(expressions)),
-                ),
+                Expr::Block { expressions, .. } => {
+                    state.stack.push(RuntimeValue::Function(
+                        Function::Composite(Rc::clone(expressions)),
+                    ))
+                }
             }
         }
 
@@ -143,10 +139,10 @@ impl<'a> Interpreter<'a> {
             match value.clone() {
                 RuntimeValue::Function(func) => match func {
                     Function::Composite(block) => {
-                        Interpreter::call(block, state)?;
+                        Interpreter::call(&block, state)?;
                     }
                     Function::Builtin(op) => {
-                        Interpreter::apply(op, state)?;
+                        Interpreter::apply(&op, state)?;
                     }
                 },
                 value => state.stack.push(value),

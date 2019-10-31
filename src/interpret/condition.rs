@@ -11,14 +11,14 @@ pub fn apply_if(state: &mut State) -> Result<(), String> {
 
     if condition {
         match if_branch {
-            Function::Composite(block) => Interpreter::call(block, state)?,
+            Function::Composite(block) => Interpreter::call(&block, state)?,
             Function::Builtin(operator) => {
                 Interpreter::apply(&operator, state)?
             }
         }
     } else {
         match else_branch {
-            Function::Composite(block) => Interpreter::call(block, state)?,
+            Function::Composite(block) => Interpreter::call(&block, state)?,
             Function::Builtin(operator) => {
                 Interpreter::apply(&operator, state)?
             }

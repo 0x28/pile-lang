@@ -1,17 +1,18 @@
 use std::cmp::Ordering;
 use std::fmt;
+use std::rc::Rc;
 
 pub use crate::lex::Number;
 pub use crate::lex::Operator;
 pub use crate::parse::Expr;
 
 #[derive(Debug, PartialEq, Clone)]
-pub enum Function<'a> {
-    Composite(&'a [Expr]),
-    Builtin(&'a Operator),
+pub enum Function {
+    Composite(Rc<Vec<Expr>>),
+    Builtin(Operator),
 }
 
-impl<'a> fmt::Display for Function<'a> {
+impl fmt::Display for Function {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Function::Composite(block) => write!(f, "function @ {:p}", block),
@@ -21,15 +22,15 @@ impl<'a> fmt::Display for Function<'a> {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub enum RuntimeValue<'a> {
-    Function(Function<'a>),
+pub enum RuntimeValue {
+    Function(Function),
     Number(Number),
     Identifier(String),
     String(String),
     Boolean(bool),
 }
 
-impl<'a> RuntimeValue<'a> {
+impl RuntimeValue {
     pub fn type_fmt(&self) -> String {
         match self {
             RuntimeValue::Function(func) => format!("{}", func),
@@ -44,7 +45,7 @@ impl<'a> RuntimeValue<'a> {
     }
 }
 
-impl<'a> fmt::Display for RuntimeValue<'a> {
+impl fmt::Display for RuntimeValue {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             RuntimeValue::Function(func) => write!(f, "{}", func),
@@ -59,7 +60,7 @@ impl<'a> fmt::Display for RuntimeValue<'a> {
     }
 }
 
-impl<'a> PartialOrd for RuntimeValue<'a> {
+impl PartialOrd for RuntimeValue {
     fn partial_cmp(&self, other: &RuntimeValue) -> Option<Ordering> {
         match (self, other) {
             (
