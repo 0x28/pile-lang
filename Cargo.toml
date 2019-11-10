@@ -5,3 +5,4 @@ authors = ["0x28"]
 edition = "2018"
 
 [dependencies]
+clap = "2.33.0"
