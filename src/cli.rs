@@ -28,6 +28,14 @@ impl CommandLineOptions {
             },
         }
     }
+
+    pub fn stack_size(&self) -> usize {
+        self.stack_size
+    }
+
+    pub fn debug(&self) -> bool {
+        self.debug
+    }
 }
 
 pub fn read_options() -> CommandLineOptions {

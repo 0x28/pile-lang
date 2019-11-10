@@ -29,11 +29,11 @@ pub struct Interpreter {
 }
 
 impl Interpreter {
-    pub fn new(program: Ast) -> Interpreter {
+    pub fn new(program: Ast, initial_size: usize) -> Interpreter {
         Interpreter {
             program,
             state: State {
-                stack: vec![],
+                stack: Vec::with_capacity(initial_size),
                 lookup: HashMap::new(),
                 current_lines: (1, 1),
             },
@@ -47,17 +47,6 @@ impl Interpreter {
             },
             state: State {
                 stack: vec![],
-                lookup: HashMap::new(),
-                current_lines: (1, 1),
-            },
-        }
-    }
-
-    pub fn reserve(program: Ast, initial_size: usize) -> Interpreter {
-        Interpreter {
-            program,
-            state: State {
-                stack: Vec::with_capacity(initial_size),
                 lookup: HashMap::new(),
                 current_lines: (1, 1),
             },

@@ -27,7 +27,8 @@ fn main() {
         Ok(ast) => ast,
     };
 
-    let mut interpreter = interpret::Interpreter::new(ast);
+    let mut interpreter =
+        interpret::Interpreter::new(ast, options.stack_size());
     let value = interpreter.run();
 
     if let Err(runtime_error) = value {
