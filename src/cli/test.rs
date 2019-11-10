@@ -1,14 +1,15 @@
-use super::read_program;
+use super::CommandLineOptions;
 
 #[test]
 fn test_cli() {
-    assert_eq!(
-        read_program(&["prog", "unknown.txt"]),
-        Err("unknown.txt: No such file or directory (os error 2)".to_string())
-    );
+    let options = CommandLineOptions {
+        stack_size: 100,
+        program: Some("unknown.txt".to_owned()),
+        debug: true,
+    };
 
     assert_eq!(
-        read_program(&["prog", "a", "b", "c"]),
-        Err("Usage: prog [FILE]".to_string())
+        options.read_program(),
+        Err("unknown.txt: No such file or directory (os error 2)".to_string())
     );
 }

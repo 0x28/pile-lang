@@ -1,3 +1,5 @@
+extern crate clap;
+
 mod cli;
 mod interpret;
 mod lex;
@@ -5,8 +7,9 @@ mod parse;
 mod repl;
 
 fn main() {
-    let args: Vec<String> = std::env::args().collect();
-    let program_text = match cli::read_program(&args) {
+    let options = cli::read_options();
+
+    let program_text = match options.read_program() {
         Err(msg) => {
             eprintln!("{}", msg);
             std::process::exit(1);
