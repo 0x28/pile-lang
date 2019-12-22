@@ -119,7 +119,7 @@ impl Interpreter {
                         Function::Composite(Rc::clone(expressions)),
                     ))
                 }
-                Expr::Use { .. } => return Err(format!("Unexpected 'use'")),
+                Expr::Use { .. } => return Err("Unexpected 'use'".to_owned()),
             }
         }
 

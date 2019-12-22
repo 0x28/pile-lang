@@ -140,12 +140,10 @@ impl<'a> Parser<'a> {
             Some((line, Token::End)) => {
                 Err(format!("Line {}: Unexpected {}", line, Token::End))
             }
-            Some((line, Token::Use)) => {
-                return Err(format!(
-                    "Line {}: 'use' isn't allowed inside quotes.",
-                    line
-                ))
-            }
+            Some((line, Token::Use)) => Err(format!(
+                "Line {}: 'use' isn't allowed inside quotes.",
+                line
+            )),
             Some((line, _)) => Ok(Expr::Quoted {
                 line: *line,
                 token: self.lookahead.take().unwrap().1,
@@ -158,9 +156,10 @@ impl<'a> Parser<'a> {
         self.consume()?;
 
         match &self.lookahead {
-            Some((line, Token::String(string))) => {
-                Ok(Expr::Use { line: *line, path: PathBuf::from(string) })
-            }
+            Some((line, Token::String(string))) => Ok(Expr::Use {
+                line: *line,
+                path: PathBuf::from(string),
+            }),
             Some((line, token)) => {
                 Err(format!("Line {}: Expected string found {}.", line, token))
             }
