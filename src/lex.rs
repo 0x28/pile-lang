@@ -87,6 +87,8 @@ pub enum Token {
     Identifier(String),
     String(String),
     Boolean(bool),
+    // use
+    Use,
     // eof
     Fin,
 }
@@ -103,6 +105,7 @@ impl fmt::Display for Token {
             Token::End => write!(f, "token 'end'"),
             Token::Quote => write!(f, "token 'quote'"),
             Token::Operator(o) => write!(f, "operator '{}'", o),
+            Token::Use => write!(f, "token 'use'"),
             Token::Fin => write!(f, "'EOF'"),
         }
     }
@@ -188,6 +191,7 @@ impl<'a> Lexer<'a> {
             "natural" => Token::Operator(Operator::Natural),
             "integer" => Token::Operator(Operator::Integer),
             "float" => Token::Operator(Operator::Float),
+            "use" => Token::Use,
             _ => Token::Identifier(ident),
         })
     }

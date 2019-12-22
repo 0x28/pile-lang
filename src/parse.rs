@@ -1,6 +1,7 @@
 use crate::lex::Lexer;
 use crate::lex::Token;
 
+use std::path::PathBuf;
 use std::rc::Rc;
 
 #[derive(Debug, PartialEq)]
@@ -23,6 +24,10 @@ pub enum Expr {
         end: u64,
         expressions: Rc<Vec<Expr>>,
     },
+    Use {
+        line: u64,
+        path: PathBuf,
+    },
 }
 
 impl Expr {
@@ -31,6 +36,7 @@ impl Expr {
             Self::Atom { line, .. } => (*line, *line),
             Self::Quoted { line, .. } => (*line, *line),
             Self::Block { begin, end, .. } => (*begin, *end),
+            Self::Use { line, .. } => (*line, *line),
         }
     }
 }
@@ -61,6 +67,7 @@ impl<'a> Parser<'a> {
                 }
                 Some((_, Token::Begin)) => program.push(self.block()?),
                 Some((_, Token::Quote)) => program.push(self.quote()?),
+                Some((_, Token::Use)) => program.push(self.using()?),
                 Some((line, _)) => program.push(Expr::Atom {
                     line,
                     token: self.lookahead.take().unwrap().1,
@@ -99,6 +106,12 @@ impl<'a> Parser<'a> {
                 }
                 Some((_, Token::Begin)) => block.push(self.block()?),
                 Some((_, Token::Quote)) => block.push(self.quote()?),
+                Some((line, Token::Use)) => {
+                    return Err(format!(
+                        "Line {}: 'use' isn't allowed inside blocks.",
+                        line
+                    ))
+                }
                 Some((line, _)) => block.push(Expr::Atom {
                     line,
                     token: self.lookahead.take().unwrap().1,
@@ -127,10 +140,30 @@ impl<'a> Parser<'a> {
             Some((line, Token::End)) => {
                 Err(format!("Line {}: Unexpected {}", line, Token::End))
             }
+            Some((line, Token::Use)) => {
+                return Err(format!(
+                    "Line {}: 'use' isn't allowed inside quotes.",
+                    line
+                ))
+            }
             Some((line, _)) => Ok(Expr::Quoted {
                 line: *line,
                 token: self.lookahead.take().unwrap().1,
             }),
+            None => Err(String::from("No lookahead found.")),
+        }
+    }
+
+    fn using(&mut self) -> Result<Expr, String> {
+        self.consume()?;
+
+        match &self.lookahead {
+            Some((line, Token::String(string))) => {
+                Ok(Expr::Use { line: *line, path: PathBuf::from(string) })
+            }
+            Some((line, token)) => {
+                Err(format!("Line {}: Expected string found {}.", line, token))
+            }
             None => Err(String::from("No lookahead found.")),
         }
     }
