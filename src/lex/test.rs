@@ -321,7 +321,7 @@ fn test_error_missing_backspace() {
         (1, Ok(Token::Number(Number::Natural(3)))),
         (1, Ok(Token::Operator(Operator::Mul))),
         (1, Ok(Token::Operator(Operator::Plus))),
-        (1, Err(String::from("Missing character after backspace."))),
+        (1, Err(String::from("Missing character after backslash."))),
     ];
 
     compare_token_lists(&mut lexer, expected);

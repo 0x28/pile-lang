@@ -220,7 +220,7 @@ impl<'a> Lexer<'a> {
                 }
                 ('\\', None) => {
                     return Err(String::from(
-                        "Missing character after backspace.",
+                        "Missing character after backslash.",
                     ))
                 }
                 ('"', _) => break,
