@@ -6,6 +6,8 @@ fn ast_assert_eq(left: &Ast, right: &Ast) {
     let left_iter = left.expressions.iter();
     let right_iter = right.expressions.iter();
 
+    assert_eq!(left.expressions.len(), right.expressions.len());
+
     for (expr_left, expr_right) in left_iter.zip(right_iter) {
         assert_eq!(expr_left, expr_right)
     }
