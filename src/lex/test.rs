@@ -313,7 +313,20 @@ fn test_operators() {
 }
 
 #[test]
-fn test_error_missing_backspace() {
+fn test_use() {
+    let mut lexer = Lexer::new("use \"test.pile\"\n use \"file\"");
+    let expected = vec![
+        (1, Ok(Token::Use)),
+        (1, Ok(Token::String("test.pile".to_owned()))),
+        (2, Ok(Token::Use)),
+        (2, Ok(Token::String("file".to_owned()))),
+    ];
+
+    compare_token_lists(&mut lexer, expected);
+}
+
+#[test]
+fn test_error_missing_backslash() {
     let mut lexer = Lexer::new("1 2 3 * + \"cool string\\");
     let expected = vec![
         (1, Ok(Token::Number(Number::Natural(1)))),
@@ -511,6 +524,10 @@ fn test_token_fmt() {
     assert_eq!(
         format!("{}", Token::Operator(Operator::Float)),
         "operator 'float'"
+    );
+    assert_eq!(
+        format!("{}", Token::Use),
+        "token 'use'"
     );
     assert_eq!(format!("{}", Token::Fin), "'EOF'");
 }

@@ -229,6 +229,95 @@ end",
 }
 
 #[test]
+fn test_use() {
+    expect_ast(
+        "
+use \"file_a\"
+1 2 3 +
+use \"file_b\"
+use \"file_c\"
+100 200 +
+",
+        Ast {
+            expressions: vec![
+                Expr::Use {
+                    line: 2,
+                    path: PathBuf::from("file_a"),
+                },
+                Expr::Atom {
+                    line: 3,
+                    token: Token::Number(Number::Natural(1)),
+                },
+                Expr::Atom {
+                    line: 3,
+                    token: Token::Number(Number::Natural(2)),
+                },
+                Expr::Atom {
+                    line: 3,
+                    token: Token::Number(Number::Natural(3)),
+                },
+                Expr::Atom {
+                    line: 3,
+                    token: Token::Operator(Operator::Plus),
+                },
+                Expr::Use {
+                    line: 4,
+                    path: PathBuf::from("file_b"),
+                },
+                Expr::Use {
+                    line: 5,
+                    path: PathBuf::from("file_c"),
+                },
+                Expr::Atom {
+                    line: 6,
+                    token: Token::Number(Number::Natural(100)),
+                },
+                Expr::Atom {
+                    line: 6,
+                    token: Token::Number(Number::Natural(200)),
+                },
+                Expr::Atom {
+                    line: 6,
+                    token: Token::Operator(Operator::Plus),
+                },
+            ],
+        },
+    );
+}
+
+#[test]
+fn test_error_use_in_block() {
+    expect_error(
+        "
+begin
+    use \"file1\"
+end
+",
+        Err(String::from("Line 3: 'use' isn't allowed inside blocks.")),
+    )
+}
+
+#[test]
+fn test_error_use_in_quote() {
+    expect_error(
+        "
+quote use \"file1\"
+",
+        Err(String::from("Line 2: 'use' isn't allowed inside quotes.")),
+    )
+}
+
+#[test]
+fn test_error_use_wrong_arg() {
+    expect_error(
+        "
+use 42
+",
+        Err(String::from("Line 2: Expected string found natural '42'.")),
+    )
+}
+
+#[test]
 fn test_error_unmatched_end() {
     expect_error(
         "
