@@ -1,10 +1,10 @@
-use super::CommandLineOptions;
+use super::*;
 
 #[test]
 fn test_cli() {
     let options = CommandLineOptions {
         stack_size: 100,
-        program: Some("unknown.txt".to_owned()),
+        source: ProgramSource::File(PathBuf::from("unknown.txt")),
         debug: true,
     };
 

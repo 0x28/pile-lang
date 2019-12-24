@@ -2,30 +2,35 @@ use crate::repl;
 
 use std::fs;
 use std::io::{self, Read};
+use std::path::PathBuf;
 
 use clap::{crate_version, App, Arg};
 
 pub struct CommandLineOptions {
     stack_size: usize,
-    program: Option<String>,
+    source: ProgramSource,
     debug: bool,
+}
+
+pub enum ProgramSource {
+    Repl,
+    Stdin,
+    File(PathBuf),
 }
 
 impl CommandLineOptions {
     pub fn read_program(&self) -> Result<String, String> {
-        match &self.program {
-            None => repl::repl(),
-            Some(filename) => match filename.as_ref() {
-                "-" => {
-                    let mut buffer = String::new();
-                    io::stdin()
-                        .read_to_string(&mut buffer)
-                        .map_err(|err| format!("stdin: {}", err))?;
-                    Ok(buffer)
-                }
-                file => fs::read_to_string(file)
-                    .map_err(|err| format!("{}: {}", file, err)),
-            },
+        match &self.source {
+            ProgramSource::Repl => repl::repl(),
+            ProgramSource::Stdin => {
+                let mut buffer = String::new();
+                io::stdin()
+                    .read_to_string(&mut buffer)
+                    .map_err(|err| format!("stdin: {}", err))?;
+                Ok(buffer)
+            }
+            ProgramSource::File(file) => fs::read_to_string(file)
+                .map_err(|err| format!("{}: {}", file.to_string_lossy(), err)),
         }
     }
 
@@ -70,12 +75,16 @@ pub fn read_options() -> CommandLineOptions {
         .get_matches();
 
     let stack_size: usize = matches.value_of("size").unwrap().parse().unwrap();
-    let program = matches.value_of("FILE");
+    let file = matches.value_of("FILE");
     let debug = matches.is_present("debug");
 
     CommandLineOptions {
         stack_size,
-        program: program.map(str::to_owned),
+        source: match file {
+            None => ProgramSource::Repl,
+            Some("-") => ProgramSource::Stdin,
+            Some(file) => ProgramSource::File(PathBuf::from(file)),
+        },
         debug,
     }
 }
