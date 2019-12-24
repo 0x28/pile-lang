@@ -1,11 +1,12 @@
 use super::*;
+use crate::cli::ProgramSource;
 use crate::lex::Lexer;
 use crate::lex::Number;
 use crate::lex::Operator;
 use crate::parse::Parser;
 
 fn expect_value(prog: &str, value: Result<RuntimeValue, RuntimeError>) {
-    let lexer = Lexer::new(prog);
+    let lexer = Lexer::new(prog, ProgramSource::Stdin);
     let parser = Parser::new(lexer);
     let mut interpreter =
         Interpreter::new(parser.parse().expect("invalid program"), 10);

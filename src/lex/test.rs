@@ -1,4 +1,5 @@
 use super::*;
+use crate::cli::ProgramSource;
 
 fn token_list(lexer: &mut Lexer) -> Vec<(u64, Result<Token, String>)> {
     let mut result = vec![];
@@ -27,7 +28,7 @@ fn compare_token_lists(
 
 #[test]
 fn test_empty_program() {
-    let mut lexer = Lexer::new("");
+    let mut lexer = Lexer::new("", ProgramSource::Stdin);
     let result = token_list(&mut lexer);
 
     assert_eq!(result.len(), 0);
@@ -35,7 +36,8 @@ fn test_empty_program() {
 
 #[test]
 fn test_comment_simple() {
-    let mut lexer = Lexer::new("2 3 *# hello world\n1 1 +");
+    let mut lexer =
+        Lexer::new("2 3 *# hello world\n1 1 +", ProgramSource::Stdin);
     let expected = vec![
         (1, Ok(Token::Number(Number::Natural(2)))),
         (1, Ok(Token::Number(Number::Natural(3)))),
@@ -50,7 +52,7 @@ fn test_comment_simple() {
 
 #[test]
 fn test_comment_only() {
-    let mut lexer = Lexer::new("# empty program");
+    let mut lexer = Lexer::new("# empty program", ProgramSource::Stdin);
     let result = token_list(&mut lexer);
 
     assert_eq!(result.len(), 0);
@@ -58,7 +60,10 @@ fn test_comment_only() {
 
 #[test]
 fn test_string_simple() {
-    let mut lexer = Lexer::new("\"yay programming languages :)\"# comment");
+    let mut lexer = Lexer::new(
+        "\"yay programming languages :)\"# comment",
+        ProgramSource::Stdin,
+    );
     let expected = vec![(
         1,
         Ok(Token::String(String::from("yay programming languages :)"))),
@@ -69,7 +74,8 @@ fn test_string_simple() {
 
 #[test]
 fn test_string_escaped() {
-    let mut lexer = Lexer::new("\"\\n\\n\\n\\t\\r\0#test#\"");
+    let mut lexer =
+        Lexer::new("\"\\n\\n\\n\\t\\r\0#test#\"", ProgramSource::Stdin);
     let expected =
         vec![(1, Ok(Token::String(String::from("\n\n\n\t\r\0#test#"))))];
 
@@ -78,7 +84,7 @@ fn test_string_escaped() {
 
 #[test]
 fn test_unknown_char() {
-    let mut lexer = Lexer::new("\\hello world\\");
+    let mut lexer = Lexer::new("\\hello world\\", ProgramSource::Stdin);
     let expected = vec![
         (1, Err(String::from("Unknown char '\\'"))),
         (1, Ok(Token::Identifier(String::from("hello")))),
@@ -94,6 +100,7 @@ fn test_numbers_natural() {
     let mut lexer = Lexer::new(
         "100 2000 3000 123 4543 123 21393#123#123
          203 040 05060 70 80 002 1203004 003",
+        ProgramSource::Stdin,
     );
     let expected = vec![
         (1, Ok(Token::Number(Number::Natural(100)))),
@@ -121,6 +128,7 @@ fn test_numbers_integer() {
     let mut lexer = Lexer::new(
         "-1\n-2\n-3\n-4000\n-0044
         -1000 -200 -42 -42",
+        ProgramSource::Stdin,
     );
     let expected = vec![
         (1, Ok(Token::Number(Number::Integer(-1)))),
@@ -142,6 +150,7 @@ fn test_numbers_float() {
     let mut lexer = Lexer::new(
         "1.1\n2.2\n3.3\n-10e20\n 20E3
          3.1415 7777.7777 -3e-10#number :)",
+        ProgramSource::Stdin,
     );
     let expected = vec![
         (1, Ok(Token::Number(Number::Float(1.1)))),
@@ -159,7 +168,8 @@ fn test_numbers_float() {
 
 #[test]
 fn test_numbers_overflow() {
-    let mut lexer = Lexer::new("8589934592 -8589934592 +8589934592");
+    let mut lexer =
+        Lexer::new("8589934592 -8589934592 +8589934592", ProgramSource::Stdin);
     let expected = vec![
         (
             1,
@@ -186,6 +196,7 @@ fn test_boolean() {
     let mut lexer = Lexer::new(
         "true false true
          false true false",
+        ProgramSource::Stdin,
     );
     let expected = vec![
         (1, Ok(Token::Boolean(true))),
@@ -211,6 +222,7 @@ fn test_keywords() {
         while def dotimes DEF DOTIMES END BEGIN QUOTE quote if IF print
         and AND or OR not NOT
         natural NATURAL integer INTEGER float FLOAT",
+        ProgramSource::Stdin,
     );
     let expected = vec![
         (2, Ok(Token::Begin)),
@@ -254,6 +266,7 @@ fn test_identifier() {
         "quote var 100 def
          begin VAR 200 + end begin true end while
          definition_var looped while_not# variable",
+        ProgramSource::Stdin,
     );
     let expected = vec![
         (1, Ok(Token::Quote)),
@@ -279,8 +292,10 @@ fn test_identifier() {
 
 #[test]
 fn test_whitespace() {
-    let mut lexer =
-        Lexer::new("\r\t100 200\t\r\n + \n\n 200 100 +\n\n\n\"hallo\"\t\t\t");
+    let mut lexer = Lexer::new(
+        "\r\t100 200\t\r\n + \n\n 200 100 +\n\n\n\"hallo\"\t\t\t",
+        ProgramSource::Stdin,
+    );
     let expected = vec![
         (1, Ok(Token::Number(Number::Natural(100)))),
         (1, Ok(Token::Number(Number::Natural(200)))),
@@ -296,7 +311,10 @@ fn test_whitespace() {
 
 #[test]
 fn test_operators() {
-    let mut lexer = Lexer::new("\r\t+ -\t\r\n * /\n\n > >=\n\n\n< <=\t\t\t=");
+    let mut lexer = Lexer::new(
+        "\r\t+ -\t\r\n * /\n\n > >=\n\n\n< <=\t\t\t=",
+        ProgramSource::Stdin,
+    );
     let expected = vec![
         (1, Ok(Token::Operator(Operator::Plus))),
         (1, Ok(Token::Operator(Operator::Minus))),
@@ -314,7 +332,8 @@ fn test_operators() {
 
 #[test]
 fn test_use() {
-    let mut lexer = Lexer::new("use \"test.pile\"\n use \"file\"");
+    let mut lexer =
+        Lexer::new("use \"test.pile\"\n use \"file\"", ProgramSource::Stdin);
     let expected = vec![
         (1, Ok(Token::Use)),
         (1, Ok(Token::String("test.pile".to_owned()))),
@@ -327,7 +346,8 @@ fn test_use() {
 
 #[test]
 fn test_error_missing_backslash() {
-    let mut lexer = Lexer::new("1 2 3 * + \"cool string\\");
+    let mut lexer =
+        Lexer::new("1 2 3 * + \"cool string\\", ProgramSource::Stdin);
     let expected = vec![
         (1, Ok(Token::Number(Number::Natural(1)))),
         (1, Ok(Token::Number(Number::Natural(2)))),
@@ -344,6 +364,7 @@ fn test_error_missing_backslash() {
 fn test_error_unknown_escape() {
     let mut lexer = Lexer::new(
         "\"cool string\\t\\z\" 3.14 \"some string\\a\\b\\c \\\"test\" 100",
+        ProgramSource::Stdin,
     );
     let expected = vec![
         (1, Err(String::from("Unknown escape chars: \'\\z\'"))),
@@ -362,8 +383,10 @@ fn test_error_unknown_escape() {
 
 #[test]
 fn test_error_unknown_char() {
-    let mut lexer =
-        Lexer::new("\"var\" BEGIN 0 1 + 2 * \n{ END append }# comment");
+    let mut lexer = Lexer::new(
+        "\"var\" BEGIN 0 1 + 2 * \n{ END append }# comment",
+        ProgramSource::Stdin,
+    );
     let expected = vec![
         (1, Ok(Token::String(String::from("var")))),
         (1, Ok(Token::Begin)),
@@ -383,7 +406,10 @@ fn test_error_unknown_char() {
 
 #[test]
 fn test_error_invalid_number() {
-    let mut lexer = Lexer::new("BEGIN 002 122 + 2f \n 3d 3y * \n END append");
+    let mut lexer = Lexer::new(
+        "BEGIN 002 122 + 2f \n 3d 3y * \n END append",
+        ProgramSource::Stdin,
+    );
     let expected = vec![
         (1, Ok(Token::Begin)),
         (1, Ok(Token::Number(Number::Natural(2)))),
@@ -402,7 +428,10 @@ fn test_error_invalid_number() {
 
 #[test]
 fn test_error_unknown_operator() {
-    let mut lexer = Lexer::new("BEGIN x ++ y \n -- /= * \n END append");
+    let mut lexer = Lexer::new(
+        "BEGIN x ++ y \n -- /= * \n END append",
+        ProgramSource::Stdin,
+    );
     let expected = vec![
         (1, Ok(Token::Begin)),
         (1, Ok(Token::Identifier(String::from("x")))),
@@ -525,9 +554,6 @@ fn test_token_fmt() {
         format!("{}", Token::Operator(Operator::Float)),
         "operator 'float'"
     );
-    assert_eq!(
-        format!("{}", Token::Use),
-        "token 'use'"
-    );
+    assert_eq!(format!("{}", Token::Use), "token 'use'");
     assert_eq!(format!("{}", Token::Fin), "'EOF'");
 }

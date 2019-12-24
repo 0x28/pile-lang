@@ -1,3 +1,5 @@
+use crate::cli::ProgramSource;
+
 use std::fmt;
 use std::iter::Peekable;
 use std::str::Chars;
@@ -112,6 +114,7 @@ impl fmt::Display for Token {
 }
 
 pub struct Lexer<'a> {
+    source: ProgramSource,
     input: Peekable<Chars<'a>>,
     line_number: u64,
 }
@@ -119,11 +122,16 @@ pub struct Lexer<'a> {
 impl<'a> Lexer<'a> {
     const DEFAULT_CAPACITY: usize = 16;
 
-    pub fn new(s: &str) -> Lexer {
+    pub fn new(text: &str, source: ProgramSource) -> Lexer {
         Lexer {
-            input: s.chars().peekable(),
+            source,
+            input: text.chars().peekable(),
             line_number: 1,
         }
+    }
+
+    pub fn source(&self) -> ProgramSource {
+        self.source.clone()
     }
 
     fn skip<P>(&mut self, predicate: P)

@@ -1,6 +1,7 @@
 use crate::interpret::Interpreter;
 use crate::lex::Lexer;
 use crate::parse::Parser;
+use crate::cli::ProgramSource;
 
 use std::io::Write;
 
@@ -18,7 +19,7 @@ pub fn repl() -> ! {
             println!();
             break;
         }
-        let lexer = Lexer::new(&line);
+        let lexer = Lexer::new(&line, ProgramSource::Repl);
         let parser = Parser::new(lexer);
 
         let expr = match parser.parse() {

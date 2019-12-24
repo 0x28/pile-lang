@@ -12,6 +12,7 @@ pub struct CommandLineOptions {
     debug: bool,
 }
 
+#[derive(Clone)]
 pub enum ProgramSource {
     Repl,
     Stdin,
@@ -40,6 +41,10 @@ impl CommandLineOptions {
 
     pub fn debug(&self) -> bool {
         self.debug
+    }
+
+    pub fn source(&self) -> ProgramSource {
+        self.source.clone()
     }
 }
 

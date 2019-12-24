@@ -1,4 +1,5 @@
 use super::*;
+use crate::cli::ProgramSource;
 use crate::lex::Number;
 use crate::lex::Operator;
 
@@ -14,7 +15,7 @@ fn ast_assert_eq(left: &Ast, right: &Ast) {
 }
 
 fn expect_ast(input: &str, ast: Ast) {
-    let lex = Lexer::new(input);
+    let lex = Lexer::new(input, ProgramSource::Stdin);
     let parser = Parser::new(lex);
     let result_ast = parser.parse().unwrap();
 
@@ -22,7 +23,7 @@ fn expect_ast(input: &str, ast: Ast) {
 }
 
 fn expect_error(input: &str, err: Result<Ast, String>) {
-    let lex = Lexer::new(input);
+    let lex = Lexer::new(input, ProgramSource::Stdin);
     let parser = Parser::new(lex);
     let result_err = parser.parse();
 
