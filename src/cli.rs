@@ -12,7 +12,7 @@ pub struct CommandLineOptions {
     debug: bool,
 }
 
-#[derive(Clone)]
+#[derive(PartialEq, Debug, Clone)]
 pub enum ProgramSource {
     Repl,
     Stdin,

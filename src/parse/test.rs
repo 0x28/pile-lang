@@ -2,6 +2,7 @@ use super::*;
 use crate::cli::ProgramSource;
 use crate::lex::Number;
 use crate::lex::Operator;
+use crate::pile_error::PileError;
 
 fn ast_assert_eq(left: &Ast, right: &Ast) {
     let left_iter = left.expressions.iter();
@@ -22,7 +23,7 @@ fn expect_ast(input: &str, ast: Ast) {
     ast_assert_eq(&ast, &result_ast);
 }
 
-fn expect_error(input: &str, err: Result<Ast, String>) {
+fn expect_error(input: &str, err: Result<Ast, PileError>) {
     let lex = Lexer::new(input, ProgramSource::Stdin);
     let parser = Parser::new(lex);
     let result_err = parser.parse();
@@ -294,7 +295,11 @@ begin
     use \"file1\"
 end
 ",
-        Err(String::from("Line 3: 'use' isn't allowed inside blocks.")),
+        Err(PileError::new(
+            ProgramSource::Stdin,
+            (3, 3),
+            "'use' isn't allowed inside blocks.".to_owned(),
+        )),
     )
 }
 
@@ -304,7 +309,11 @@ fn test_error_use_in_quote() {
         "
 quote use \"file1\"
 ",
-        Err(String::from("Line 2: 'use' isn't allowed inside quotes.")),
+        Err(PileError::new(
+            ProgramSource::Stdin,
+            (2, 2),
+            "'use' isn't allowed inside quotes.".to_owned(),
+        )),
     )
 }
 
@@ -314,7 +323,11 @@ fn test_error_use_wrong_arg() {
         "
 use 42
 ",
-        Err(String::from("Line 2: Expected string found natural '42'.")),
+        Err(PileError::new(
+            ProgramSource::Stdin,
+            (2, 2),
+            "Expected string found natural '42'.".to_owned(),
+        )),
     )
 }
 
@@ -327,7 +340,11 @@ begin
 end
 end
 ",
-        Err(String::from("Line 5: Unmatched 'end'.")),
+        Err(PileError::new(
+            ProgramSource::Stdin,
+            (5, 5),
+            "Unmatched 'end'.".to_owned(),
+        )),
     )
 }
 
@@ -343,7 +360,11 @@ begin
     +
     *
 ",
-        Err(String::from("Line 9: Expected 'end' found 'EOF'.")),
+        Err(PileError::new(
+            ProgramSource::Stdin,
+            (9, 9),
+            "Expected 'end' found 'EOF'.".to_owned(),
+        )),
     )
 }
 
@@ -364,19 +385,34 @@ begin 1
                     begin 1
                       begin 2
 ",
-        Err(String::from("Line 14: Expected 'end' found 'EOF'.")),
+        Err(PileError::new(
+            ProgramSource::Stdin,
+            (14, 14),
+            "Expected 'end' found 'EOF'.".to_owned(),
+        )),
     )
 }
 
 #[test]
 fn test_error_bad_quote1() {
-    expect_error("quote", Err("Line 1: Unexpected 'EOF'".to_string()))
+    expect_error(
+        "quote",
+        Err(PileError::new(
+            ProgramSource::Stdin,
+            (1, 1),
+            "Unexpected 'EOF'".to_string(),
+        )),
+    )
 }
 
 #[test]
 fn test_error_bad_quote2() {
     expect_error(
         "quote end",
-        Err("Line 1: Unexpected token 'end'".to_string()),
+        Err(PileError::new(
+            ProgramSource::Stdin,
+            (1, 1),
+            "Unexpected token 'end'".to_string(),
+        )),
     )
 }

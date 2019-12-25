@@ -1,5 +1,6 @@
 use crate::lex::Lexer;
 use crate::lex::Token;
+use crate::pile_error::PileError;
 
 use std::path::PathBuf;
 use std::rc::Rc;
@@ -54,7 +55,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    pub fn parse(mut self) -> Result<Ast, String> {
+    pub fn parse(mut self) -> Result<Ast, PileError> {
         let mut program = vec![];
 
         loop {
@@ -63,7 +64,7 @@ impl<'a> Parser<'a> {
             match self.lookahead {
                 Some((_, Token::Fin)) => break,
                 Some((line, Token::End)) => {
-                    return Err(format!("Line {}: Unmatched 'end'.", line))
+                    return Err(self.parse_error(line, "Unmatched 'end'."));
                 }
                 Some((_, Token::Begin)) => program.push(self.block()?),
                 Some((_, Token::Quote)) => program.push(self.quote()?),
@@ -81,7 +82,11 @@ impl<'a> Parser<'a> {
         })
     }
 
-    fn block(&mut self) -> Result<Expr, String> {
+    fn parse_error(&self, line: u64, msg: &str) -> PileError {
+        PileError::new(self.lexer.source(), (line, line), msg.to_owned())
+    }
+
+    fn block(&mut self) -> Result<Expr, PileError> {
         self.expect(Token::Begin)?;
 
         let begin = self.lookahead.as_ref().unwrap().0;
@@ -94,11 +99,10 @@ impl<'a> Parser<'a> {
 
             match self.lookahead {
                 Some((line, Token::Fin)) => {
-                    return Err(format!(
-                        "Line {}: Expected 'end' found {}.",
+                    return Err(self.parse_error(
                         line,
-                        Token::Fin
-                    ))
+                        &format!("Expected 'end' found {}.", Token::Fin),
+                    ));
                 }
                 Some((line, Token::End)) => {
                     end = line;
@@ -107,10 +111,10 @@ impl<'a> Parser<'a> {
                 Some((_, Token::Begin)) => block.push(self.block()?),
                 Some((_, Token::Quote)) => block.push(self.quote()?),
                 Some((line, Token::Use)) => {
-                    return Err(format!(
-                        "Line {}: 'use' isn't allowed inside blocks.",
-                        line
-                    ))
+                    return Err(self.parse_error(
+                        line,
+                        "'use' isn't allowed inside blocks.",
+                    ));
                 }
                 Some((line, _)) => block.push(Expr::Atom {
                     line,
@@ -127,32 +131,34 @@ impl<'a> Parser<'a> {
         })
     }
 
-    fn quote(&mut self) -> Result<Expr, String> {
+    fn quote(&mut self) -> Result<Expr, PileError> {
         self.expect(Token::Quote)?;
 
         self.consume()?;
 
         match &self.lookahead {
             Some((line, Token::Fin)) => {
-                Err(format!("Line {}: Unexpected {}", line, Token::Fin))
+                Err(self
+                    .parse_error(*line, &format!("Unexpected {}", Token::Fin)))
             }
             Some((_, Token::Begin)) => self.block(),
             Some((line, Token::End)) => {
-                Err(format!("Line {}: Unexpected {}", line, Token::End))
+                Err(self
+                    .parse_error(*line, &format!("Unexpected {}", Token::End)))
             }
-            Some((line, Token::Use)) => Err(format!(
-                "Line {}: 'use' isn't allowed inside quotes.",
-                line
-            )),
+            Some((line, Token::Use)) => {
+                Err(self
+                    .parse_error(*line, "'use' isn't allowed inside quotes."))
+            }
             Some((line, _)) => Ok(Expr::Quoted {
                 line: *line,
                 token: self.lookahead.take().unwrap().1,
             }),
-            None => Err(String::from("No lookahead found.")),
+            None => Err(self.parse_error(0, "No lookahead found.")),
         }
     }
 
-    fn using(&mut self) -> Result<Expr, String> {
+    fn using(&mut self) -> Result<Expr, PileError> {
         self.consume()?;
 
         match &self.lookahead {
@@ -160,14 +166,15 @@ impl<'a> Parser<'a> {
                 line: *line,
                 path: PathBuf::from(string),
             }),
-            Some((line, token)) => {
-                Err(format!("Line {}: Expected string found {}.", line, token))
-            }
-            None => Err(String::from("No lookahead found.")),
+            Some((line, token)) => Err(self.parse_error(
+                *line,
+                &format!("Expected string found {}.", token),
+            )),
+            None => Err(self.parse_error(0, "No lookahead found.")),
         }
     }
 
-    fn consume(&mut self) -> Result<(), String> {
+    fn consume(&mut self) -> Result<(), PileError> {
         let (line, current_token) = self.lexer.next();
         let current_token = current_token?;
 
@@ -176,19 +183,22 @@ impl<'a> Parser<'a> {
         Ok(())
     }
 
-    fn expect(&mut self, expected: Token) -> Result<(), String> {
+    fn expect(&mut self, expected: Token) -> Result<(), PileError> {
         match &self.lookahead {
             Some((line, current_token)) => {
                 if *current_token != expected {
-                    Err(format!(
-                        "Line {}: expected {} found {}.",
-                        line, expected, current_token
+                    Err(self.parse_error(
+                        *line,
+                        &format!(
+                            "Expected {} found {}.",
+                            expected, current_token
+                        ),
                     ))
                 } else {
                     Ok(())
                 }
             }
-            None => Err(String::from("No lookahead found.")),
+            None => Err(self.parse_error(0, "No lookahead found.")),
         }
     }
 }

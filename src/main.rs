@@ -5,6 +5,7 @@ mod interpret;
 mod lex;
 mod parse;
 mod repl;
+mod pile_error;
 
 fn main() {
     let options = cli::read_options();

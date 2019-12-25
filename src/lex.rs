@@ -1,4 +1,5 @@
 use crate::cli::ProgramSource;
+use crate::pile_error::PileError;
 
 use std::fmt;
 use std::iter::Peekable;
@@ -134,6 +135,14 @@ impl<'a> Lexer<'a> {
         self.source.clone()
     }
 
+    fn lex_error(&self, msg: &str) -> PileError {
+        PileError::new(
+            self.source(),
+            (self.line_number, self.line_number),
+            msg.to_owned(),
+        )
+    }
+
     fn skip<P>(&mut self, predicate: P)
     where
         P: Fn(char) -> bool,
@@ -177,7 +186,7 @@ impl<'a> Lexer<'a> {
         self.input.next();
     }
 
-    fn identifier(&mut self) -> Result<Token, String> {
+    fn identifier(&mut self) -> Result<Token, PileError> {
         let ident = self
             .collect_while(|c| c.is_alphanumeric() || c == '_')
             .to_lowercase();
@@ -215,7 +224,7 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    fn string(&mut self) -> Result<Token, String> {
+    fn string(&mut self) -> Result<Token, PileError> {
         let mut string = String::with_capacity(Lexer::DEFAULT_CAPACITY);
         let mut unknown_escapes = vec![];
 
@@ -231,9 +240,9 @@ impl<'a> Lexer<'a> {
                     }
                 }
                 ('\\', None) => {
-                    return Err(String::from(
-                        "Missing character after backslash.",
-                    ))
+                    return Err(
+                        self.lex_error("Missing character after backslash.")
+                    )
                 }
                 ('"', _) => break,
                 (c, _) => string.push(c),
@@ -245,50 +254,52 @@ impl<'a> Lexer<'a> {
             for unknown in unknown_escapes {
                 error.push_str(format!(" '\\{}'", unknown).as_ref());
             }
-            Err(error)
+            Err(self.lex_error(&error))
         } else {
             Ok(Token::String(string))
         }
     }
 
-    fn parse_number(s: &str) -> Result<Token, String> {
+    fn parse_number(&self, s: &str) -> Result<Token, PileError> {
         let digits_only = |s: &str| s.chars().all(|c| c.is_digit(10));
 
         if digits_only(s) || s.starts_with('+') && digits_only(&s[1..]) {
             match s.parse() {
                 Ok(nat) => Ok(Token::Number(Number::Natural(nat))),
-                Err(_) => Err(format!(
+                Err(_) => Err(self.lex_error(&format!(
                     "'{}' is too large to be represented as a number",
                     s
-                )),
+                ))),
             }
         } else if s.starts_with('-') && digits_only(&s[1..]) {
             match s.parse() {
                 Ok(int) => Ok(Token::Number(Number::Integer(int))),
-                Err(_) => Err(format!(
+                Err(_) => Err(self.lex_error(&format!(
                     "'{}' is too small to be represented as a number",
                     s
-                )),
+                ))),
             }
         } else {
             match s.parse() {
                 Ok(float) => Ok(Token::Number(Number::Float(float))),
-                Err(_) => Err(format!("'{}' isn't a number", s)),
+                Err(_) => {
+                    Err(self.lex_error(&format!("'{}' isn't a number", s)))
+                }
             }
         }
     }
 
-    fn number(&mut self) -> Result<Token, String> {
+    fn number(&mut self) -> Result<Token, PileError> {
         let number = self.collect_while(|c| !c.is_whitespace() && c != '#');
 
-        Lexer::parse_number(number.as_ref())
+        self.parse_number(number.as_ref())
     }
 
-    fn operator(&mut self) -> Result<Token, String> {
+    fn operator(&mut self) -> Result<Token, PileError> {
         let operator = self.collect_while(|c| !c.is_whitespace() && c != '#');
 
         if operator.chars().any(|c| c.is_digit(10)) {
-            return Lexer::parse_number(operator.as_ref());
+            return self.parse_number(operator.as_ref());
         }
 
         match operator.as_ref() {
@@ -301,11 +312,11 @@ impl<'a> Lexer<'a> {
             "=" => Ok(Token::Operator(Operator::Equal)),
             "<=" => Ok(Token::Operator(Operator::LessEqual)),
             "<" => Ok(Token::Operator(Operator::Less)),
-            o => Err(format!("Unknown operator '{}'", o)),
+            o => Err(self.lex_error(&format!("Unknown operator '{}'", o))),
         }
     }
 
-    pub fn next(&mut self) -> (u64, Result<Token, String>) {
+    pub fn next(&mut self) -> (u64, Result<Token, PileError>) {
         while let Some(&lookahead) = self.input.peek() {
             let token = match lookahead {
                 '#' => {
@@ -327,7 +338,7 @@ impl<'a> Lexer<'a> {
                 c if c.is_alphabetic() || c == '_' => self.identifier(),
                 c => {
                     self.consume();
-                    Err(format!("Unknown char '{}'", c))
+                    Err(self.lex_error(&format!("Unknown char '{}'", c)))
                 }
             };
 

@@ -1,7 +1,7 @@
 use super::*;
 use crate::cli::ProgramSource;
 
-fn token_list(lexer: &mut Lexer) -> Vec<(u64, Result<Token, String>)> {
+fn token_list(lexer: &mut Lexer) -> Vec<(u64, Result<Token, PileError>)> {
     let mut result = vec![];
     loop {
         match lexer.next() {
@@ -15,7 +15,7 @@ fn token_list(lexer: &mut Lexer) -> Vec<(u64, Result<Token, String>)> {
 
 fn compare_token_lists(
     lexer: &mut Lexer,
-    expected: Vec<(u64, Result<Token, String>)>,
+    expected: Vec<(u64, Result<Token, PileError>)>,
 ) {
     let results = token_list(lexer);
 
@@ -86,10 +86,24 @@ fn test_string_escaped() {
 fn test_unknown_char() {
     let mut lexer = Lexer::new("\\hello world\\", ProgramSource::Stdin);
     let expected = vec![
-        (1, Err(String::from("Unknown char '\\'"))),
+        (
+            1,
+            Err(PileError::new(
+                ProgramSource::Stdin,
+                (1, 1),
+                "Unknown char '\\'".to_owned(),
+            )),
+        ),
         (1, Ok(Token::Identifier(String::from("hello")))),
         (1, Ok(Token::Identifier(String::from("world")))),
-        (1, Err(String::from("Unknown char '\\'"))),
+        (
+            1,
+            Err(PileError::new(
+                ProgramSource::Stdin,
+                (1, 1),
+                "Unknown char '\\'".to_owned(),
+            )),
+        ),
     ];
 
     compare_token_lists(&mut lexer, expected);
@@ -173,18 +187,30 @@ fn test_numbers_overflow() {
     let expected = vec![
         (
             1,
-            Err("'8589934592' is too large to be represented as a number"
-                .to_string()),
+            Err(PileError::new(
+                ProgramSource::Stdin,
+                (1, 1),
+                "'8589934592' is too large to be represented as a number"
+                    .to_string(),
+            )),
         ),
         (
             1,
-            Err("'-8589934592' is too small to be represented as a number"
-                .to_string()),
+            Err(PileError::new(
+                ProgramSource::Stdin,
+                (1, 1),
+                "'-8589934592' is too small to be represented as a number"
+                    .to_string(),
+            )),
         ),
         (
             1,
-            Err("'+8589934592' is too large to be represented as a number"
-                .to_string()),
+            Err(PileError::new(
+                ProgramSource::Stdin,
+                (1, 1),
+                "'+8589934592' is too large to be represented as a number"
+                    .to_string(),
+            )),
         ),
     ];
 
@@ -354,7 +380,14 @@ fn test_error_missing_backslash() {
         (1, Ok(Token::Number(Number::Natural(3)))),
         (1, Ok(Token::Operator(Operator::Mul))),
         (1, Ok(Token::Operator(Operator::Plus))),
-        (1, Err(String::from("Missing character after backslash."))),
+        (
+            1,
+            Err(PileError::new(
+                ProgramSource::Stdin,
+                (1, 1),
+                "Missing character after backslash.".to_owned(),
+            )),
+        ),
     ];
 
     compare_token_lists(&mut lexer, expected);
@@ -367,12 +400,21 @@ fn test_error_unknown_escape() {
         ProgramSource::Stdin,
     );
     let expected = vec![
-        (1, Err(String::from("Unknown escape chars: \'\\z\'"))),
+        (
+            1,
+            Err(PileError::new(
+                ProgramSource::Stdin,
+                (1, 1),
+                "Unknown escape chars: \'\\z\'".to_owned(),
+            )),
+        ),
         (1, Ok(Token::Number(Number::Float(3.14)))),
         (
             1,
-            Err(String::from(
-                "Unknown escape chars: \'\\a\' \'\\b\' \'\\c\'",
+            Err(PileError::new(
+                ProgramSource::Stdin,
+                (1, 1),
+                "Unknown escape chars: \'\\a\' \'\\b\' \'\\c\'".to_owned(),
             )),
         ),
         (1, Ok(Token::Number(Number::Natural(100)))),
@@ -395,10 +437,24 @@ fn test_error_unknown_char() {
         (1, Ok(Token::Operator(Operator::Plus))),
         (1, Ok(Token::Number(Number::Natural(2)))),
         (1, Ok(Token::Operator(Operator::Mul))),
-        (2, Err(String::from("Unknown char '{'"))),
+        (
+            2,
+            Err(PileError::new(
+                ProgramSource::Stdin,
+                (2, 2),
+                "Unknown char '{'".to_owned(),
+            )),
+        ),
         (2, Ok(Token::End)),
         (2, Ok(Token::Identifier(String::from("append")))),
-        (2, Err(String::from("Unknown char '}'"))),
+        (
+            2,
+            Err(PileError::new(
+                ProgramSource::Stdin,
+                (2, 2),
+                "Unknown char '}'".to_owned(),
+            )),
+        ),
     ];
 
     compare_token_lists(&mut lexer, expected);
@@ -415,9 +471,30 @@ fn test_error_invalid_number() {
         (1, Ok(Token::Number(Number::Natural(2)))),
         (1, Ok(Token::Number(Number::Natural(122)))),
         (1, Ok(Token::Operator(Operator::Plus))),
-        (1, Err(String::from("'2f' isn't a number"))),
-        (2, Err(String::from("'3d' isn't a number"))),
-        (2, Err(String::from("'3y' isn't a number"))),
+        (
+            1,
+            Err(PileError::new(
+                ProgramSource::Stdin,
+                (1, 1),
+                "'2f' isn't a number".to_owned(),
+            )),
+        ),
+        (
+            2,
+            Err(PileError::new(
+                ProgramSource::Stdin,
+                (2, 2),
+                "'3d' isn't a number".to_owned(),
+            )),
+        ),
+        (
+            2,
+            Err(PileError::new(
+                ProgramSource::Stdin,
+                (2, 2),
+                "'3y' isn't a number".to_owned(),
+            )),
+        ),
         (2, Ok(Token::Operator(Operator::Mul))),
         (3, Ok(Token::End)),
         (3, Ok(Token::Identifier(String::from("append")))),
@@ -435,10 +512,31 @@ fn test_error_unknown_operator() {
     let expected = vec![
         (1, Ok(Token::Begin)),
         (1, Ok(Token::Identifier(String::from("x")))),
-        (1, Err(String::from("Unknown operator '++'"))),
+        (
+            1,
+            Err(PileError::new(
+                ProgramSource::Stdin,
+                (1, 1),
+                "Unknown operator '++'".to_owned(),
+            )),
+        ),
         (1, Ok(Token::Identifier(String::from("y")))),
-        (2, Err(String::from("Unknown operator '--'"))),
-        (2, Err(String::from("Unknown operator '/='"))),
+        (
+            2,
+            Err(PileError::new(
+                ProgramSource::Stdin,
+                (2, 2),
+                "Unknown operator '--'".to_owned(),
+            )),
+        ),
+        (
+            2,
+            Err(PileError::new(
+                ProgramSource::Stdin,
+                (2, 2),
+                "Unknown operator '/='".to_owned(),
+            )),
+        ),
         (2, Ok(Token::Operator(Operator::Mul))),
         (3, Ok(Token::End)),
         (3, Ok(Token::Identifier(String::from("append")))),
