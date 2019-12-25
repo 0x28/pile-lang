@@ -36,6 +36,7 @@ fn test_simple1() {
     expect_ast(
         "",
         Ast {
+            source: ProgramSource::Stdin,
             expressions: vec![],
         },
     )
@@ -46,6 +47,7 @@ fn test_simple2() {
     expect_ast(
         "100 200 +",
         Ast {
+            source: ProgramSource::Stdin,
             expressions: vec![
                 Expr::Atom {
                     line: 1,
@@ -69,6 +71,7 @@ fn test_simple3() {
     expect_ast(
         "\"hello world\" \" test\" append",
         Ast {
+            source: ProgramSource::Stdin,
             expressions: vec![
                 Expr::Atom {
                     line: 1,
@@ -92,6 +95,7 @@ fn test_simple4() {
     expect_ast(
         "quote var 100 def",
         Ast {
+            source: ProgramSource::Stdin,
             expressions: vec![
                 Expr::Quoted {
                     line: 1,
@@ -115,6 +119,7 @@ fn test_block1() {
     expect_ast(
         "begin 100 end 20 dotimes",
         Ast {
+            source: ProgramSource::Stdin,
             expressions: vec![
                 Expr::Block {
                     begin: 1,
@@ -142,6 +147,7 @@ fn test_block2() {
     expect_ast(
         "begin 100 end begin -100 end 1 2 > if",
         Ast {
+            source: ProgramSource::Stdin,
             expressions: vec![
                 Expr::Block {
                     begin: 1,
@@ -194,6 +200,7 @@ begin
     end
 end",
         Ast {
+            source: ProgramSource::Stdin,
             expressions: vec![Expr::Block {
                 begin: 2,
                 end: 10,
@@ -241,10 +248,14 @@ use \"file_c\"
 100 200 +
 ",
         Ast {
+            source: ProgramSource::Stdin,
             expressions: vec![
                 Expr::Use {
                     line: 2,
-                    path: PathBuf::from("file_a"),
+                    subprogram: Ast {
+                        source: ProgramSource::File(PathBuf::from("file_a")),
+                        expressions: vec![],
+                    },
                 },
                 Expr::Atom {
                     line: 3,
@@ -264,11 +275,17 @@ use \"file_c\"
                 },
                 Expr::Use {
                     line: 4,
-                    path: PathBuf::from("file_b"),
+                    subprogram: Ast {
+                        source: ProgramSource::File(PathBuf::from("file_b")),
+                        expressions: vec![],
+                    },
                 },
                 Expr::Use {
                     line: 5,
-                    path: PathBuf::from("file_c"),
+                    subprogram: Ast {
+                        source: ProgramSource::File(PathBuf::from("file_c")),
+                        expressions: vec![],
+                    },
                 },
                 Expr::Atom {
                     line: 6,

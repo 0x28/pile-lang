@@ -1,12 +1,14 @@
 use crate::lex::Lexer;
 use crate::lex::Token;
 use crate::pile_error::PileError;
+use crate::cli::ProgramSource;
 
-use std::path::PathBuf;
 use std::rc::Rc;
+use std::path::PathBuf;
 
 #[derive(Debug, PartialEq)]
 pub struct Ast {
+    pub source: ProgramSource,
     pub expressions: Vec<Expr>,
 }
 
@@ -27,7 +29,7 @@ pub enum Expr {
     },
     Use {
         line: u64,
-        path: PathBuf,
+        subprogram: Ast,
     },
 }
 
@@ -78,6 +80,7 @@ impl<'a> Parser<'a> {
         }
 
         Ok(Ast {
+            source: self.lexer.source(),
             expressions: program,
         })
     }
@@ -164,7 +167,10 @@ impl<'a> Parser<'a> {
         match &self.lookahead {
             Some((line, Token::String(string))) => Ok(Expr::Use {
                 line: *line,
-                path: PathBuf::from(string),
+                subprogram: Ast {
+                    source: ProgramSource::File(PathBuf::from(string)),
+                    expressions: vec![],
+                }
             }),
             Some((line, token)) => Err(self.parse_error(
                 *line,

@@ -1,5 +1,6 @@
 use crate::lex::Token;
 use crate::parse::Ast;
+use crate::cli::ProgramSource;
 
 mod runtime_value;
 use runtime_value::*;
@@ -43,6 +44,7 @@ impl Interpreter {
     pub fn empty() -> Interpreter {
         Interpreter {
             program: Ast {
+                source: ProgramSource::Repl,
                 expressions: vec![],
             },
             state: State {
