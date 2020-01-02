@@ -2,32 +2,6 @@ use super::runtime_value::Function;
 use super::runtime_value::RuntimeValue;
 pub use crate::lex::Number;
 use super::State;
-use std::fmt;
-
-#[derive(Debug, PartialEq)]
-pub struct RuntimeError {
-    lines: (u64, u64),
-    message: String,
-}
-
-impl RuntimeError {
-    pub fn new(lines: (u64, u64), message: String) -> RuntimeError {
-        RuntimeError { lines, message }
-    }
-}
-
-impl fmt::Display for RuntimeError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self.lines {
-            (begin, end) if begin == end => {
-                write!(f, "Line {}: {}", begin, self.message)
-            }
-            (begin, end) => {
-                write!(f, "Lines {}-{}: {}", begin, end, self.message)
-            }
-        }
-    }
-}
 
 pub fn ensure_element<T>(stack: &mut Vec<T>) -> Result<T, String> {
     stack.pop().ok_or_else(|| "Stack underflow".to_owned())

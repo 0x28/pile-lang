@@ -1,6 +1,7 @@
+use crate::cli::ProgramSource;
 use crate::lex::Token;
 use crate::parse::Ast;
-use crate::cli::ProgramSource;
+use crate::pile_error::PileError;
 
 mod runtime_value;
 use runtime_value::*;
@@ -14,7 +15,6 @@ mod print;
 mod runtime_error;
 mod while_loop;
 
-use runtime_error::RuntimeError;
 use std::collections::HashMap;
 use std::rc::Rc;
 
@@ -55,16 +55,23 @@ impl Interpreter {
         }
     }
 
-    pub fn run(&mut self) -> Result<Option<RuntimeValue>, RuntimeError> {
-        Interpreter::call(&self.program.expressions, &mut self.state)
-            .map_err(|msg| RuntimeError::new(self.state.current_lines, msg))?;
+    pub fn run(&mut self) -> Result<Option<RuntimeValue>, PileError> {
+        Interpreter::call(&self.program.expressions, &mut self.state).map_err(
+            |msg| {
+                PileError::new(
+                    self.program.source.clone(),
+                    self.state.current_lines,
+                    msg,
+                )
+            },
+        )?;
         Ok(self.state.stack.pop())
     }
 
     pub fn eval(
         &mut self,
         mut expressions: Vec<Expr>,
-    ) -> Result<Option<&RuntimeValue>, RuntimeError> {
+    ) -> Result<Option<&RuntimeValue>, PileError> {
         let old_size = self.program.expressions.len();
         self.program.expressions.append(&mut expressions);
 
@@ -72,7 +79,13 @@ impl Interpreter {
             &self.program.expressions[old_size..],
             &mut self.state,
         )
-        .map_err(|msg| RuntimeError::new(self.state.current_lines, msg))?;
+        .map_err(|msg| {
+            PileError::new(
+                self.program.source.clone(),
+                self.state.current_lines,
+                msg,
+            )
+        })?;
         Ok(self.state.stack.last())
     }
 
