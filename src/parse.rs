@@ -63,20 +63,22 @@ impl<'a> Parser<'a> {
         loop {
             self.consume()?;
 
-            match self.lookahead {
+            let expr = match self.lookahead {
                 Some((_, Token::Fin)) => break,
                 Some((line, Token::End)) => {
                     return Err(self.parse_error(line, "Unmatched 'end'."));
                 }
-                Some((_, Token::Begin)) => program.push(self.block()?),
-                Some((_, Token::Quote)) => program.push(self.quote()?),
-                Some((_, Token::Use)) => program.push(self.using()?),
-                Some((line, _)) => program.push(Expr::Atom {
+                Some((_, Token::Begin)) => self.block()?,
+                Some((_, Token::Quote)) => self.quote()?,
+                Some((_, Token::Use)) => self.using()?,
+                Some((line, _)) => Expr::Atom {
                     line,
                     token: self.lookahead.take().unwrap().1,
-                }),
+                },
                 None => continue,
-            }
+            };
+
+            program.push(expr);
         }
 
         Ok(Ast {
