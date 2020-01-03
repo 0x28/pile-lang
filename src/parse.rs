@@ -80,7 +80,7 @@ impl<'a> Parser<'a> {
         }
 
         Ok(Ast {
-            source: self.lexer.source().clone(),
+            source: self.lexer.into_source(),
             expressions: program,
         })
     }
