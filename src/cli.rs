@@ -43,8 +43,8 @@ impl CommandLineOptions {
         self.debug
     }
 
-    pub fn source(&self) -> ProgramSource {
-        self.source.clone()
+    pub fn source(&self) -> &ProgramSource {
+        &self.source
     }
 }
 

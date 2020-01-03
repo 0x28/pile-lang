@@ -131,13 +131,13 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    pub fn source(&self) -> ProgramSource {
-        self.source.clone()
+    pub fn source(&self) -> &ProgramSource {
+        &self.source
     }
 
     fn lex_error(&self, msg: &str) -> PileError {
         PileError::new(
-            self.source(),
+            self.source().clone(),
             (self.line_number, self.line_number),
             msg.to_owned(),
         )

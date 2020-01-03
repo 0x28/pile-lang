@@ -19,7 +19,8 @@ fn main() {
         Ok(program) => program,
     };
 
-    let lexer = lex::Lexer::new(program_text.as_ref(), options.source());
+    let lexer =
+        lex::Lexer::new(program_text.as_ref(), options.source().clone());
     let parser = parse::Parser::new(lexer);
     let ast = match parser.parse() {
         Err(error) => {

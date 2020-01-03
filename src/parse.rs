@@ -1,10 +1,10 @@
+use crate::cli::ProgramSource;
 use crate::lex::Lexer;
 use crate::lex::Token;
 use crate::pile_error::PileError;
-use crate::cli::ProgramSource;
 
-use std::rc::Rc;
 use std::path::PathBuf;
+use std::rc::Rc;
 
 #[derive(Debug, PartialEq)]
 pub struct Ast {
@@ -80,13 +80,17 @@ impl<'a> Parser<'a> {
         }
 
         Ok(Ast {
-            source: self.lexer.source(),
+            source: self.lexer.source().clone(),
             expressions: program,
         })
     }
 
     fn parse_error(&self, line: u64, msg: &str) -> PileError {
-        PileError::new(self.lexer.source(), (line, line), msg.to_owned())
+        PileError::new(
+            self.lexer.source().clone(),
+            (line, line),
+            msg.to_owned(),
+        )
     }
 
     fn block(&mut self) -> Result<Expr, PileError> {
@@ -170,7 +174,7 @@ impl<'a> Parser<'a> {
                 subprogram: Ast {
                     source: ProgramSource::File(PathBuf::from(string)),
                     expressions: vec![],
-                }
+                },
             }),
             Some((line, token)) => Err(self.parse_error(
                 *line,
