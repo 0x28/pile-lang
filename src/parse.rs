@@ -1,5 +1,6 @@
 use crate::cli::ProgramSource;
 use crate::lex::Lexer;
+use crate::lex::LexerIter;
 use crate::lex::Token;
 use crate::pile_error::PileError;
 
@@ -45,14 +46,14 @@ impl Expr {
 }
 
 pub struct Parser<'a> {
-    lexer: Lexer<'a>,
+    lex_iter: LexerIter<'a>,
     lookahead: Option<(u64, Token)>,
 }
 
 impl<'a> Parser<'a> {
     pub fn new(lexer: Lexer) -> Parser {
         Parser {
-            lexer,
+            lex_iter: lexer.into_iter(),
             lookahead: None,
         }
     }
@@ -64,7 +65,6 @@ impl<'a> Parser<'a> {
             self.consume()?;
 
             let expr = match self.lookahead {
-                Some((_, Token::Fin)) => break,
                 Some((line, Token::End)) => {
                     return Err(self.parse_error(line, "Unmatched 'end'."));
                 }
@@ -75,21 +75,21 @@ impl<'a> Parser<'a> {
                     line,
                     token: self.lookahead.take().unwrap().1,
                 },
-                None => continue,
+                None => break,
             };
 
             program.push(expr);
         }
 
         Ok(Ast {
-            source: self.lexer.into_source(),
+            source: self.lex_iter.into_source(),
             expressions: program,
         })
     }
 
     fn parse_error(&self, line: u64, msg: &str) -> PileError {
         PileError::new(
-            self.lexer.source().clone(),
+            self.lex_iter.source().clone(),
             (line, line),
             msg.to_owned(),
         )
@@ -107,12 +107,13 @@ impl<'a> Parser<'a> {
             self.consume()?;
 
             match self.lookahead {
-                Some((line, Token::Fin)) => {
+                None => {
                     return Err(self.parse_error(
-                        line,
-                        &format!("Expected 'end' found {}.", Token::Fin),
+                        self.lex_iter.line(),
+                        &"Expected 'end' found end of file.".to_string(),
                     ));
                 }
+
                 Some((line, Token::End)) => {
                     end = line;
                     break;
@@ -129,7 +130,6 @@ impl<'a> Parser<'a> {
                     line,
                     token: self.lookahead.take().unwrap().1,
                 }),
-                None => continue,
             }
         }
 
@@ -146,14 +146,14 @@ impl<'a> Parser<'a> {
         self.consume()?;
 
         match &self.lookahead {
-            Some((line, Token::Fin)) => {
-                Err(self
-                    .parse_error(*line, &format!("Unexpected {}", Token::Fin)))
-            }
+            None => Err(self.parse_error(
+                self.lex_iter.line(),
+                &"Unexpected end of file.".to_string(),
+            )),
             Some((_, Token::Begin)) => self.block(),
             Some((line, Token::End)) => {
                 Err(self
-                    .parse_error(*line, &format!("Unexpected {}", Token::End)))
+                    .parse_error(*line, &format!("Unexpected {}.", Token::End)))
             }
             Some((line, Token::Use)) => {
                 Err(self
@@ -163,7 +163,6 @@ impl<'a> Parser<'a> {
                 line: *line,
                 token: self.lookahead.take().unwrap().1,
             }),
-            None => Err(self.parse_error(0, "No lookahead found.")),
         }
     }
 
@@ -187,10 +186,10 @@ impl<'a> Parser<'a> {
     }
 
     fn consume(&mut self) -> Result<(), PileError> {
-        let (line, current_token) = self.lexer.next();
-        let current_token = current_token?;
-
-        self.lookahead = Some((line, current_token));
+        self.lookahead = match self.lex_iter.next() {
+            Some((line, current_token)) => Some((line, current_token?)),
+            None => None,
+        };
 
         Ok(())
     }

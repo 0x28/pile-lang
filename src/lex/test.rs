@@ -1,43 +1,29 @@
 use super::*;
 use crate::cli::ProgramSource;
 
-fn token_list(lexer: &mut Lexer) -> Vec<(u64, Result<Token, PileError>)> {
-    let mut result = vec![];
-    loop {
-        match lexer.next() {
-            (_, Ok(Token::Fin)) => break,
-            token => result.push(token),
-        };
-    }
-
-    result
-}
-
 fn compare_token_lists(
-    lexer: &mut Lexer,
+    lexer: Lexer,
     expected: Vec<(u64, Result<Token, PileError>)>,
 ) {
-    let results = token_list(lexer);
+    let result: Vec<_> = lexer.into_iter().collect();
 
-    assert_eq!(results.len(), expected.len());
+    assert_eq!(result.len(), expected.len());
 
-    for (actual, expected) in results.iter().zip(expected.iter()) {
+    for (actual, expected) in result.iter().zip(expected.iter()) {
         assert_eq!(actual, expected);
     }
 }
 
 #[test]
 fn test_empty_program() {
-    let mut lexer = Lexer::new("", ProgramSource::Stdin);
-    let result = token_list(&mut lexer);
+    let lexer = Lexer::new("", ProgramSource::Stdin);
 
-    assert_eq!(result.len(), 0);
+    assert_eq!(lexer.into_iter().count(), 0);
 }
 
 #[test]
 fn test_comment_simple() {
-    let mut lexer =
-        Lexer::new("2 3 *# hello world\n1 1 +", ProgramSource::Stdin);
+    let lexer = Lexer::new("2 3 *# hello world\n1 1 +", ProgramSource::Stdin);
     let expected = vec![
         (1, Ok(Token::Number(Number::Natural(2)))),
         (1, Ok(Token::Number(Number::Natural(3)))),
@@ -47,20 +33,19 @@ fn test_comment_simple() {
         (2, Ok(Token::Operator(Operator::Plus))),
     ];
 
-    compare_token_lists(&mut lexer, expected);
+    compare_token_lists(lexer, expected);
 }
 
 #[test]
 fn test_comment_only() {
-    let mut lexer = Lexer::new("# empty program", ProgramSource::Stdin);
-    let result = token_list(&mut lexer);
+    let lexer = Lexer::new("# empty program", ProgramSource::Stdin);
 
-    assert_eq!(result.len(), 0);
+    assert_eq!(lexer.into_iter().count(), 0);
 }
 
 #[test]
 fn test_string_simple() {
-    let mut lexer = Lexer::new(
+    let lexer = Lexer::new(
         "\"yay programming languages :)\"# comment",
         ProgramSource::Stdin,
     );
@@ -69,22 +54,21 @@ fn test_string_simple() {
         Ok(Token::String(String::from("yay programming languages :)"))),
     )];
 
-    compare_token_lists(&mut lexer, expected);
+    compare_token_lists(lexer, expected);
 }
 
 #[test]
 fn test_string_escaped() {
-    let mut lexer =
-        Lexer::new("\"\\n\\n\\n\\t\\r\0#test#\"", ProgramSource::Stdin);
+    let lexer = Lexer::new("\"\\n\\n\\n\\t\\r\0#test#\"", ProgramSource::Stdin);
     let expected =
         vec![(1, Ok(Token::String(String::from("\n\n\n\t\r\0#test#"))))];
 
-    compare_token_lists(&mut lexer, expected);
+    compare_token_lists(lexer, expected);
 }
 
 #[test]
 fn test_unknown_char() {
-    let mut lexer = Lexer::new("\\hello world\\", ProgramSource::Stdin);
+    let lexer = Lexer::new("\\hello world\\", ProgramSource::Stdin);
     let expected = vec![
         (
             1,
@@ -106,12 +90,12 @@ fn test_unknown_char() {
         ),
     ];
 
-    compare_token_lists(&mut lexer, expected);
+    compare_token_lists(lexer, expected);
 }
 
 #[test]
 fn test_numbers_natural() {
-    let mut lexer = Lexer::new(
+    let lexer = Lexer::new(
         "100 2000 3000 123 4543 123 21393#123#123
          203 040 05060 70 80 002 1203004 003",
         ProgramSource::Stdin,
@@ -134,12 +118,12 @@ fn test_numbers_natural() {
         (2, Ok(Token::Number(Number::Natural(3)))),
     ];
 
-    compare_token_lists(&mut lexer, expected);
+    compare_token_lists(lexer, expected);
 }
 
 #[test]
 fn test_numbers_integer() {
-    let mut lexer = Lexer::new(
+    let lexer = Lexer::new(
         "-1\n-2\n-3\n-4000\n-0044
         -1000 -200 -42 -42",
         ProgramSource::Stdin,
@@ -156,12 +140,12 @@ fn test_numbers_integer() {
         (6, Ok(Token::Number(Number::Integer(-42)))),
     ];
 
-    compare_token_lists(&mut lexer, expected);
+    compare_token_lists(lexer, expected);
 }
 
 #[test]
 fn test_numbers_float() {
-    let mut lexer = Lexer::new(
+    let lexer = Lexer::new(
         "1.1\n2.2\n3.3\n-10e20\n 20E3
          3.1415 7777.7777 -3e-10#number :)",
         ProgramSource::Stdin,
@@ -177,12 +161,12 @@ fn test_numbers_float() {
         (6, Ok(Token::Number(Number::Float(-3e-10)))),
     ];
 
-    compare_token_lists(&mut lexer, expected);
+    compare_token_lists(lexer, expected);
 }
 
 #[test]
 fn test_numbers_overflow() {
-    let mut lexer =
+    let lexer =
         Lexer::new("8589934592 -8589934592 +8589934592", ProgramSource::Stdin);
     let expected = vec![
         (
@@ -214,12 +198,12 @@ fn test_numbers_overflow() {
         ),
     ];
 
-    compare_token_lists(&mut lexer, expected);
+    compare_token_lists(lexer, expected);
 }
 
 #[test]
 fn test_boolean() {
-    let mut lexer = Lexer::new(
+    let lexer = Lexer::new(
         "true false true
          false true false",
         ProgramSource::Stdin,
@@ -233,12 +217,12 @@ fn test_boolean() {
         (2, Ok(Token::Boolean(false))),
     ];
 
-    compare_token_lists(&mut lexer, expected);
+    compare_token_lists(lexer, expected);
 }
 
 #[test]
 fn test_keywords() {
-    let mut lexer = Lexer::new(
+    let lexer = Lexer::new(
         "
         begin#what
           10 +
@@ -283,12 +267,12 @@ fn test_keywords() {
         (9, Ok(Token::Operator(Operator::Float))),
     ];
 
-    compare_token_lists(&mut lexer, expected);
+    compare_token_lists(lexer, expected);
 }
 
 #[test]
 fn test_identifier() {
-    let mut lexer = Lexer::new(
+    let lexer = Lexer::new(
         "quote var 100 def
          begin VAR 200 + end begin true end while
          definition_var looped while_not# variable",
@@ -313,12 +297,12 @@ fn test_identifier() {
         (3, Ok(Token::Identifier(String::from("while_not")))),
     ];
 
-    compare_token_lists(&mut lexer, expected);
+    compare_token_lists(lexer, expected);
 }
 
 #[test]
 fn test_whitespace() {
-    let mut lexer = Lexer::new(
+    let lexer = Lexer::new(
         "\r\t100 200\t\r\n + \n\n 200 100 +\n\n\n\"hallo\"\t\t\t",
         ProgramSource::Stdin,
     );
@@ -332,12 +316,12 @@ fn test_whitespace() {
         (7, Ok(Token::String(String::from("hallo")))),
     ];
 
-    compare_token_lists(&mut lexer, expected);
+    compare_token_lists(lexer, expected);
 }
 
 #[test]
 fn test_operators() {
-    let mut lexer = Lexer::new(
+    let lexer = Lexer::new(
         "\r\t+ -\t\r\n * /\n\n > >=\n\n\n< <=\t\t\t=",
         ProgramSource::Stdin,
     );
@@ -353,12 +337,12 @@ fn test_operators() {
         (7, Ok(Token::Operator(Operator::Equal))),
     ];
 
-    compare_token_lists(&mut lexer, expected);
+    compare_token_lists(lexer, expected);
 }
 
 #[test]
 fn test_use() {
-    let mut lexer =
+    let lexer =
         Lexer::new("use \"test.pile\"\n use \"file\"", ProgramSource::Stdin);
     let expected = vec![
         (1, Ok(Token::Use)),
@@ -367,13 +351,12 @@ fn test_use() {
         (2, Ok(Token::String("file".to_owned()))),
     ];
 
-    compare_token_lists(&mut lexer, expected);
+    compare_token_lists(lexer, expected);
 }
 
 #[test]
 fn test_error_missing_backslash() {
-    let mut lexer =
-        Lexer::new("1 2 3 * + \"cool string\\", ProgramSource::Stdin);
+    let lexer = Lexer::new("1 2 3 * + \"cool string\\", ProgramSource::Stdin);
     let expected = vec![
         (1, Ok(Token::Number(Number::Natural(1)))),
         (1, Ok(Token::Number(Number::Natural(2)))),
@@ -390,12 +373,12 @@ fn test_error_missing_backslash() {
         ),
     ];
 
-    compare_token_lists(&mut lexer, expected);
+    compare_token_lists(lexer, expected);
 }
 
 #[test]
 fn test_error_unknown_escape() {
-    let mut lexer = Lexer::new(
+    let lexer = Lexer::new(
         "\"cool string\\t\\z\" 3.14 \"some string\\a\\b\\c \\\"test\" 100",
         ProgramSource::Stdin,
     );
@@ -420,12 +403,12 @@ fn test_error_unknown_escape() {
         (1, Ok(Token::Number(Number::Natural(100)))),
     ];
 
-    compare_token_lists(&mut lexer, expected);
+    compare_token_lists(lexer, expected);
 }
 
 #[test]
 fn test_error_unknown_char() {
-    let mut lexer = Lexer::new(
+    let lexer = Lexer::new(
         "\"var\" BEGIN 0 1 + 2 * \n{ END append }# comment",
         ProgramSource::Stdin,
     );
@@ -457,12 +440,12 @@ fn test_error_unknown_char() {
         ),
     ];
 
-    compare_token_lists(&mut lexer, expected);
+    compare_token_lists(lexer, expected);
 }
 
 #[test]
 fn test_error_invalid_number() {
-    let mut lexer = Lexer::new(
+    let lexer = Lexer::new(
         "BEGIN 002 122 + 2f \n 3d 3y * \n END append",
         ProgramSource::Stdin,
     );
@@ -500,12 +483,12 @@ fn test_error_invalid_number() {
         (3, Ok(Token::Identifier(String::from("append")))),
     ];
 
-    compare_token_lists(&mut lexer, expected);
+    compare_token_lists(lexer, expected);
 }
 
 #[test]
 fn test_error_unknown_operator() {
-    let mut lexer = Lexer::new(
+    let lexer = Lexer::new(
         "BEGIN x ++ y \n -- /= * \n END append",
         ProgramSource::Stdin,
     );
@@ -542,7 +525,7 @@ fn test_error_unknown_operator() {
         (3, Ok(Token::Identifier(String::from("append")))),
     ];
 
-    compare_token_lists(&mut lexer, expected);
+    compare_token_lists(lexer, expected);
 }
 
 #[test]
@@ -653,5 +636,4 @@ fn test_token_fmt() {
         "operator 'float'"
     );
     assert_eq!(format!("{}", Token::Use), "token 'use'");
-    assert_eq!(format!("{}", Token::Fin), "'EOF'");
 }

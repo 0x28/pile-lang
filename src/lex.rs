@@ -2,6 +2,7 @@ use crate::cli::ProgramSource;
 use crate::pile_error::PileError;
 
 use std::fmt;
+use std::iter::Iterator;
 use std::iter::Peekable;
 use std::str::Chars;
 
@@ -93,7 +94,6 @@ pub enum Token {
     // use
     Use,
     // eof
-    Fin,
 }
 
 impl fmt::Display for Token {
@@ -109,7 +109,6 @@ impl fmt::Display for Token {
             Token::Quote => write!(f, "token 'quote'"),
             Token::Operator(o) => write!(f, "operator '{}'", o),
             Token::Use => write!(f, "token 'use'"),
-            Token::Fin => write!(f, "'EOF'"),
         }
     }
 }
@@ -119,6 +118,8 @@ pub struct Lexer<'a> {
     input: Peekable<Chars<'a>>,
     line_number: u64,
 }
+
+type LexerItem = (u64, Result<Token, PileError>);
 
 impl<'a> Lexer<'a> {
     const DEFAULT_CAPACITY: usize = 16;
@@ -135,8 +136,8 @@ impl<'a> Lexer<'a> {
         &self.source
     }
 
-    pub fn into_source(self) -> ProgramSource {
-        self.source
+    pub fn line(&self) -> u64 {
+        self.line_number
     }
 
     fn lex_error(&self, msg: &str) -> PileError {
@@ -320,7 +321,7 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    pub fn next(&mut self) -> (u64, Result<Token, PileError>) {
+    fn next(&mut self) -> Option<LexerItem> {
         while let Some(&lookahead) = self.input.peek() {
             let token = match lookahead {
                 '#' => {
@@ -346,10 +347,45 @@ impl<'a> Lexer<'a> {
                 }
             };
 
-            return (self.line_number, token);
+            return Some((self.line_number, token));
         }
 
-        (self.line_number, Ok(Token::Fin))
+        None
+    }
+}
+
+pub struct LexerIter<'a> {
+    lexer: Lexer<'a>,
+}
+
+impl<'a> LexerIter<'a> {
+    pub fn into_source(self) -> ProgramSource {
+        self.lexer.source
+    }
+
+    pub fn source(&self) -> &ProgramSource {
+        self.lexer.source()
+    }
+
+    pub fn line(&self) -> u64 {
+        self.lexer.line()
+    }
+}
+
+impl<'a> Iterator for LexerIter<'a> {
+    type Item = LexerItem;
+
+    fn next(&mut self) -> Option<LexerItem> {
+        self.lexer.next()
+    }
+}
+
+impl<'a> IntoIterator for Lexer<'a> {
+    type Item = LexerItem;
+    type IntoIter = LexerIter<'a>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        LexerIter { lexer: self }
     }
 }
 

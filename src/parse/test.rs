@@ -380,7 +380,7 @@ begin
         Err(PileError::new(
             ProgramSource::Stdin,
             (9, 9),
-            "Expected 'end' found 'EOF'.".to_owned(),
+            "Expected 'end' found end of file.".to_owned(),
         )),
     )
 }
@@ -405,7 +405,7 @@ begin 1
         Err(PileError::new(
             ProgramSource::Stdin,
             (14, 14),
-            "Expected 'end' found 'EOF'.".to_owned(),
+            "Expected 'end' found end of file.".to_owned(),
         )),
     )
 }
@@ -417,7 +417,7 @@ fn test_error_bad_quote1() {
         Err(PileError::new(
             ProgramSource::Stdin,
             (1, 1),
-            "Unexpected 'EOF'".to_string(),
+            "Unexpected end of file.".to_string(),
         )),
     )
 }
@@ -429,7 +429,7 @@ fn test_error_bad_quote2() {
         Err(PileError::new(
             ProgramSource::Stdin,
             (1, 1),
-            "Unexpected token 'end'".to_string(),
+            "Unexpected token 'end'.".to_string(),
         )),
     )
 }
