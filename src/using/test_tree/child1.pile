@@ -1,0 +1,4 @@
+use "child1_1"
+use "child1_2"
+
+"child1" print

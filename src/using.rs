@@ -123,3 +123,6 @@ fn parse_file(file: &PathBuf) -> Result<Ast, PileError> {
 
     parser.parse()
 }
+
+#[cfg(test)]
+mod test;

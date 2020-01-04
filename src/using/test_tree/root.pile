@@ -1,0 +1,9 @@
+#       root
+#       /  \
+#    child1 child2
+#    /    \
+# child1_1 child1_2
+#
+
+use "child1"
+use "child2.pile"
