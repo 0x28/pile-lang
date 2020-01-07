@@ -40,6 +40,13 @@ fn assert_resolve_eq(s: &str, expr: Vec<Expr>) {
     }
 }
 
+fn assert_resolve_error(s: &str, error: PileError) {
+    let path = test_directory() + s;
+    let actual_result = resolve_file(&path);
+
+    assert_eq!(actual_result, Err(error));
+}
+
 #[test]
 fn test_simple_use() {
     assert_resolve_eq(
@@ -138,4 +145,22 @@ fn test_tree() {
             },
         ],
     );
+}
+
+#[test]
+fn test_cycle1() {
+    let relative_path = "test_cycle1/cycle1.pile";
+    let absolute_path = PathBuf::from(test_directory() + relative_path);
+
+    assert_resolve_error(
+        relative_path,
+        PileError::new(
+            ProgramSource::File(absolute_path.clone()),
+            (1, 1),
+            format!(
+                "Found cyclic use of '{}'.",
+                absolute_path.to_string_lossy()
+            ),
+        ),
+    )
 }
