@@ -164,3 +164,42 @@ fn test_cycle1() {
         ),
     )
 }
+
+#[test]
+fn test_cycle2() {
+    let relative_path = "test_cycle2/cycle2.pile";
+    let absolute_path = PathBuf::from(test_directory() + relative_path);
+
+    assert_resolve_error(
+        relative_path,
+        PileError::new(
+            ProgramSource::File(PathBuf::from(
+                test_directory() + "test_cycle2/c.pile",
+            )),
+            (1, 1),
+            format!(
+                "Found cyclic use of '{}'.",
+                absolute_path.to_string_lossy()
+            ),
+        ),
+    )
+}
+
+#[test]
+fn test_file_not_found() {
+    let relative_path = "test_not_found/root.pile";
+
+    assert_resolve_error(
+        relative_path,
+        PileError::new(
+            ProgramSource::File(PathBuf::from(
+                test_directory() + "test_not_found/root.pile",
+            )),
+            (1, 1),
+            format!(
+                "{}: No such file or directory (os error 2)",
+                test_directory() + "test_not_found/unknown.pile"
+            ),
+        ),
+    )
+}

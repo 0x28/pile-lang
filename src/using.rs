@@ -43,7 +43,8 @@ impl<'d> DependencyTree<'d> {
 
 pub fn resolve(mut ast: Ast) -> Result<Ast, PileError> {
     let path = match &mut ast.source {
-        ProgramSource::File(file) => normalize_path(file)?,
+        ProgramSource::File(file) => normalize_path(file)
+            .map_err(|err| PileError::new(ast.source.clone(), (0, 0), err))?,
         _ => PathBuf::new(),
     };
 
@@ -72,7 +73,16 @@ fn resolve_use(
                 ProgramSource::File(file) => file,
             };
             let component_path =
-                normalize_path(&current_dir.join(&component_path))?;
+                match normalize_path(&current_dir.join(&component_path)) {
+                    Ok(path) => path,
+                    Err(msg) => {
+                        return Err(PileError::new(
+                            ast.source,
+                            (*line, *line),
+                            msg,
+                        ))
+                    }
+                };
 
             if tree.contains(&component_path) {
                 return Err(PileError::new(
@@ -84,7 +94,19 @@ fn resolve_use(
                     ),
                 ));
             }
-            let sub_ast = parse_file(&component_path)?;
+            let program_text = match read_file(&component_path) {
+                Ok(ast) => ast,
+                Err(msg) => {
+                    return Err(PileError::new(ast.source, (*line, *line), msg))
+                }
+            };
+
+            let lexer = Lexer::new(
+                &program_text,
+                ProgramSource::File(PathBuf::from(&component_path)),
+            );
+            let sub_ast = Parser::new(lexer).parse()?;
+
             *subprogram = resolve_use(
                 &component_path
                     .parent()
@@ -100,28 +122,22 @@ fn resolve_use(
     Ok(ast)
 }
 
-fn normalize_path(file: &PathBuf) -> Result<PathBuf, PileError> {
+fn normalize_path(file: &PathBuf) -> Result<PathBuf, String> {
     let mut file = file.to_owned();
     if file.extension() == None {
         file.set_extension("pile");
     }
 
-    let path = file.canonicalize().map_err(|err| {
-        PileError::new(ProgramSource::File(file), (0, 0), err.to_string())
-    })?;
+    let path = file
+        .canonicalize()
+        .map_err(|err| format!("{}: {}", file.to_string_lossy(), err))?;
 
     Ok(path)
 }
 
-fn parse_file(file: &PathBuf) -> Result<Ast, PileError> {
-    let source = ProgramSource::File(file.to_owned());
-    let program_text = fs::read_to_string(&file).map_err(|err| {
-        PileError::new(source.clone(), (0, 0), err.to_string())
-    })?;
-    let lexer = Lexer::new(&program_text, source);
-    let parser = Parser::new(lexer);
-
-    parser.parse()
+fn read_file(file: &PathBuf) -> Result<String, String> {
+    fs::read_to_string(&file)
+        .map_err(|err| format!("{}: {}", file.to_string_lossy(), err))
 }
 
 #[cfg(test)]
