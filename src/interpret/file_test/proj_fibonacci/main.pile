@@ -1,0 +1,6 @@
+use "fibonacci"
+
+1 fib
+2 fib
+5 fib
+10 fib

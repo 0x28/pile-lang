@@ -1,0 +1,15 @@
+begin
+  quote number def # arg1 = number
+  0 quote current def
+  1 quote next def
+  begin
+    next
+    current next + quote next def
+    quote current def
+  end
+  number
+  dotimes
+
+  current
+end
+quote fib def

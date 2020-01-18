@@ -1,0 +1,4 @@
+use "util"
+
+10 inc
+20 dec

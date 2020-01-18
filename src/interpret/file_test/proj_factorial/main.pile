@@ -1,0 +1,10 @@
+use "factorial"
+
+0 quote i def
+
+begin
+  i fact
+  i 1 + quote i def
+end
+10
+dotimes

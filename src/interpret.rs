@@ -67,9 +67,9 @@ impl Interpreter {
         }
     }
 
-    pub fn run(&mut self) -> Result<Option<RuntimeValue>, PileError> {
+    pub fn run(&mut self) -> Result<Option<&RuntimeValue>, PileError> {
         Interpreter::call(&self.program.expressions, &mut self.state)?;
-        Ok(self.state.stack.pop())
+        Ok(self.state.stack.last())
     }
 
     pub fn eval(
@@ -198,3 +198,6 @@ impl Interpreter {
 
 #[cfg(test)]
 mod test;
+
+#[cfg(test)]
+mod file_test;

@@ -1,0 +1,14 @@
+begin
+  quote n def
+  1 quote result def
+  begin
+    n result * quote result def
+    n 1 - quote n def
+  end
+  begin
+    n 0 >
+  end
+  while
+  result
+end
+quote fact def

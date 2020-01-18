@@ -1,0 +1,5 @@
+# add one to the argument
+begin 1 + end quote inc def
+
+# subtract one from the argument
+begin 1 - end quote dec def
