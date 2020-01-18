@@ -6,7 +6,7 @@ use crate::lex::Operator;
 use crate::parse::Parser;
 
 fn expect_value(prog: &str, value: Result<&RuntimeValue, PileError>) {
-    let lexer = Lexer::new(prog, ProgramSource::Stdin);
+    let lexer = Lexer::new(prog, Rc::new(ProgramSource::Stdin));
     let parser = Parser::new(lexer);
     let mut interpreter =
         Interpreter::new(parser.parse().expect("invalid program"), 10);
@@ -14,7 +14,7 @@ fn expect_value(prog: &str, value: Result<&RuntimeValue, PileError>) {
     let result = match interpreter.run() {
         Ok(Some(value)) => Ok(value),
         Ok(None) => Err(PileError::new(
-            ProgramSource::Stdin,
+            Rc::new(ProgramSource::Stdin),
             (0, 0),
             "No value returned!".to_owned(),
         )),
@@ -257,7 +257,7 @@ fn test_quote() {
     expect_value(
         "quote quote true",
         Err(PileError::new(
-            ProgramSource::Stdin,
+            Rc::new(ProgramSource::Stdin),
             (1, 1),
             "Unexpected token \'quote\'".to_string(),
         )),
@@ -312,7 +312,7 @@ begin 200 * end
     expect_value(
         "var var +",
         Err(PileError::new(
-            ProgramSource::Stdin,
+            Rc::new(ProgramSource::Stdin),
             (1, 1),
             "Unknown variable 'var'".to_string(),
         )),
@@ -401,7 +401,7 @@ fn test_cast_to_natural() {
     expect_value(
         "-1 natural",
         Err(PileError::new(
-            ProgramSource::Stdin,
+            Rc::new(ProgramSource::Stdin),
             (1, 1),
             "Conversion from integer '-1' to natural is invalid".to_string(),
         )),
@@ -422,7 +422,7 @@ fn test_cast_to_integer() {
     expect_value(
         "4290000000 integer",
         Err(PileError::new(
-            ProgramSource::Stdin,
+            Rc::new(ProgramSource::Stdin),
             (1, 1),
             "Conversion from natural '4290000000' to integer is invalid"
                 .to_string(),
@@ -448,7 +448,7 @@ fn test_numeric_overflow() {
     expect_value(
         "4294967295 1 +",
         Err(PileError::new(
-            ProgramSource::Stdin,
+            Rc::new(ProgramSource::Stdin),
             (1, 1),
             "Numeric overflow".to_string(),
         )),
@@ -456,7 +456,7 @@ fn test_numeric_overflow() {
     expect_value(
         "0 1 -",
         Err(PileError::new(
-            ProgramSource::Stdin,
+            Rc::new(ProgramSource::Stdin),
             (1, 1),
             "Numeric overflow".to_string(),
         )),
@@ -464,7 +464,7 @@ fn test_numeric_overflow() {
     expect_value(
         "1000000000 100000 *",
         Err(PileError::new(
-            ProgramSource::Stdin,
+            Rc::new(ProgramSource::Stdin),
             (1, 1),
             "Numeric overflow".to_string(),
         )),
@@ -472,7 +472,7 @@ fn test_numeric_overflow() {
     expect_value(
         "-2000000005 -2000000005 +",
         Err(PileError::new(
-            ProgramSource::Stdin,
+            Rc::new(ProgramSource::Stdin),
             (1, 1),
             "Numeric overflow".to_string(),
         )),
@@ -480,7 +480,7 @@ fn test_numeric_overflow() {
     expect_value(
         "-2000000005 -2000000005 *",
         Err(PileError::new(
-            ProgramSource::Stdin,
+            Rc::new(ProgramSource::Stdin),
             (1, 1),
             "Numeric overflow".to_string(),
         )),
@@ -492,7 +492,7 @@ fn test_div_by_zero() {
     expect_value(
         "0 0 /",
         Err(PileError::new(
-            ProgramSource::Stdin,
+            Rc::new(ProgramSource::Stdin),
             (1, 1),
             "Division by zero".to_string(),
         )),
@@ -500,7 +500,7 @@ fn test_div_by_zero() {
     expect_value(
         "-0 -0 /",
         Err(PileError::new(
-            ProgramSource::Stdin,
+            Rc::new(ProgramSource::Stdin),
             (1, 1),
             "Division by zero".to_string(),
         )),
@@ -512,7 +512,7 @@ fn test_type_errors() {
     expect_value(
         "42 \"hi\" *",
         Err(PileError::new(
-            ProgramSource::Stdin,
+            Rc::new(ProgramSource::Stdin),
             (1, 1),
             "Type error: natural \'42\', string \'hi\'".to_string(),
         )),
@@ -521,7 +521,7 @@ fn test_type_errors() {
     expect_value(
         "12.34 4 +",
         Err(PileError::new(
-            ProgramSource::Stdin,
+            Rc::new(ProgramSource::Stdin),
             (1, 1),
             "Numeric type mismatch: float \'12.34\', natural \'4\'".to_string(),
         )),
@@ -530,7 +530,7 @@ fn test_type_errors() {
     expect_value(
         "begin end begin end \"...\" if",
         Err(PileError::new(
-            ProgramSource::Stdin,
+            Rc::new(ProgramSource::Stdin),
             (1, 1),
             "Expected boolean found string \'...\'".to_string(),
         )),
@@ -539,7 +539,7 @@ fn test_type_errors() {
     expect_value(
         "0 begin \"hi\" print end \"...\" dotimes",
         Err(PileError::new(
-            ProgramSource::Stdin,
+            Rc::new(ProgramSource::Stdin),
             (1, 1),
             "Expected positive number found string \'...\'".to_string(),
         )),
@@ -549,7 +549,7 @@ fn test_type_errors() {
         "10 quote x def
          quote x 10 dotimes",
         Err(PileError::new(
-            ProgramSource::Stdin,
+            Rc::new(ProgramSource::Stdin),
             (2, 2),
             "Expected function found natural \'10\'".to_string(),
         )),
@@ -558,7 +558,7 @@ fn test_type_errors() {
     expect_value(
         "10 10 dotimes",
         Err(PileError::new(
-            ProgramSource::Stdin,
+            Rc::new(ProgramSource::Stdin),
             (1, 1),
             "Expected function found natural \'10\'".to_string(),
         )),
@@ -567,7 +567,7 @@ fn test_type_errors() {
     expect_value(
         "quote unknown_func 10 dotimes",
         Err(PileError::new(
-            ProgramSource::Stdin,
+            Rc::new(ProgramSource::Stdin),
             (1, 1),
             "Unknown variable 'unknown_func'".to_string(),
         )),
@@ -576,7 +576,7 @@ fn test_type_errors() {
     expect_value(
         "begin end begin end \"true\" if",
         Err(PileError::new(
-            ProgramSource::Stdin,
+            Rc::new(ProgramSource::Stdin),
             (1, 1),
             "Expected boolean found string 'true'".to_string(),
         )),
@@ -589,7 +589,7 @@ fn test_runtime_error_fmt() {
         format!(
             "{}",
             PileError::new(
-                ProgramSource::Stdin,
+                Rc::new(ProgramSource::Stdin),
                 (1000, 1000),
                 "Serious error!!!".to_string(),
             )
@@ -601,7 +601,7 @@ fn test_runtime_error_fmt() {
         format!(
             "{}",
             PileError::new(
-                ProgramSource::Stdin,
+                Rc::new(ProgramSource::Stdin),
                 (10, 20),
                 "This is really bad...".to_string(),
             )

@@ -9,7 +9,7 @@ use std::rc::Rc;
 
 #[derive(Debug, PartialEq)]
 pub struct Ast {
-    pub source: ProgramSource,
+    pub source: Rc<ProgramSource>,
     pub expressions: Vec<Expr>,
 }
 
@@ -82,14 +82,14 @@ impl<'a> Parser<'a> {
         }
 
         Ok(Ast {
-            source: self.lex_iter.into_source(),
+            source: Rc::clone(self.lex_iter.source()),
             expressions: program,
         })
     }
 
     fn parse_error(&self, line: u64, msg: &str) -> PileError {
         PileError::new(
-            self.lex_iter.source().clone(),
+            Rc::clone(self.lex_iter.source()),
             (line, line),
             msg.to_owned(),
         )
@@ -173,7 +173,7 @@ impl<'a> Parser<'a> {
             Some((line, Token::String(string))) => Ok(Expr::Use {
                 line: *line,
                 subprogram: Ast {
-                    source: ProgramSource::File(PathBuf::from(string)),
+                    source: Rc::new(ProgramSource::File(PathBuf::from(string))),
                     expressions: vec![],
                 },
             }),

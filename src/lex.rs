@@ -5,6 +5,7 @@ use std::fmt;
 use std::iter::Iterator;
 use std::iter::Peekable;
 use std::str::Chars;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Number {
@@ -114,7 +115,7 @@ impl fmt::Display for Token {
 }
 
 pub struct Lexer<'a> {
-    source: ProgramSource,
+    source: Rc<ProgramSource>,
     input: Peekable<Chars<'a>>,
     line_number: u64,
 }
@@ -124,7 +125,7 @@ type LexerItem = (u64, Result<Token, PileError>);
 impl<'a> Lexer<'a> {
     const DEFAULT_CAPACITY: usize = 16;
 
-    pub fn new(text: &str, source: ProgramSource) -> Lexer {
+    pub fn new(text: &str, source: Rc<ProgramSource>) -> Lexer {
         Lexer {
             source,
             input: text.chars().peekable(),
@@ -132,7 +133,7 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    pub fn source(&self) -> &ProgramSource {
+    pub fn source(&self) -> &Rc<ProgramSource> {
         &self.source
     }
 
@@ -142,7 +143,7 @@ impl<'a> Lexer<'a> {
 
     fn lex_error(&self, msg: &str) -> PileError {
         PileError::new(
-            self.source().clone(),
+            Rc::clone(self.source()),
             (self.line_number, self.line_number),
             msg.to_owned(),
         )
@@ -359,12 +360,8 @@ pub struct LexerIter<'a> {
 }
 
 impl<'a> LexerIter<'a> {
-    pub fn into_source(self) -> ProgramSource {
-        self.lexer.source
-    }
-
-    pub fn source(&self) -> &ProgramSource {
-        self.lexer.source()
+    pub fn source(&self) -> &Rc<ProgramSource> {
+        &self.lexer.source()
     }
 
     pub fn line(&self) -> u64 {

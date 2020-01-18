@@ -16,14 +16,15 @@ fn compare_token_lists(
 
 #[test]
 fn test_empty_program() {
-    let lexer = Lexer::new("", ProgramSource::Stdin);
+    let lexer = Lexer::new("", Rc::new(ProgramSource::Stdin));
 
     assert_eq!(lexer.into_iter().count(), 0);
 }
 
 #[test]
 fn test_comment_simple() {
-    let lexer = Lexer::new("2 3 *# hello world\n1 1 +", ProgramSource::Stdin);
+    let lexer =
+        Lexer::new("2 3 *# hello world\n1 1 +", Rc::new(ProgramSource::Stdin));
     let expected = vec![
         (1, Ok(Token::Number(Number::Natural(2)))),
         (1, Ok(Token::Number(Number::Natural(3)))),
@@ -38,7 +39,7 @@ fn test_comment_simple() {
 
 #[test]
 fn test_comment_only() {
-    let lexer = Lexer::new("# empty program", ProgramSource::Stdin);
+    let lexer = Lexer::new("# empty program", Rc::new(ProgramSource::Stdin));
 
     assert_eq!(lexer.into_iter().count(), 0);
 }
@@ -47,7 +48,7 @@ fn test_comment_only() {
 fn test_string_simple() {
     let lexer = Lexer::new(
         "\"yay programming languages :)\"# comment",
-        ProgramSource::Stdin,
+        Rc::new(ProgramSource::Stdin),
     );
     let expected = vec![(
         1,
@@ -59,7 +60,7 @@ fn test_string_simple() {
 
 #[test]
 fn test_string_escaped() {
-    let lexer = Lexer::new("\"\\n\\n\\n\\t\\r\0#test#\"", ProgramSource::Stdin);
+    let lexer = Lexer::new("\"\\n\\n\\n\\t\\r\0#test#\"", Rc::new(ProgramSource::Stdin));
     let expected =
         vec![(1, Ok(Token::String(String::from("\n\n\n\t\r\0#test#"))))];
 
@@ -68,12 +69,12 @@ fn test_string_escaped() {
 
 #[test]
 fn test_unknown_char() {
-    let lexer = Lexer::new("\\hello world\\", ProgramSource::Stdin);
+    let lexer = Lexer::new("\\hello world\\", Rc::new(ProgramSource::Stdin));
     let expected = vec![
         (
             1,
             Err(PileError::new(
-                ProgramSource::Stdin,
+                Rc::new(ProgramSource::Stdin),
                 (1, 1),
                 "Unknown char '\\'".to_owned(),
             )),
@@ -83,7 +84,7 @@ fn test_unknown_char() {
         (
             1,
             Err(PileError::new(
-                ProgramSource::Stdin,
+                Rc::new(ProgramSource::Stdin),
                 (1, 1),
                 "Unknown char '\\'".to_owned(),
             )),
@@ -98,7 +99,7 @@ fn test_numbers_natural() {
     let lexer = Lexer::new(
         "100 2000 3000 123 4543 123 21393#123#123
          203 040 05060 70 80 002 1203004 003",
-        ProgramSource::Stdin,
+        Rc::new(ProgramSource::Stdin),
     );
     let expected = vec![
         (1, Ok(Token::Number(Number::Natural(100)))),
@@ -126,7 +127,7 @@ fn test_numbers_integer() {
     let lexer = Lexer::new(
         "-1\n-2\n-3\n-4000\n-0044
         -1000 -200 -42 -42",
-        ProgramSource::Stdin,
+        Rc::new(ProgramSource::Stdin),
     );
     let expected = vec![
         (1, Ok(Token::Number(Number::Integer(-1)))),
@@ -148,7 +149,7 @@ fn test_numbers_float() {
     let lexer = Lexer::new(
         "1.1\n2.2\n3.3\n-10e20\n 20E3
          3.1415 7777.7777 -3e-10#number :)",
-        ProgramSource::Stdin,
+        Rc::new(ProgramSource::Stdin),
     );
     let expected = vec![
         (1, Ok(Token::Number(Number::Float(1.1)))),
@@ -167,12 +168,12 @@ fn test_numbers_float() {
 #[test]
 fn test_numbers_overflow() {
     let lexer =
-        Lexer::new("8589934592 -8589934592 +8589934592", ProgramSource::Stdin);
+        Lexer::new("8589934592 -8589934592 +8589934592", Rc::new(ProgramSource::Stdin));
     let expected = vec![
         (
             1,
             Err(PileError::new(
-                ProgramSource::Stdin,
+                Rc::new(ProgramSource::Stdin),
                 (1, 1),
                 "'8589934592' is too large to be represented as a number"
                     .to_string(),
@@ -181,7 +182,7 @@ fn test_numbers_overflow() {
         (
             1,
             Err(PileError::new(
-                ProgramSource::Stdin,
+                Rc::new(ProgramSource::Stdin),
                 (1, 1),
                 "'-8589934592' is too small to be represented as a number"
                     .to_string(),
@@ -190,7 +191,7 @@ fn test_numbers_overflow() {
         (
             1,
             Err(PileError::new(
-                ProgramSource::Stdin,
+                Rc::new(ProgramSource::Stdin),
                 (1, 1),
                 "'+8589934592' is too large to be represented as a number"
                     .to_string(),
@@ -206,7 +207,7 @@ fn test_boolean() {
     let lexer = Lexer::new(
         "true false true
          false true false",
-        ProgramSource::Stdin,
+        Rc::new(ProgramSource::Stdin),
     );
     let expected = vec![
         (1, Ok(Token::Boolean(true))),
@@ -232,7 +233,7 @@ fn test_keywords() {
         while def dotimes DEF DOTIMES END BEGIN QUOTE quote if IF print
         and AND or OR not NOT
         natural NATURAL integer INTEGER float FLOAT",
-        ProgramSource::Stdin,
+        Rc::new(ProgramSource::Stdin),
     );
     let expected = vec![
         (2, Ok(Token::Begin)),
@@ -276,7 +277,7 @@ fn test_identifier() {
         "quote var 100 def
          begin VAR 200 + end begin true end while
          definition_var looped while_not# variable",
-        ProgramSource::Stdin,
+        Rc::new(ProgramSource::Stdin),
     );
     let expected = vec![
         (1, Ok(Token::Quote)),
@@ -304,7 +305,7 @@ fn test_identifier() {
 fn test_whitespace() {
     let lexer = Lexer::new(
         "\r\t100 200\t\r\n + \n\n 200 100 +\n\n\n\"hallo\"\t\t\t",
-        ProgramSource::Stdin,
+        Rc::new(ProgramSource::Stdin),
     );
     let expected = vec![
         (1, Ok(Token::Number(Number::Natural(100)))),
@@ -323,7 +324,7 @@ fn test_whitespace() {
 fn test_operators() {
     let lexer = Lexer::new(
         "\r\t+ -\t\r\n * /\n\n > >=\n\n\n< <=\t\t\t=",
-        ProgramSource::Stdin,
+        Rc::new(ProgramSource::Stdin),
     );
     let expected = vec![
         (1, Ok(Token::Operator(Operator::Plus))),
@@ -343,7 +344,7 @@ fn test_operators() {
 #[test]
 fn test_use() {
     let lexer =
-        Lexer::new("use \"test.pile\"\n use \"file\"", ProgramSource::Stdin);
+        Lexer::new("use \"test.pile\"\n use \"file\"", Rc::new(ProgramSource::Stdin));
     let expected = vec![
         (1, Ok(Token::Use)),
         (1, Ok(Token::String("test.pile".to_owned()))),
@@ -356,7 +357,7 @@ fn test_use() {
 
 #[test]
 fn test_error_missing_backslash() {
-    let lexer = Lexer::new("1 2 3 * + \"cool string\\", ProgramSource::Stdin);
+    let lexer = Lexer::new("1 2 3 * + \"cool string\\", Rc::new(ProgramSource::Stdin));
     let expected = vec![
         (1, Ok(Token::Number(Number::Natural(1)))),
         (1, Ok(Token::Number(Number::Natural(2)))),
@@ -366,7 +367,7 @@ fn test_error_missing_backslash() {
         (
             1,
             Err(PileError::new(
-                ProgramSource::Stdin,
+                Rc::new(ProgramSource::Stdin),
                 (1, 1),
                 "Missing character after backslash.".to_owned(),
             )),
@@ -380,13 +381,13 @@ fn test_error_missing_backslash() {
 fn test_error_unknown_escape() {
     let lexer = Lexer::new(
         "\"cool string\\t\\z\" 3.14 \"some string\\a\\b\\c \\\"test\" 100",
-        ProgramSource::Stdin,
+        Rc::new(ProgramSource::Stdin),
     );
     let expected = vec![
         (
             1,
             Err(PileError::new(
-                ProgramSource::Stdin,
+                Rc::new(ProgramSource::Stdin),
                 (1, 1),
                 "Unknown escape chars: \'\\z\'".to_owned(),
             )),
@@ -395,7 +396,7 @@ fn test_error_unknown_escape() {
         (
             1,
             Err(PileError::new(
-                ProgramSource::Stdin,
+                Rc::new(ProgramSource::Stdin),
                 (1, 1),
                 "Unknown escape chars: \'\\a\' \'\\b\' \'\\c\'".to_owned(),
             )),
@@ -410,7 +411,7 @@ fn test_error_unknown_escape() {
 fn test_error_unknown_char() {
     let lexer = Lexer::new(
         "\"var\" BEGIN 0 1 + 2 * \n{ END append }# comment",
-        ProgramSource::Stdin,
+        Rc::new(ProgramSource::Stdin),
     );
     let expected = vec![
         (1, Ok(Token::String(String::from("var")))),
@@ -423,7 +424,7 @@ fn test_error_unknown_char() {
         (
             2,
             Err(PileError::new(
-                ProgramSource::Stdin,
+                Rc::new(ProgramSource::Stdin),
                 (2, 2),
                 "Unknown char '{'".to_owned(),
             )),
@@ -433,7 +434,7 @@ fn test_error_unknown_char() {
         (
             2,
             Err(PileError::new(
-                ProgramSource::Stdin,
+                Rc::new(ProgramSource::Stdin),
                 (2, 2),
                 "Unknown char '}'".to_owned(),
             )),
@@ -447,7 +448,7 @@ fn test_error_unknown_char() {
 fn test_error_invalid_number() {
     let lexer = Lexer::new(
         "BEGIN 002 122 + 2f \n 3d 3y * \n END append",
-        ProgramSource::Stdin,
+        Rc::new(ProgramSource::Stdin),
     );
     let expected = vec![
         (1, Ok(Token::Begin)),
@@ -457,7 +458,7 @@ fn test_error_invalid_number() {
         (
             1,
             Err(PileError::new(
-                ProgramSource::Stdin,
+                Rc::new(ProgramSource::Stdin),
                 (1, 1),
                 "'2f' isn't a number".to_owned(),
             )),
@@ -465,7 +466,7 @@ fn test_error_invalid_number() {
         (
             2,
             Err(PileError::new(
-                ProgramSource::Stdin,
+                Rc::new(ProgramSource::Stdin),
                 (2, 2),
                 "'3d' isn't a number".to_owned(),
             )),
@@ -473,7 +474,7 @@ fn test_error_invalid_number() {
         (
             2,
             Err(PileError::new(
-                ProgramSource::Stdin,
+                Rc::new(ProgramSource::Stdin),
                 (2, 2),
                 "'3y' isn't a number".to_owned(),
             )),
@@ -490,7 +491,7 @@ fn test_error_invalid_number() {
 fn test_error_unknown_operator() {
     let lexer = Lexer::new(
         "BEGIN x ++ y \n -- /= * \n END append",
-        ProgramSource::Stdin,
+        Rc::new(ProgramSource::Stdin),
     );
     let expected = vec![
         (1, Ok(Token::Begin)),
@@ -498,7 +499,7 @@ fn test_error_unknown_operator() {
         (
             1,
             Err(PileError::new(
-                ProgramSource::Stdin,
+                Rc::new(ProgramSource::Stdin),
                 (1, 1),
                 "Unknown operator '++'".to_owned(),
             )),
@@ -507,7 +508,7 @@ fn test_error_unknown_operator() {
         (
             2,
             Err(PileError::new(
-                ProgramSource::Stdin,
+                Rc::new(ProgramSource::Stdin),
                 (2, 2),
                 "Unknown operator '--'".to_owned(),
             )),
@@ -515,7 +516,7 @@ fn test_error_unknown_operator() {
         (
             2,
             Err(PileError::new(
-                ProgramSource::Stdin,
+                Rc::new(ProgramSource::Stdin),
                 (2, 2),
                 "Unknown operator '/='".to_owned(),
             )),

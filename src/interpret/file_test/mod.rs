@@ -18,7 +18,10 @@ impl Interpreter {
 fn expect_stack(filename: &str, expected: &Vec<RuntimeValue>) {
     let prog = fs::read_to_string(filename)
         .expect(&format!("{}: can't read file", filename));
-    let lexer = Lexer::new(&prog, ProgramSource::File(PathBuf::from(filename)));
+    let lexer = Lexer::new(
+        &prog,
+        Rc::new(ProgramSource::File(PathBuf::from(filename))),
+    );
     let parser = Parser::new(lexer);
 
     let ast = using::resolve(parser.parse().expect("invalid program"))

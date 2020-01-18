@@ -3,12 +3,13 @@ use crate::repl;
 use std::fs;
 use std::io::{self, Read};
 use std::path::PathBuf;
+use std::rc::Rc;
 
 use clap::{crate_version, App, Arg};
 
 pub struct CommandLineOptions {
     stack_size: usize,
-    source: ProgramSource,
+    source: Rc<ProgramSource>,
     debug: bool,
 }
 
@@ -21,7 +22,7 @@ pub enum ProgramSource {
 
 impl CommandLineOptions {
     pub fn read_program(&self) -> Result<String, String> {
-        match &self.source {
+        match self.source.as_ref() {
             ProgramSource::Repl => repl::repl(),
             ProgramSource::Stdin => {
                 let mut buffer = String::new();
@@ -43,8 +44,8 @@ impl CommandLineOptions {
         self.debug
     }
 
-    pub fn source(&self) -> &ProgramSource {
-        &self.source
+    pub fn source(&self) -> Rc<ProgramSource> {
+        Rc::clone(&self.source)
     }
 }
 
@@ -85,11 +86,11 @@ pub fn read_options() -> CommandLineOptions {
 
     CommandLineOptions {
         stack_size,
-        source: match file {
+        source: Rc::new(match file {
             None => ProgramSource::Repl,
             Some("-") => ProgramSource::Stdin,
             Some(file) => ProgramSource::File(PathBuf::from(file)),
-        },
+        }),
         debug,
     }
 }

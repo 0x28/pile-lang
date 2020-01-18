@@ -23,12 +23,12 @@ pub struct State {
     stack: Vec<RuntimeValue>,
     lookup: HashMap<String, RuntimeValue>,
     current_lines: (u64, u64),
-    current_source: ProgramSource,
+    current_source: Rc<ProgramSource>,
 }
 
 impl State {
     fn error(&self, msg: String) -> PileError {
-        PileError::new(self.current_source.clone(), self.current_lines, msg)
+        PileError::new(Rc::clone(&self.current_source), self.current_lines, msg)
     }
 }
 
@@ -39,7 +39,7 @@ pub struct Interpreter {
 
 impl Interpreter {
     pub fn new(program: Ast, initial_size: usize) -> Interpreter {
-        let source = program.source.clone();
+        let source = Rc::clone(&program.source);
 
         Interpreter {
             program,
@@ -55,14 +55,14 @@ impl Interpreter {
     pub fn empty() -> Interpreter {
         Interpreter {
             program: Ast {
-                source: ProgramSource::Repl,
+                source: Rc::new(ProgramSource::Repl),
                 expressions: vec![],
             },
             state: State {
                 stack: vec![],
                 lookup: HashMap::new(),
                 current_lines: (1, 1),
-                current_source: ProgramSource::Repl,
+                current_source: Rc::new(ProgramSource::Repl),
             },
         }
     }
@@ -136,7 +136,7 @@ impl Interpreter {
                     ))
                 }
                 Expr::Use { subprogram, .. } => {
-                    let mut sub_source = subprogram.source.clone();
+                    let mut sub_source = Rc::clone(&subprogram.source);
 
                     mem::swap(&mut sub_source, &mut state.current_source);
                     Interpreter::call(&subprogram.expressions, state)?;

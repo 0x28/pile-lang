@@ -8,6 +8,7 @@ use crate::pile_error::PileError;
 use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
+use std::rc::Rc;
 
 struct DependencyTree<'d> {
     parent: Option<&'d DependencyTree<'d>>,
@@ -41,14 +42,15 @@ impl<'d> DependencyTree<'d> {
     }
 }
 
-pub fn resolve(mut ast: Ast) -> Result<Ast, PileError> {
-    let path = match &mut ast.source {
-        ProgramSource::File(file) => normalize_path(file)
-            .map_err(|err| PileError::new(ast.source.clone(), (0, 0), err))?,
+pub fn resolve(ast: Ast) -> Result<Ast, PileError> {
+    let path = match ast.source.as_ref() {
+        ProgramSource::File(file) => normalize_path(file).map_err(|err| {
+            PileError::new(Rc::clone(&ast.source), (0, 0), err)
+        })?,
         _ => PathBuf::new(),
     };
 
-    let dir = match &ast.source {
+    let dir = match &ast.source.as_ref() {
         ProgramSource::Repl | ProgramSource::Stdin => PathBuf::from("."),
         ProgramSource::File(file) => file
             .parent()
@@ -66,7 +68,7 @@ fn resolve_use(
 ) -> Result<Ast, PileError> {
     for expr in &mut ast.expressions {
         if let Expr::Use { subprogram, line } = expr {
-            let component_path = match &subprogram.source {
+            let component_path = match &subprogram.source.as_ref() {
                 ProgramSource::Repl | ProgramSource::Stdin => {
                     panic!("applying 'use' to stdin or repl is impossible!")
                 }
@@ -101,10 +103,10 @@ fn resolve_use(
                 }
             };
 
-            let lexer = Lexer::new(
-                &program_text,
-                ProgramSource::File(PathBuf::from(&component_path)),
-            );
+            let sub_source =
+                Rc::new(ProgramSource::File(PathBuf::from(&component_path)));
+
+            let lexer = Lexer::new(&program_text, Rc::clone(&sub_source));
             let sub_ast = Parser::new(lexer).parse()?;
 
             *subprogram = resolve_use(
@@ -115,7 +117,7 @@ fn resolve_use(
                 &tree.add_node(&component_path),
                 sub_ast,
             )?;
-            subprogram.source = ProgramSource::File(component_path);
+            subprogram.source = sub_source
         }
     }
 

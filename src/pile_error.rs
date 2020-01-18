@@ -1,17 +1,18 @@
 use crate::cli::ProgramSource;
 
 use std::fmt;
+use std::rc::Rc;
 
 #[derive(Debug, PartialEq)]
 pub struct PileError {
-    source: ProgramSource,
+    source: Rc<ProgramSource>,
     lines: (u64, u64),
     message: String,
 }
 
 impl PileError {
     pub fn new(
-        source: ProgramSource,
+        source: Rc<ProgramSource>,
         lines: (u64, u64),
         message: String,
     ) -> Self {
@@ -25,7 +26,7 @@ impl PileError {
 
 impl fmt::Display for PileError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match &self.source {
+        match &self.source.as_ref() {
             ProgramSource::Repl | ProgramSource::Stdin => (),
             ProgramSource::File(file) => {
                 write!(f, "{}:", file.to_string_lossy())?;

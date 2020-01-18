@@ -4,6 +4,7 @@ use crate::parse::Parser;
 use crate::cli::ProgramSource;
 
 use std::io::Write;
+use std::rc::Rc;
 
 pub fn repl() -> ! {
     let mut interpreter = Interpreter::empty();
@@ -19,7 +20,7 @@ pub fn repl() -> ! {
             println!();
             break;
         }
-        let lexer = Lexer::new(&line, ProgramSource::Repl);
+        let lexer = Lexer::new(&line, Rc::new(ProgramSource::Repl));
         let parser = Parser::new(lexer);
 
         let expr = match parser.parse() {

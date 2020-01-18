@@ -8,11 +8,13 @@ use crate::using;
 
 use std::fs;
 use std::path::PathBuf;
+use std::rc::Rc;
 
 fn resolve_file(s: &str) -> Result<Ast, PileError> {
     let input =
         fs::read_to_string(s).expect(&format!("couldn't read test file {}", s));
-    let lexer = Lexer::new(&input, ProgramSource::File(PathBuf::from(s)));
+    let lexer =
+        Lexer::new(&input, Rc::new(ProgramSource::File(PathBuf::from(s))));
     let parser = Parser::new(lexer);
 
     let ast = parser.parse().expect("couldn't parse test file");
@@ -28,7 +30,7 @@ fn assert_resolve_eq(s: &str, expr: Vec<Expr>) {
     let actual_ast = resolve_file(&path).expect("resolve error");
     let path = PathBuf::from(path);
     let expected_ast = Ast {
-        source: ProgramSource::File(path),
+        source: Rc::new(ProgramSource::File(path)),
         expressions: expr,
     };
 
@@ -54,9 +56,9 @@ fn test_simple_use() {
         vec![Expr::Use {
             line: 1,
             subprogram: Ast {
-                source: ProgramSource::File(PathBuf::from(
+                source: Rc::new(ProgramSource::File(PathBuf::from(
                     test_directory() + "test_simple/other.pile",
-                )),
+                ))),
                 expressions: vec![
                     Expr::Atom {
                         line: 1,
@@ -80,16 +82,18 @@ fn test_tree() {
             Expr::Use {
                 line: 8,
                 subprogram: Ast {
-                    source: ProgramSource::File(PathBuf::from(
+                    source: Rc::new(ProgramSource::File(PathBuf::from(
                         test_directory() + "test_tree/child1.pile",
-                    )),
+                    ))),
                     expressions: vec![
                         Expr::Use {
                             line: 1,
                             subprogram: Ast {
-                                source: ProgramSource::File(PathBuf::from(
-                                    test_directory()
-                                        + "test_tree/child1_1.pile",
+                                source: Rc::new(ProgramSource::File(
+                                    PathBuf::from(
+                                        test_directory()
+                                            + "test_tree/child1_1.pile",
+                                    ),
                                 )),
                                 expressions: vec![
                                     Expr::Atom {
@@ -116,9 +120,11 @@ fn test_tree() {
                         Expr::Use {
                             line: 2,
                             subprogram: Ast {
-                                source: ProgramSource::File(PathBuf::from(
-                                    test_directory()
-                                        + "test_tree/child1_2.pile",
+                                source: Rc::new(ProgramSource::File(
+                                    PathBuf::from(
+                                        test_directory()
+                                            + "test_tree/child1_2.pile",
+                                    ),
                                 )),
                                 expressions: vec![],
                             },
@@ -137,9 +143,9 @@ fn test_tree() {
             Expr::Use {
                 line: 9,
                 subprogram: Ast {
-                    source: ProgramSource::File(PathBuf::from(
+                    source: Rc::new(ProgramSource::File(PathBuf::from(
                         test_directory() + "test_tree/child2.pile",
-                    )),
+                    ))),
                     expressions: vec![],
                 },
             },
@@ -150,16 +156,16 @@ fn test_tree() {
 #[test]
 fn test_cycle1() {
     let relative_path = "test_cycle1/cycle1.pile";
-    let absolute_path = PathBuf::from(test_directory() + relative_path);
+    let absolute_path = test_directory() + relative_path;
 
     assert_resolve_error(
         relative_path,
         PileError::new(
-            ProgramSource::File(absolute_path.clone()),
+            Rc::new(ProgramSource::File(PathBuf::from(&absolute_path))),
             (1, 1),
             format!(
                 "Found cyclic use of '{}'.",
-                absolute_path.to_string_lossy()
+                absolute_path
             ),
         ),
     )
@@ -173,9 +179,9 @@ fn test_cycle2() {
     assert_resolve_error(
         relative_path,
         PileError::new(
-            ProgramSource::File(PathBuf::from(
+            Rc::new(ProgramSource::File(PathBuf::from(
                 test_directory() + "test_cycle2/c.pile",
-            )),
+            ))),
             (1, 1),
             format!(
                 "Found cyclic use of '{}'.",
@@ -192,9 +198,9 @@ fn test_file_not_found() {
     assert_resolve_error(
         relative_path,
         PileError::new(
-            ProgramSource::File(PathBuf::from(
+            Rc::new(ProgramSource::File(PathBuf::from(
                 test_directory() + "test_not_found/root.pile",
-            )),
+            ))),
             (1, 1),
             format!(
                 "{}: No such file or directory (os error 2)",

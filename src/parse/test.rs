@@ -16,7 +16,7 @@ fn ast_assert_eq(left: &Ast, right: &Ast) {
 }
 
 fn expect_ast(input: &str, ast: Ast) {
-    let lex = Lexer::new(input, ProgramSource::Stdin);
+    let lex = Lexer::new(input, Rc::new(ProgramSource::Stdin));
     let parser = Parser::new(lex);
     let result_ast = parser.parse().unwrap();
 
@@ -24,7 +24,7 @@ fn expect_ast(input: &str, ast: Ast) {
 }
 
 fn expect_error(input: &str, err: Result<Ast, PileError>) {
-    let lex = Lexer::new(input, ProgramSource::Stdin);
+    let lex = Lexer::new(input, Rc::new(ProgramSource::Stdin));
     let parser = Parser::new(lex);
     let result_err = parser.parse();
 
@@ -36,7 +36,7 @@ fn test_simple1() {
     expect_ast(
         "",
         Ast {
-            source: ProgramSource::Stdin,
+            source: Rc::new(ProgramSource::Stdin),
             expressions: vec![],
         },
     )
@@ -47,7 +47,7 @@ fn test_simple2() {
     expect_ast(
         "100 200 +",
         Ast {
-            source: ProgramSource::Stdin,
+            source: Rc::new(ProgramSource::Stdin),
             expressions: vec![
                 Expr::Atom {
                     line: 1,
@@ -71,7 +71,7 @@ fn test_simple3() {
     expect_ast(
         "\"hello world\" \" test\" append",
         Ast {
-            source: ProgramSource::Stdin,
+            source: Rc::new(ProgramSource::Stdin),
             expressions: vec![
                 Expr::Atom {
                     line: 1,
@@ -95,7 +95,7 @@ fn test_simple4() {
     expect_ast(
         "quote var 100 def",
         Ast {
-            source: ProgramSource::Stdin,
+            source: Rc::new(ProgramSource::Stdin),
             expressions: vec![
                 Expr::Quoted {
                     line: 1,
@@ -119,7 +119,7 @@ fn test_block1() {
     expect_ast(
         "begin 100 end 20 dotimes",
         Ast {
-            source: ProgramSource::Stdin,
+            source: Rc::new(ProgramSource::Stdin),
             expressions: vec![
                 Expr::Block {
                     begin: 1,
@@ -147,7 +147,7 @@ fn test_block2() {
     expect_ast(
         "begin 100 end begin -100 end 1 2 > if",
         Ast {
-            source: ProgramSource::Stdin,
+            source: Rc::new(ProgramSource::Stdin),
             expressions: vec![
                 Expr::Block {
                     begin: 1,
@@ -200,7 +200,7 @@ begin
     end
 end",
         Ast {
-            source: ProgramSource::Stdin,
+            source: Rc::new(ProgramSource::Stdin),
             expressions: vec![Expr::Block {
                 begin: 2,
                 end: 10,
@@ -248,12 +248,14 @@ use \"file_c\"
 100 200 +
 ",
         Ast {
-            source: ProgramSource::Stdin,
+            source: Rc::new(ProgramSource::Stdin),
             expressions: vec![
                 Expr::Use {
                     line: 2,
                     subprogram: Ast {
-                        source: ProgramSource::File(PathBuf::from("file_a")),
+                        source: Rc::new(ProgramSource::File(PathBuf::from(
+                            "file_a",
+                        ))),
                         expressions: vec![],
                     },
                 },
@@ -276,14 +278,18 @@ use \"file_c\"
                 Expr::Use {
                     line: 4,
                     subprogram: Ast {
-                        source: ProgramSource::File(PathBuf::from("file_b")),
+                        source: Rc::new(ProgramSource::File(PathBuf::from(
+                            "file_b",
+                        ))),
                         expressions: vec![],
                     },
                 },
                 Expr::Use {
                     line: 5,
                     subprogram: Ast {
-                        source: ProgramSource::File(PathBuf::from("file_c")),
+                        source: Rc::new(ProgramSource::File(PathBuf::from(
+                            "file_c",
+                        ))),
                         expressions: vec![],
                     },
                 },
@@ -313,7 +319,7 @@ begin
 end
 ",
         Err(PileError::new(
-            ProgramSource::Stdin,
+            Rc::new(ProgramSource::Stdin),
             (3, 3),
             "'use' isn't allowed inside blocks.".to_owned(),
         )),
@@ -327,7 +333,7 @@ fn test_error_use_in_quote() {
 quote use \"file1\"
 ",
         Err(PileError::new(
-            ProgramSource::Stdin,
+            Rc::new(ProgramSource::Stdin),
             (2, 2),
             "'use' isn't allowed inside quotes.".to_owned(),
         )),
@@ -341,7 +347,7 @@ fn test_error_use_wrong_arg() {
 use 42
 ",
         Err(PileError::new(
-            ProgramSource::Stdin,
+            Rc::new(ProgramSource::Stdin),
             (2, 2),
             "Expected string found natural '42'.".to_owned(),
         )),
@@ -358,7 +364,7 @@ end
 end
 ",
         Err(PileError::new(
-            ProgramSource::Stdin,
+            Rc::new(ProgramSource::Stdin),
             (5, 5),
             "Unmatched 'end'.".to_owned(),
         )),
@@ -378,7 +384,7 @@ begin
     *
 ",
         Err(PileError::new(
-            ProgramSource::Stdin,
+            Rc::new(ProgramSource::Stdin),
             (9, 9),
             "Expected 'end' found end of file.".to_owned(),
         )),
@@ -403,7 +409,7 @@ begin 1
                       begin 2
 ",
         Err(PileError::new(
-            ProgramSource::Stdin,
+            Rc::new(ProgramSource::Stdin),
             (14, 14),
             "Expected 'end' found end of file.".to_owned(),
         )),
@@ -415,7 +421,7 @@ fn test_error_bad_quote1() {
     expect_error(
         "quote",
         Err(PileError::new(
-            ProgramSource::Stdin,
+            Rc::new(ProgramSource::Stdin),
             (1, 1),
             "Unexpected end of file.".to_string(),
         )),
@@ -427,7 +433,7 @@ fn test_error_bad_quote2() {
     expect_error(
         "quote end",
         Err(PileError::new(
-            ProgramSource::Stdin,
+            Rc::new(ProgramSource::Stdin),
             (1, 1),
             "Unexpected token 'end'.".to_string(),
         )),
