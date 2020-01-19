@@ -1,7 +1,8 @@
+use crate::cli::ProgramSource;
 use crate::interpret::Interpreter;
 use crate::lex::Lexer;
 use crate::parse::Parser;
-use crate::cli::ProgramSource;
+use crate::using;
 
 use std::io::Write;
 use std::rc::Rc;
@@ -22,8 +23,15 @@ pub fn repl() -> ! {
         }
         let lexer = Lexer::new(&line, Rc::new(ProgramSource::Repl));
         let parser = Parser::new(lexer);
+        let ast = match parser.parse() {
+            Ok(ast) => ast,
+            Err(msg) => {
+                eprintln!("{}", msg);
+                continue;
+            }
+        };
 
-        let expr = match parser.parse() {
+        let expr = match using::resolve(ast) {
             Ok(ast) => ast.expressions,
             Err(msg) => {
                 eprintln!("{}", msg);
