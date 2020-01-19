@@ -5,6 +5,7 @@ use std::io::{self, Read};
 use std::path::PathBuf;
 use std::rc::Rc;
 
+use atty::Stream;
 use clap::{crate_version, App, Arg};
 
 pub struct CommandLineOptions {
@@ -87,7 +88,13 @@ pub fn read_options() -> CommandLineOptions {
     CommandLineOptions {
         stack_size,
         source: Rc::new(match file {
-            None => ProgramSource::Repl,
+            None => {
+                if atty::is(Stream::Stdin) {
+                    ProgramSource::Repl
+                } else {
+                    ProgramSource::Stdin
+                }
+            }
             Some("-") => ProgramSource::Stdin,
             Some(file) => ProgramSource::File(PathBuf::from(file)),
         }),
