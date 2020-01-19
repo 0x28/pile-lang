@@ -4,36 +4,44 @@ use super::runtime_value::RuntimeValue;
 use super::Interpreter;
 use super::State;
 
+use crate::cli::ProgramSource;
 use crate::lex::Number;
 use crate::pile_error::PileError;
 
-pub fn apply_dotimes(state: &mut State) -> Result<(), PileError> {
+use std::rc::Rc;
+
+pub fn apply_dotimes(
+    state: &mut State,
+    source: &Rc<ProgramSource>,
+) -> Result<(), PileError> {
+    let lines = state.current_lines;
+    let to_pile_error = |msg| PileError::new(Rc::clone(&source), lines, msg);
+
     let stack = &mut state.stack;
-    let count =
-        runtime_error::ensure_element(stack).map_err(|msg| state.error(msg))?;
-    let body = runtime_error::ensure_function(state)
-        .map_err(|msg| state.error(msg))?;
+    let count = runtime_error::ensure_element(stack).map_err(to_pile_error)?;
+    let body = runtime_error::ensure_function(state).map_err(to_pile_error)?;
 
     let count = match count {
         RuntimeValue::Number(Number::Natural(n)) => n,
         RuntimeValue::Number(Number::Integer(i)) if i >= 0 => i as u32,
         val => {
-            return Err(state.error(format!(
-                "Expected positive number found {}",
-                val.type_fmt()
-            )))
+            return Err(PileError::new(
+                Rc::clone(&source),
+                state.current_lines,
+                format!("Expected positive number found {}", val.type_fmt()),
+            ))
         }
     };
 
     match body {
-        Function::Composite(block) => {
+        Function::Composite(fsource, block) => {
             for _ in 0..count {
-                Interpreter::call(&block, state)?
+                Interpreter::call(&block, state, &fsource)?
             }
         }
         Function::Builtin(operator) => {
             for _ in 0..count {
-                Interpreter::apply(&operator, state)?
+                Interpreter::apply(&operator, state, source)?
             }
         }
     }

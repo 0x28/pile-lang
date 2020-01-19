@@ -244,7 +244,10 @@ fn test_quote() {
     let block = vec![];
     expect_value(
         "quote begin end",
-        Ok(&RuntimeValue::Function(Function::Composite(Rc::new(block)))),
+        Ok(&RuntimeValue::Function(Function::Composite(
+            Rc::new(ProgramSource::Stdin),
+            Rc::new(block),
+        ))),
     );
 
     expect_value(

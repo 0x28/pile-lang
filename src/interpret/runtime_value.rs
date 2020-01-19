@@ -6,16 +6,18 @@ pub use crate::lex::Number;
 pub use crate::lex::Operator;
 pub use crate::parse::Expr;
 
+use crate::cli::ProgramSource;
+
 #[derive(Debug, PartialEq, Clone)]
 pub enum Function {
-    Composite(Rc<Vec<Expr>>),
+    Composite(Rc<ProgramSource>, Rc<Vec<Expr>>),
     Builtin(Operator),
 }
 
 impl fmt::Display for Function {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Function::Composite(block) => write!(f, "function @ {:p}", block),
+            Function::Composite(_, block) => write!(f, "function @ {:p}", block),
             Function::Builtin(o) => write!(f, "function '{}'", o),
         }
     }

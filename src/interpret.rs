@@ -15,7 +15,6 @@ mod print;
 mod runtime_error;
 mod while_loop;
 
-use core::mem;
 use std::collections::HashMap;
 use std::rc::Rc;
 
@@ -23,13 +22,6 @@ pub struct State {
     stack: Vec<RuntimeValue>,
     lookup: HashMap<String, RuntimeValue>,
     current_lines: (u64, u64),
-    current_source: Rc<ProgramSource>,
-}
-
-impl State {
-    fn error(&self, msg: String) -> PileError {
-        PileError::new(Rc::clone(&self.current_source), self.current_lines, msg)
-    }
 }
 
 pub struct Interpreter {
@@ -39,15 +31,12 @@ pub struct Interpreter {
 
 impl Interpreter {
     pub fn new(program: Ast, initial_size: usize) -> Interpreter {
-        let source = Rc::clone(&program.source);
-
         Interpreter {
             program,
             state: State {
                 stack: Vec::with_capacity(initial_size),
                 lookup: HashMap::new(),
                 current_lines: (1, 1),
-                current_source: source,
             },
         }
     }
@@ -62,13 +51,16 @@ impl Interpreter {
                 stack: vec![],
                 lookup: HashMap::new(),
                 current_lines: (1, 1),
-                current_source: Rc::new(ProgramSource::Repl),
             },
         }
     }
 
     pub fn run(&mut self) -> Result<Option<&RuntimeValue>, PileError> {
-        Interpreter::call(&self.program.expressions, &mut self.state)?;
+        Interpreter::call(
+            &self.program.expressions,
+            &mut self.state,
+            &self.program.source,
+        )?;
         Ok(self.state.stack.last())
     }
 
@@ -82,21 +74,28 @@ impl Interpreter {
         Interpreter::call(
             &self.program.expressions[old_size..],
             &mut self.state,
+            &self.program.source,
         )?;
         Ok(self.state.stack.last())
     }
 
-    fn call(expressions: &[Expr], state: &mut State) -> Result<(), PileError> {
+    fn call(
+        expressions: &[Expr],
+        state: &mut State,
+        source: &Rc<ProgramSource>,
+    ) -> Result<(), PileError> {
         for expr in expressions.iter() {
             state.current_lines = expr.lines();
             match expr {
                 Expr::Atom { token: atom, .. } => match atom {
-                    Token::Operator(op) => Interpreter::apply(op, state)?,
+                    Token::Operator(op) => {
+                        Interpreter::apply(op, state, source)?
+                    }
                     Token::Number(num) => {
                         state.stack.push(RuntimeValue::Number(num.clone()));
                     }
                     Token::Identifier(ident) => {
-                        Interpreter::resolve(ident, state)?
+                        Interpreter::resolve(ident, state, source)?
                     }
                     Token::String(string) => {
                         state.stack.push(RuntimeValue::String(string.clone()))
@@ -105,7 +104,11 @@ impl Interpreter {
                         state.stack.push(RuntimeValue::Boolean(*b))
                     }
                     token => {
-                        return Err(state.error(format!("Unexpected {}", token)))
+                        return Err(PileError::new(
+                            Rc::clone(&source),
+                            state.current_lines,
+                            format!("Unexpected {}", token),
+                        ))
                     }
                 },
                 Expr::Quoted { token: atom, .. } => match atom {
@@ -127,20 +130,25 @@ impl Interpreter {
                         state.stack.push(RuntimeValue::Boolean(*b))
                     }
                     token => {
-                        return Err(state.error(format!("Unexpected {}", token)))
+                        return Err(PileError::new(
+                            Rc::clone(&source),
+                            state.current_lines,
+                            format!("Unexpected {}", token),
+                        ))
                     }
                 },
-                Expr::Block { expressions, .. } => {
-                    state.stack.push(RuntimeValue::Function(
-                        Function::Composite(Rc::clone(expressions)),
-                    ))
-                }
+                Expr::Block { expressions, .. } => state.stack.push(
+                    RuntimeValue::Function(Function::Composite(
+                        Rc::clone(source),
+                        Rc::clone(expressions),
+                    )),
+                ),
                 Expr::Use { subprogram, .. } => {
-                    let mut sub_source = Rc::clone(&subprogram.source);
-
-                    mem::swap(&mut sub_source, &mut state.current_source);
-                    Interpreter::call(&subprogram.expressions, state)?;
-                    mem::swap(&mut sub_source, &mut state.current_source);
+                    Interpreter::call(
+                        &subprogram.expressions,
+                        state,
+                        &subprogram.source,
+                    )?;
                 }
             }
         }
@@ -148,14 +156,18 @@ impl Interpreter {
         Ok(())
     }
 
-    fn apply(op: &Operator, state: &mut State) -> Result<(), PileError> {
+    fn apply(
+        op: &Operator,
+        state: &mut State,
+        source: &Rc<ProgramSource>,
+    ) -> Result<(), PileError> {
         let stack = &mut state.stack;
         let operation_result = match op {
             Operator::Plus => numeric::apply_plus(stack),
             Operator::Minus => numeric::apply_minus(stack),
             Operator::Mul => numeric::apply_mul(stack),
             Operator::Div => numeric::apply_div(stack),
-            Operator::If => return condition::apply_if(state),
+            Operator::If => return condition::apply_if(state, source),
             Operator::Less => boolean::apply_less(stack),
             Operator::LessEqual => boolean::apply_less_equal(stack),
             Operator::Equal => boolean::apply_equal(stack),
@@ -165,33 +177,43 @@ impl Interpreter {
             Operator::Or => boolean::apply_or(stack),
             Operator::Not => boolean::apply_not(stack),
             Operator::Print => print::apply_print(stack),
-            Operator::Dotimes => return dotimes::apply_dotimes(state),
+            Operator::Dotimes => return dotimes::apply_dotimes(state, source),
             Operator::Def => def::apply_def(state),
-            Operator::While => return while_loop::apply_while(state),
+            Operator::While => return while_loop::apply_while(state, source),
             Operator::Natural => cast::apply_natural(stack),
             Operator::Integer => cast::apply_integer(stack),
             Operator::Float => cast::apply_float(stack),
         };
 
-        operation_result.map_err(|msg| state.error(msg))
+        operation_result.map_err(|msg| {
+            PileError::new(Rc::clone(&source), state.current_lines, msg)
+        })
     }
 
-    fn resolve(ident: &str, state: &mut State) -> Result<(), PileError> {
+    fn resolve(
+        ident: &str,
+        state: &mut State,
+        source: &Rc<ProgramSource>,
+    ) -> Result<(), PileError> {
         if let Some(value) = state.lookup.get(ident) {
             match value.clone() {
                 RuntimeValue::Function(func) => match func {
-                    Function::Composite(block) => {
-                        Interpreter::call(&block, state)?;
+                    Function::Composite(fsource, block) => {
+                        Interpreter::call(&block, state, &fsource)?;
                     }
                     Function::Builtin(op) => {
-                        Interpreter::apply(&op, state)?;
+                        Interpreter::apply(&op, state, source)?;
                     }
                 },
                 value => state.stack.push(value),
             }
             Ok(())
         } else {
-            Err(state.error(format!("Unknown variable '{}'", ident)))
+            Err(PileError::new(
+                Rc::clone(&source),
+                state.current_lines,
+                format!("Unknown variable '{}'", ident),
+            ))
         }
     }
 }
