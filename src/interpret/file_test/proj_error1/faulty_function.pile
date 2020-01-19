@@ -1,0 +1,4 @@
+begin
+  "hello" 100 +
+end
+quote faulty def

@@ -37,6 +37,22 @@ fn expect_stack(filename: &str, expected: &Vec<RuntimeValue>) {
     assert_eq!(interpreter.stack(), expected);
 }
 
+fn expect_error(filename: &str, expected: PileError) {
+    let prog = fs::read_to_string(filename)
+        .expect(&format!("{}: can't read file", filename));
+    let lexer = Lexer::new(
+        &prog,
+        Rc::new(ProgramSource::File(PathBuf::from(filename))),
+    );
+    let parser = Parser::new(lexer);
+    let ast = using::resolve(parser.parse().expect("invalid program"))
+        .expect("invalid 'use'");
+
+    let mut interpreter = Interpreter::new(ast, 10);
+
+    assert_eq!(interpreter.run(), Err(expected));
+}
+
 fn test_file(filename: &str) -> String {
     env!("CARGO_MANIFEST_DIR").to_owned()
         + "/src/interpret/file_test/"
@@ -83,5 +99,33 @@ fn proj_factorial() {
             RuntimeValue::Number(Number::Natural(40320)),
             RuntimeValue::Number(Number::Natural(362880)),
         ],
+    )
+}
+
+#[test]
+fn proj_error_in_function() {
+    let main_file = test_file("proj_error1/main.pile");
+    let faulty_file = test_file("proj_error1/faulty_function.pile");
+    expect_error(
+        &main_file,
+        PileError::new(
+            Rc::new(ProgramSource::File(PathBuf::from(&faulty_file))),
+            (2, 2),
+            "Type error: string 'hello', natural '100'".to_owned(),
+        ),
+    )
+}
+
+#[test]
+fn proj_error_eval() {
+    let main_file = test_file("proj_error2/main.pile");
+    let bad_file = test_file("proj_error2/bad.pile");
+    expect_error(
+        &main_file,
+        PileError::new(
+            Rc::new(ProgramSource::File(PathBuf::from(&bad_file))),
+            (1, 1),
+            "Division by zero".to_owned(),
+        ),
     )
 }
