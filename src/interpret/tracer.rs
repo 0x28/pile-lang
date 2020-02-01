@@ -1,5 +1,4 @@
 use crate::cli::ProgramSource;
-use crate::lex::Number;
 use crate::lex::Operator;
 use crate::lex::Token;
 use crate::parse::Expr;
@@ -41,9 +40,7 @@ impl<'t> fmt::Display for TracedToken<'t> {
             Token::End => write!(f, "end"),
             Token::Quote => write!(f, "quote"),
             Token::Operator(op) => write!(f, "{}", op),
-            Token::Number(Number::Natural(n)) => write!(f, "{}", n),
-            Token::Number(Number::Integer(i)) => write!(f, "{}", i),
-            Token::Number(Number::Float(fl)) => write!(f, "{}", fl),
+            Token::Number(n) => write!(f, "{}", n),
             Token::String(s) => write!(f, "\"{}\"", s),
             Token::Use => write!(f, "use"),
             Token::Boolean(b) => write!(f, "{}", b),

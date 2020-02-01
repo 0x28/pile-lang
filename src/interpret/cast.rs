@@ -13,10 +13,7 @@ pub fn apply_natural(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
         }
         Number::Integer(i) => stack.push(RuntimeValue::Number(
             Number::Natural(i.try_into().map_err(|_| {
-                format!(
-                    "Conversion from {} to natural is invalid",
-                    Number::Integer(i)
-                )
+                format!("Conversion from integer '{}' to natural is invalid", i)
             })?),
         )),
         Number::Float(f) => {
@@ -33,10 +30,7 @@ pub fn apply_integer(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
     match element {
         Number::Natural(n) => stack.push(RuntimeValue::Number(
             Number::Integer(n.try_into().map_err(|_| {
-                format!(
-                    "Conversion from {} to integer is invalid",
-                    Number::Natural(n)
-                )
+                format!("Conversion from natural '{}' to integer is invalid", n)
             })?),
         )),
         Number::Integer(i) => {

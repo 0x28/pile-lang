@@ -17,7 +17,9 @@ pub enum Function {
 impl fmt::Display for Function {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Function::Composite(_, block) => write!(f, "function @ {:p}", block),
+            Function::Composite(_, block) => {
+                write!(f, "function @ {:p}", block)
+            }
             Function::Builtin(o) => write!(f, "function '{}'", o),
         }
     }
@@ -36,7 +38,15 @@ impl RuntimeValue {
     pub fn type_fmt(&self) -> String {
         match self {
             RuntimeValue::Function(func) => format!("{}", func),
-            RuntimeValue::Number(n) => format!("{}", n),
+            RuntimeValue::Number(Number::Natural(n)) => {
+                format!("natural '{}'", n)
+            }
+            RuntimeValue::Number(Number::Integer(i)) => {
+                format!("integer '{}'", i)
+            }
+            RuntimeValue::Number(Number::Float(fl)) => {
+                format!("float '{}'", fl)
+            }
             RuntimeValue::String(s) => format!("string '{}'", s),
             RuntimeValue::Boolean(true) => format!("boolean '{}'", true),
             RuntimeValue::Boolean(false) => format!("boolean '{}'", false),

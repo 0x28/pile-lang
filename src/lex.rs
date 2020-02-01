@@ -4,8 +4,8 @@ use crate::pile_error::PileError;
 use std::fmt;
 use std::iter::Iterator;
 use std::iter::Peekable;
-use std::str::Chars;
 use std::rc::Rc;
+use std::str::Chars;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Number {
@@ -17,9 +17,9 @@ pub enum Number {
 impl fmt::Display for Number {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Number::Natural(n) => write!(f, "natural '{}'", n),
-            Number::Integer(n) => write!(f, "integer '{}'", n),
-            Number::Float(n) => write!(f, "float '{}'", n),
+            Number::Natural(n) => write!(f, "{}", n),
+            Number::Integer(n) => write!(f, "{}", n),
+            Number::Float(n) => write!(f, "{}", n),
         }
     }
 }
@@ -100,7 +100,9 @@ pub enum Token {
 impl fmt::Display for Token {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Token::Number(n) => write!(f, "{}", n),
+            Token::Number(Number::Natural(n)) => write!(f, "natural '{}'", n),
+            Token::Number(Number::Integer(i)) => write!(f, "integer '{}'", i),
+            Token::Number(Number::Float(fl)) => write!(f, "float '{}'", fl),
             Token::Identifier(ident) => write!(f, "identifier '{}'", ident),
             Token::String(s) => write!(f, "string \"{}\"", s),
             Token::Boolean(true) => write!(f, "boolean 'true'"),
