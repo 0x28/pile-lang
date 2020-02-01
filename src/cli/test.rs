@@ -5,7 +5,7 @@ fn test_cli() {
     let options = CommandLineOptions {
         stack_size: 100,
         source: Rc::new(ProgramSource::File(PathBuf::from("unknown.txt"))),
-        debug: true,
+        trace: true,
     };
 
     assert_eq!(

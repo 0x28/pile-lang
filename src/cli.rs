@@ -11,7 +11,7 @@ use clap::{crate_version, App, Arg};
 pub struct CommandLineOptions {
     stack_size: usize,
     source: Rc<ProgramSource>,
-    debug: bool,
+    trace: bool,
 }
 
 #[derive(PartialEq, Debug, Clone)]
@@ -41,8 +41,8 @@ impl CommandLineOptions {
         self.stack_size
     }
 
-    pub fn debug(&self) -> bool {
-        self.debug
+    pub fn trace(&self) -> bool {
+        self.trace
     }
 
     pub fn source(&self) -> Rc<ProgramSource> {
@@ -70,10 +70,10 @@ pub fn read_options() -> CommandLineOptions {
                 }),
         )
         .arg(
-            Arg::with_name("debug")
-                .help("Enable stack traces")
-                .short("d")
-                .long("debug"),
+            Arg::with_name("trace")
+                .help("Enable program tracing")
+                .short("t")
+                .long("trace"),
         )
         .arg(
             Arg::with_name("FILE")
@@ -83,7 +83,7 @@ pub fn read_options() -> CommandLineOptions {
 
     let stack_size: usize = matches.value_of("size").unwrap().parse().unwrap();
     let file = matches.value_of("FILE");
-    let debug = matches.is_present("debug");
+    let trace = matches.is_present("trace");
 
     CommandLineOptions {
         stack_size,
@@ -98,7 +98,7 @@ pub fn read_options() -> CommandLineOptions {
             Some("-") => ProgramSource::Stdin,
             Some(file) => ProgramSource::File(PathBuf::from(file)),
         }),
-        debug,
+        trace,
     }
 }
 

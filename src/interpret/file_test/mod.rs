@@ -27,7 +27,7 @@ fn expect_stack(filename: &str, expected: &Vec<RuntimeValue>) {
     let ast = using::resolve(parser.parse().expect("invalid program"))
         .expect("invalid 'use'");
 
-    let mut interpreter = Interpreter::new(ast, 10);
+    let mut interpreter = Interpreter::new(ast, 10, false);
 
     match interpreter.run() {
         Err(e) => panic!("interpreter failed: {}", e),
@@ -48,7 +48,7 @@ fn expect_error(filename: &str, expected: PileError) {
     let ast = using::resolve(parser.parse().expect("invalid program"))
         .expect("invalid 'use'");
 
-    let mut interpreter = Interpreter::new(ast, 10);
+    let mut interpreter = Interpreter::new(ast, 10, false);
 
     assert_eq!(interpreter.run(), Err(expected));
 }

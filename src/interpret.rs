@@ -13,6 +13,7 @@ mod dotimes;
 mod numeric;
 mod print;
 mod runtime_error;
+mod tracer;
 mod while_loop;
 
 use std::collections::HashMap;
@@ -22,6 +23,7 @@ pub struct State {
     stack: Vec<RuntimeValue>,
     lookup: HashMap<String, RuntimeValue>,
     current_lines: (u64, u64),
+    trace: bool,
 }
 
 pub struct Interpreter {
@@ -30,13 +32,14 @@ pub struct Interpreter {
 }
 
 impl Interpreter {
-    pub fn new(program: Ast, initial_size: usize) -> Interpreter {
+    pub fn new(program: Ast, initial_size: usize, trace: bool) -> Interpreter {
         Interpreter {
             program,
             state: State {
                 stack: Vec::with_capacity(initial_size),
                 lookup: HashMap::new(),
                 current_lines: (1, 1),
+                trace,
             },
         }
     }
@@ -51,6 +54,7 @@ impl Interpreter {
                 stack: vec![],
                 lookup: HashMap::new(),
                 current_lines: (1, 1),
+                trace: false,
             },
         }
     }
@@ -86,6 +90,11 @@ impl Interpreter {
     ) -> Result<(), PileError> {
         for expr in expressions.iter() {
             state.current_lines = expr.lines();
+
+            if state.trace {
+                tracer::before_eval(&expr);
+            }
+
             match expr {
                 Expr::Atom { token: atom, .. } => match atom {
                     Token::Operator(op) => {
@@ -150,6 +159,10 @@ impl Interpreter {
                         &subprogram.source,
                     )?;
                 }
+            }
+
+            if state.trace {
+                tracer::after_eval(&expr);
             }
         }
 

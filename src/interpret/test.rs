@@ -9,7 +9,7 @@ fn expect_value(prog: &str, value: Result<&RuntimeValue, PileError>) {
     let lexer = Lexer::new(prog, Rc::new(ProgramSource::Stdin));
     let parser = Parser::new(lexer);
     let mut interpreter =
-        Interpreter::new(parser.parse().expect("invalid program"), 10);
+        Interpreter::new(parser.parse().expect("invalid program"), 10, false);
 
     let result = match interpreter.run() {
         Ok(Some(value)) => Ok(value),
