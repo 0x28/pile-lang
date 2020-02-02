@@ -1,4 +1,5 @@
 use crate::repl;
+use crate::program_source::ProgramSource;
 
 use std::fs;
 use std::io::{self, Read};
@@ -12,13 +13,6 @@ pub struct CommandLineOptions {
     stack_size: usize,
     source: Rc<ProgramSource>,
     trace: bool,
-}
-
-#[derive(PartialEq, Debug, Clone)]
-pub enum ProgramSource {
-    Repl,
-    Stdin,
-    File(PathBuf),
 }
 
 impl CommandLineOptions {

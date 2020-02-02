@@ -6,7 +6,7 @@ pub use crate::lex::Number;
 pub use crate::lex::Operator;
 pub use crate::parse::Expr;
 
-use crate::cli::ProgramSource;
+use crate::program_source::ProgramSource;
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Function {

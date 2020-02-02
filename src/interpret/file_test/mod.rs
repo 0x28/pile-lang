@@ -1,6 +1,6 @@
 use super::*;
 
-use crate::cli::ProgramSource;
+use crate::program_source::ProgramSource;
 use crate::lex::Lexer;
 use crate::lex::*;
 use crate::parse::Parser;

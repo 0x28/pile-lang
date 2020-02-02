@@ -1,5 +1,5 @@
 use super::*;
-use crate::cli::ProgramSource;
+use crate::program_source::ProgramSource;
 
 fn compare_token_lists(
     lexer: Lexer,

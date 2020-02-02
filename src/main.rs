@@ -7,6 +7,7 @@ mod parse;
 mod pile_error;
 mod repl;
 mod using;
+mod program_source;
 
 fn main() {
     let options = cli::read_options();

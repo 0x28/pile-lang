@@ -3,7 +3,7 @@ use super::runtime_value::Function;
 use super::Interpreter;
 use super::State;
 
-use crate::cli::ProgramSource;
+use crate::program_source::ProgramSource;
 use crate::pile_error::PileError;
 
 use std::rc::Rc;

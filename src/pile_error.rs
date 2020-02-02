@@ -1,4 +1,4 @@
-use crate::cli::ProgramSource;
+use crate::program_source::ProgramSource;
 
 use std::fmt;
 use std::rc::Rc;
