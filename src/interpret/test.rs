@@ -315,6 +315,14 @@ begin 200 * end
 }
 
 #[test]
+fn test_alias_def() {
+    expect_value(
+        "quote + quote plus def 11 11 plus",
+        Ok(&RuntimeValue::Number(Number::Natural(22))),
+    )
+}
+
+#[test]
 fn test_while() {
     expect_value(
         "
