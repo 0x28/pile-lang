@@ -94,7 +94,6 @@ pub enum Token {
     Boolean(bool),
     // use
     Use,
-    // eof
 }
 
 impl fmt::Display for Token {
