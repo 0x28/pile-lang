@@ -439,3 +439,15 @@ fn test_error_bad_quote2() {
         )),
     )
 }
+
+#[test]
+fn test_error_bad_quote3() {
+    expect_error(
+        "quote quote true",
+        Err(PileError::new(
+            Rc::new(ProgramSource::Stdin),
+            (1, 1),
+            "\'quote\' isn't allowed inside quotes.".to_string(),
+        )),
+    )
+}

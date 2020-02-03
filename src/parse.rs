@@ -159,6 +159,10 @@ impl<'a> Parser<'a> {
                 Err(self
                     .parse_error(*line, "'use' isn't allowed inside quotes."))
             }
+            Some((line, Token::Quote)) => {
+                Err(self
+                    .parse_error(*line, "'quote' isn't allowed inside quotes."))
+            }
             Some((line, _)) => Ok(Expr::Quoted {
                 line: *line,
                 token: self.lookahead.take().unwrap().1,

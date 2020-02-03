@@ -1,9 +1,9 @@
 use super::*;
-use crate::program_source::ProgramSource;
 use crate::lex::Lexer;
 use crate::lex::Number;
 use crate::lex::Operator;
 use crate::parse::Parser;
+use crate::program_source::ProgramSource;
 
 fn expect_value(prog: &str, value: Result<&RuntimeValue, PileError>) {
     let lexer = Lexer::new(prog, Rc::new(ProgramSource::Stdin));
@@ -257,14 +257,6 @@ fn test_quote() {
 
     expect_value("quote \"hi\"", Ok(&RuntimeValue::String("hi".to_string())));
     expect_value("quote true", Ok(&RuntimeValue::Boolean(true)));
-    expect_value(
-        "quote quote true",
-        Err(PileError::new(
-            Rc::new(ProgramSource::Stdin),
-            (1, 1),
-            "Unexpected token \'quote\'".to_string(),
-        )),
-    );
 
     expect_value(
         "10 20 quote + quote - 3 2 > if",
