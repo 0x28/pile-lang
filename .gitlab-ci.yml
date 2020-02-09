@@ -17,7 +17,7 @@ rust-nightly:
     - cargo test --verbose
   allow_failure: true
 
-rust-tarpaulin:
+pages:
   stage: coverage
   image: xd009642/tarpaulin
   before_script:
