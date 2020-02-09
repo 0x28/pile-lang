@@ -19,7 +19,6 @@ rust-nightly:
 
 rust-tarpaulin:
   stage: coverage
-  image: rust:latest
+  image: xd009642/tarpaulin
   script:
-    - cargo install cargo-tarpaulin -f
     - cargo tarpaulin
