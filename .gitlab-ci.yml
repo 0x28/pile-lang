@@ -20,5 +20,12 @@ rust-nightly:
 rust-tarpaulin:
   stage: coverage
   image: xd009642/tarpaulin
+  before_script:
+    - apt-get install -yqq lcov
   script:
-    - cargo tarpaulin
+    - cargo tarpaulin -o Lcov
+    - genhtml lcov.info -o public
+  artifacts:
+    paths:
+      - public
+    expire_in: 30 days
