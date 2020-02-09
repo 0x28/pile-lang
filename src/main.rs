@@ -10,7 +10,7 @@ mod using;
 mod program_source;
 
 fn main() {
-    let options = cli::read_options();
+    let options = cli::read_options(std::env::args_os());
 
     let program_text = match options.read_program() {
         Err(msg) => {

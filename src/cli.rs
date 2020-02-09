@@ -1,10 +1,11 @@
-use crate::repl;
 use crate::program_source::ProgramSource;
+use crate::repl;
 
 use std::fs;
 use std::io::{self, Read};
 use std::path::PathBuf;
 use std::rc::Rc;
+use std::ffi::OsString;
 
 use atty::Stream;
 use clap::{crate_version, App, Arg};
@@ -44,7 +45,11 @@ impl CommandLineOptions {
     }
 }
 
-pub fn read_options() -> CommandLineOptions {
+pub fn read_options<I, T>(itr: I) -> CommandLineOptions
+where
+    I: IntoIterator<Item = T>,
+    T: Into<OsString> + Clone,
+{
     let matches = App::new("pile")
         .version(&crate_version!()[..])
         .author("created by 0x28")
@@ -73,7 +78,7 @@ pub fn read_options() -> CommandLineOptions {
             Arg::with_name("FILE")
                 .help("The program to run. Use '-' for stdin."),
         )
-        .get_matches();
+        .get_matches_from(itr);
 
     let stack_size: usize = matches.value_of("size").unwrap().parse().unwrap();
     let file = matches.value_of("FILE");
