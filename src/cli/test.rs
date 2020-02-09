@@ -14,13 +14,21 @@ fn test_read_program() {
     );
 }
 
+// Depending on how the test is called the source can be different.
+fn get_test_source() -> ProgramSource {
+    if atty::is(Stream::Stdin) {
+        ProgramSource::Repl
+    } else {
+        ProgramSource::Stdin
+    }
+}
+
 #[test]
 fn test_read_options1() {
     let options = read_options(vec!["test1"]);
-
     assert_eq!(options.stack_size(), 100);
     assert_eq!(options.trace(), false);
-    assert_eq!(options.source().as_ref(), &ProgramSource::Repl);
+    assert_eq!(options.source().as_ref(), &get_test_source());
 }
 
 #[test]
@@ -50,5 +58,5 @@ fn test_read_options4() {
 
     assert_eq!(options.stack_size(), 123);
     assert_eq!(options.trace(), true);
-    assert_eq!(options.source().as_ref(), &ProgramSource::Repl);
+    assert_eq!(options.source().as_ref(), &get_test_source());
 }
