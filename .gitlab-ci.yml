@@ -21,6 +21,7 @@ rust-tarpaulin:
   stage: coverage
   image: xd009642/tarpaulin
   before_script:
+    - apt-get update -yqq
     - apt-get install -yqq lcov
   script:
     - cargo tarpaulin -o Lcov
