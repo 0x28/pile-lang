@@ -612,3 +612,35 @@ fn test_runtime_error_fmt() {
         "10-20: This is really bad..."
     );
 }
+
+#[test]
+fn test_eval() -> Result<(), PileError> {
+    fn read(input: &str) -> Vec<Expr> {
+        Parser::new(Lexer::new(input, Rc::new(ProgramSource::Stdin)))
+            .parse()
+            .unwrap()
+            .expressions
+    }
+
+    let mut interpreter = Interpreter::empty();
+    assert_eq!(
+        interpreter.eval(read("1 2 +"))?,
+        Some(&RuntimeValue::Number(Number::Natural(3)))
+    );
+    assert_eq!(
+        interpreter.eval(read("2 *"))?,
+        Some(&RuntimeValue::Number(Number::Natural(6)))
+    );
+    assert_eq!(
+        interpreter.eval(read("6 /"))?,
+        Some(&RuntimeValue::Number(Number::Natural(1)))
+    );
+    assert_eq!(interpreter.eval(read("print"))?, None);
+    assert_eq!(interpreter.eval(read("begin 1 + end quote inc def"))?, None);
+    assert_eq!(
+        interpreter.eval(read("20 inc"))?,
+        Some(&RuntimeValue::Number(Number::Natural(21)))
+    );
+
+    Ok(())
+}
