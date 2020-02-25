@@ -1,12 +1,10 @@
 use super::runtime_error;
-use super::runtime_value::Function;
 use super::runtime_value::RuntimeValue;
 use super::Interpreter;
 use super::State;
-
-use crate::program_source::ProgramSource;
 use crate::lex::Number;
 use crate::pile_error::PileError;
+use crate::program_source::ProgramSource;
 
 use std::rc::Rc;
 
@@ -33,17 +31,8 @@ pub fn apply_dotimes(
         }
     };
 
-    match body {
-        Function::Composite(fsource, block) => {
-            for _ in 0..count {
-                Interpreter::call(&block, state, &fsource)?
-            }
-        }
-        Function::Builtin(operator) => {
-            for _ in 0..count {
-                Interpreter::apply(&operator, state, source)?
-            }
-        }
+    for _ in 0..count {
+        Interpreter::call(&body.exprs, state, &body.source)?
     }
 
     Ok(())

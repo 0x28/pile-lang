@@ -230,7 +230,7 @@ fn test_keywords() {
           100 *# this is a operator
         end
 
-        while def dotimes DEF DOTIMES END BEGIN QUOTE quote if IF print
+        while dotimes DOTIMES END BEGIN -> if IF print
         and AND or OR not NOT
         natural NATURAL integer INTEGER float FLOAT",
         Rc::new(ProgramSource::Stdin),
@@ -243,14 +243,11 @@ fn test_keywords() {
         (4, Ok(Token::Operator(Operator::Mul))),
         (5, Ok(Token::End)),
         (7, Ok(Token::Operator(Operator::While))),
-        (7, Ok(Token::Operator(Operator::Def))),
         (7, Ok(Token::Operator(Operator::Dotimes))),
-        (7, Ok(Token::Operator(Operator::Def))),
         (7, Ok(Token::Operator(Operator::Dotimes))),
         (7, Ok(Token::End)),
         (7, Ok(Token::Begin)),
-        (7, Ok(Token::Quote)),
-        (7, Ok(Token::Quote)),
+        (7, Ok(Token::Assign)),
         (7, Ok(Token::Operator(Operator::If))),
         (7, Ok(Token::Operator(Operator::If))),
         (7, Ok(Token::Operator(Operator::Print))),
@@ -274,16 +271,16 @@ fn test_keywords() {
 #[test]
 fn test_identifier() {
     let lexer = Lexer::new(
-        "quote var 100 def
+        "-> var 100 ->
          begin VAR 200 + end begin true end while
          definition_var looped while_not# variable",
         Rc::new(ProgramSource::Stdin),
     );
     let expected = vec![
-        (1, Ok(Token::Quote)),
+        (1, Ok(Token::Assign)),
         (1, Ok(Token::Identifier(String::from("var")))),
         (1, Ok(Token::Number(Number::Natural(100)))),
-        (1, Ok(Token::Operator(Operator::Def))),
+        (1, Ok(Token::Assign)),
         (2, Ok(Token::Begin)),
         (2, Ok(Token::Identifier(String::from("var")))),
         (2, Ok(Token::Number(Number::Natural(200)))),
@@ -560,10 +557,6 @@ fn test_token_fmt() {
         "operator 'if'"
     );
     assert_eq!(
-        format!("{}", Token::Operator(Operator::Def)),
-        "operator 'def'"
-    );
-    assert_eq!(
         format!("{}", Token::Operator(Operator::Dotimes)),
         "operator 'dotimes'"
     );
@@ -571,7 +564,7 @@ fn test_token_fmt() {
         format!("{}", Token::Operator(Operator::While)),
         "operator 'while'"
     );
-    assert_eq!(format!("{}", Token::Quote), "token 'quote'");
+    assert_eq!(format!("{}", Token::Assign), "token '->'");
     assert_eq!(
         format!("{}", Token::Operator(Operator::Plus)),
         "operator '+'"

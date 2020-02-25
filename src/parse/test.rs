@@ -1,8 +1,8 @@
 use super::*;
-use crate::program_source::ProgramSource;
 use crate::lex::Number;
 use crate::lex::Operator;
 use crate::pile_error::PileError;
+use crate::program_source::ProgramSource;
 
 fn ast_assert_eq(left: &Ast, right: &Ast) {
     let left_iter = left.expressions.iter();
@@ -93,21 +93,17 @@ fn test_simple3() {
 #[test]
 fn test_simple4() {
     expect_ast(
-        "quote var 100 def",
+        "100 -> var",
         Ast {
             source: Rc::new(ProgramSource::Stdin),
             expressions: vec![
-                Expr::Quoted {
-                    line: 1,
-                    token: Token::Identifier(String::from("var")),
-                },
                 Expr::Atom {
                     line: 1,
                     token: Token::Number(Number::Natural(100)),
                 },
-                Expr::Atom {
+                Expr::Assignment {
                     line: 1,
-                    token: Token::Operator(Operator::Def),
+                    var: String::from("var"),
                 },
             ],
         },
@@ -327,15 +323,15 @@ end
 }
 
 #[test]
-fn test_error_use_in_quote() {
+fn test_error_use_in_assign() {
     expect_error(
         "
-quote use \"file1\"
+1 -> use
 ",
         Err(PileError::new(
             Rc::new(ProgramSource::Stdin),
             (2, 2),
-            "'use' isn't allowed inside quotes.".to_owned(),
+            "Expected identifier found token 'use'.".to_owned(),
         )),
     )
 }
@@ -417,37 +413,37 @@ begin 1
 }
 
 #[test]
-fn test_error_bad_quote1() {
+fn test_error_bad_assign1() {
     expect_error(
-        "quote",
+        "->",
         Err(PileError::new(
             Rc::new(ProgramSource::Stdin),
             (1, 1),
-            "Unexpected end of file.".to_string(),
+            "Expected identifier found end of file.".to_string(),
         )),
     )
 }
 
 #[test]
-fn test_error_bad_quote2() {
+fn test_error_bad_assign2() {
     expect_error(
-        "quote end",
+        "-> end",
         Err(PileError::new(
             Rc::new(ProgramSource::Stdin),
             (1, 1),
-            "Unexpected token 'end'.".to_string(),
+            "Expected identifier found token 'end'.".to_string(),
         )),
     )
 }
 
 #[test]
-fn test_error_bad_quote3() {
+fn test_error_bad_assign3() {
     expect_error(
-        "quote quote true",
+        "-> -> x",
         Err(PileError::new(
             Rc::new(ProgramSource::Stdin),
             (1, 1),
-            "\'quote\' isn't allowed inside quotes.".to_string(),
+            "Expected identifier found token '->'.".to_string(),
         )),
     )
 }

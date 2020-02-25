@@ -1,5 +1,5 @@
-use super::runtime_value::Function;
 use super::runtime_value::RuntimeValue;
+use super::runtime_value::Function;
 pub use crate::lex::Number;
 use super::State;
 
@@ -14,11 +14,6 @@ pub fn ensure_function(
 
     match func {
         RuntimeValue::Function(f) => Ok(f),
-        RuntimeValue::Identifier(i) => match state.lookup.get(&i) {
-            Some(RuntimeValue::Function(f)) => Ok(f.clone()),
-            Some(v) => Err(format!("Expected function found {}", v.type_fmt())),
-            None => Err(format!("Unknown variable '{}'", i)),
-        },
         v => Err(format!("Expected function found {}", v.type_fmt())),
     }
 }

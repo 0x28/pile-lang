@@ -1,7 +1,6 @@
 use super::*;
 use crate::lex::Lexer;
 use crate::lex::Number;
-use crate::lex::Operator;
 use crate::parse::Parser;
 use crate::program_source::ProgramSource;
 
@@ -122,7 +121,7 @@ if
 #[test]
 fn test_if5() {
     expect_value(
-        "20 20 quote + quote - false if",
+        "20 20 begin + end begin - end false if",
         Ok(&RuntimeValue::Number(Number::Natural(0))),
     );
 }
@@ -226,7 +225,7 @@ end
     );
 
     expect_value(
-        "1 1 1 1 1 1 1 1 1 1 quote - 9 dotimes",
+        "1 1 1 1 1 1 1 1 1 1 begin - end 9 dotimes",
         Ok(&RuntimeValue::Number(Number::Natural(0))),
     );
 
@@ -238,45 +237,18 @@ end
 }
 
 #[test]
-fn test_quote() {
-    expect_value("quote 100", Ok(&RuntimeValue::Number(Number::Natural(100))));
-
-    let block = vec![];
+fn test_assign() {
     expect_value(
-        "quote begin end",
-        Ok(&RuntimeValue::Function(Function::Composite(
-            Rc::new(ProgramSource::Stdin),
-            Rc::new(block),
-        ))),
-    );
-
-    expect_value(
-        "quote +",
-        Ok(&RuntimeValue::Function(Function::Builtin(Operator::Plus))),
-    );
-
-    expect_value("quote \"hi\"", Ok(&RuntimeValue::String("hi".to_string())));
-    expect_value("quote true", Ok(&RuntimeValue::Boolean(true)));
-
-    expect_value(
-        "10 20 quote + quote - 3 2 > if",
-        Ok(&RuntimeValue::Number(Number::Natural(30))),
-    )
-}
-
-#[test]
-fn test_def() {
-    expect_value(
-        "42 quote answer def answer answer +",
+        "42 -> answer answer answer +",
         Ok(&RuntimeValue::Number(Number::Natural(84))),
     );
 
     expect_value(
         "
-0 quote x def
+0 -> x
 begin
   x 2 +
-  quote x def
+  -> x
 end
 10 dotimes
 x",
@@ -288,7 +260,7 @@ x",
 begin
   1 +
 end
-quote inc def
+-> inc
 100 inc
 ",
         Ok(&RuntimeValue::Number(Number::Natural(101))),
@@ -297,8 +269,8 @@ quote inc def
     expect_value(
         "
 3
-begin 100 * end quote x def
-quote x
+begin 100 * end -> x
+begin x end
 begin 200 * end
 2 1 > if",
         Ok(&RuntimeValue::Number(Number::Natural(300))),
@@ -315,9 +287,9 @@ begin 200 * end
 }
 
 #[test]
-fn test_alias_def() {
+fn test_alias_assign() {
     expect_value(
-        "quote + quote plus def 11 11 plus",
+        "begin + end -> plus 11 11 plus",
         Ok(&RuntimeValue::Number(Number::Natural(22))),
     )
 }
@@ -326,9 +298,9 @@ fn test_alias_def() {
 fn test_while() {
     expect_value(
         "
-1 quote x def
+1 -> x
 begin
-  x 2 * quote x def
+  x 2 * -> x
 end
 begin
   x 10 <
@@ -353,8 +325,8 @@ while
 
     expect_value(
         "10 \"x\" \"y\" 1 1 1 1 1 1
-         quote print
-         quote =
+         begin print end
+         begin = end
          while",
         Ok(&RuntimeValue::Number(Number::Natural(10))),
     )
@@ -390,7 +362,7 @@ fn test_print() {
     expect_value("true 32.32 print", Ok(&RuntimeValue::Boolean(true)));
     expect_value("true true print", Ok(&RuntimeValue::Boolean(true)));
     expect_value("true false print", Ok(&RuntimeValue::Boolean(true)));
-    expect_value("true quote x print", Ok(&RuntimeValue::Boolean(true)));
+    expect_value("true begin x end print", Ok(&RuntimeValue::Boolean(true)));
 }
 
 #[test]
@@ -549,8 +521,8 @@ fn test_type_errors() {
     );
 
     expect_value(
-        "10 quote x def
-         quote x 10 dotimes",
+        "10 -> x
+         x 10 dotimes",
         Err(PileError::new(
             Rc::new(ProgramSource::Stdin),
             (2, 2),
@@ -568,7 +540,7 @@ fn test_type_errors() {
     );
 
     expect_value(
-        "quote unknown_func 10 dotimes",
+        "begin unknown_func end 10 dotimes",
         Err(PileError::new(
             Rc::new(ProgramSource::Stdin),
             (1, 1),
@@ -636,7 +608,7 @@ fn test_eval() -> Result<(), PileError> {
         Some(&RuntimeValue::Number(Number::Natural(1)))
     );
     assert_eq!(interpreter.eval(read("print"))?, None);
-    assert_eq!(interpreter.eval(read("begin 1 + end quote inc def"))?, None);
+    assert_eq!(interpreter.eval(read("begin 1 + end -> inc"))?, None);
     assert_eq!(
         interpreter.eval(read("20 inc"))?,
         Some(&RuntimeValue::Number(Number::Natural(21)))

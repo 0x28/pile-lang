@@ -1,8 +1,8 @@
-use crate::program_source::ProgramSource;
 use crate::lex::Lexer;
 use crate::lex::LexerIter;
 use crate::lex::Token;
 use crate::pile_error::PileError;
+use crate::program_source::ProgramSource;
 
 use std::path::PathBuf;
 use std::rc::Rc;
@@ -19,9 +19,9 @@ pub enum Expr {
         line: u64,
         token: Token,
     },
-    Quoted {
+    Assignment {
         line: u64,
-        token: Token,
+        var: String,
     },
     Block {
         begin: u64,
@@ -38,7 +38,7 @@ impl Expr {
     pub fn lines(&self) -> (u64, u64) {
         match self {
             Self::Atom { line, .. } => (*line, *line),
-            Self::Quoted { line, .. } => (*line, *line),
+            Self::Assignment { line, .. } => (*line, *line),
             Self::Block { begin, end, .. } => (*begin, *end),
             Self::Use { line, .. } => (*line, *line),
         }
@@ -69,7 +69,7 @@ impl<'a> Parser<'a> {
                     return Err(self.parse_error(line, "Unmatched 'end'."));
                 }
                 Some((_, Token::Begin)) => self.block()?,
-                Some((_, Token::Quote)) => self.quote()?,
+                Some((_, Token::Assign)) => self.assign()?,
                 Some((_, Token::Use)) => self.using()?,
                 Some((line, _)) => Expr::Atom {
                     line,
@@ -119,7 +119,7 @@ impl<'a> Parser<'a> {
                     break;
                 }
                 Some((_, Token::Begin)) => block.push(self.block()?),
-                Some((_, Token::Quote)) => block.push(self.quote()?),
+                Some((_, Token::Assign)) => block.push(self.assign()?),
                 Some((line, Token::Use)) => {
                     return Err(self.parse_error(
                         line,
@@ -140,33 +140,23 @@ impl<'a> Parser<'a> {
         })
     }
 
-    fn quote(&mut self) -> Result<Expr, PileError> {
-        self.expect(Token::Quote)?;
+    fn assign(&mut self) -> Result<Expr, PileError> {
+        self.expect(Token::Assign)?;
 
         self.consume()?;
 
-        match &self.lookahead {
+        match self.lookahead.take() {
             None => Err(self.parse_error(
                 self.lex_iter.line(),
-                &"Unexpected end of file.".to_string(),
+                &"Expected identifier found end of file.".to_string(),
             )),
-            Some((_, Token::Begin)) => self.block(),
-            Some((line, Token::End)) => {
-                Err(self
-                    .parse_error(*line, &format!("Unexpected {}.", Token::End)))
+            Some((line, Token::Identifier(var))) => {
+                Ok(Expr::Assignment { line, var })
             }
-            Some((line, Token::Use)) => {
-                Err(self
-                    .parse_error(*line, "'use' isn't allowed inside quotes."))
-            }
-            Some((line, Token::Quote)) => {
-                Err(self
-                    .parse_error(*line, "'quote' isn't allowed inside quotes."))
-            }
-            Some((line, _)) => Ok(Expr::Quoted {
-                line: *line,
-                token: self.lookahead.take().unwrap().1,
-            }),
+            Some((line, token)) => Err(self.parse_error(
+                line,
+                &format!("Expected identifier found {}.", token),
+            )),
         }
     }
 

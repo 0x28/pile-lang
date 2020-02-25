@@ -1,14 +1,13 @@
-use crate::program_source::ProgramSource;
 use crate::lex::Token;
 use crate::parse::Ast;
 use crate::pile_error::PileError;
+use crate::program_source::ProgramSource;
 
 mod runtime_value;
 use runtime_value::*;
 mod boolean;
 mod cast;
 mod condition;
-mod def;
 mod dotimes;
 mod numeric;
 mod print;
@@ -120,38 +119,15 @@ impl Interpreter {
                         ))
                     }
                 },
-                Expr::Quoted { token: atom, .. } => match atom {
-                    Token::Operator(op) => state.stack.push(
-                        RuntimeValue::Function(Function::Builtin(op.clone())),
-                    ),
-                    Token::Number(num) => {
-                        state.stack.push(RuntimeValue::Number(num.clone()));
-                    }
-                    Token::Identifier(ident) => {
-                        state
-                            .stack
-                            .push(RuntimeValue::Identifier(ident.clone()));
-                    }
-                    Token::String(string) => {
-                        state.stack.push(RuntimeValue::String(string.clone()))
-                    }
-                    Token::Boolean(b) => {
-                        state.stack.push(RuntimeValue::Boolean(*b))
-                    }
-                    token => {
-                        return Err(PileError::new(
-                            Rc::clone(&source),
-                            state.current_lines,
-                            format!("Unexpected {}", token),
-                        ))
-                    }
-                },
-                Expr::Block { expressions, .. } => state.stack.push(
-                    RuntimeValue::Function(Function::Composite(
-                        Rc::clone(source),
-                        Rc::clone(expressions),
-                    )),
-                ),
+                Expr::Assignment { var, .. } => {
+                    Interpreter::assign(var, state, source)?
+                }
+                Expr::Block { expressions, .. } => {
+                    state.stack.push(RuntimeValue::Function(Function {
+                        source: Rc::clone(source),
+                        exprs: Rc::clone(expressions),
+                    }))
+                }
                 Expr::Use { subprogram, .. } => {
                     Interpreter::call(
                         &subprogram.expressions,
@@ -191,7 +167,6 @@ impl Interpreter {
             Operator::Not => boolean::apply_not(stack),
             Operator::Print => print::apply_print(stack),
             Operator::Dotimes => return dotimes::apply_dotimes(state, source),
-            Operator::Def => def::apply_def(state),
             Operator::While => return while_loop::apply_while(state, source),
             Operator::Natural => cast::apply_natural(stack),
             Operator::Integer => cast::apply_integer(stack),
@@ -211,11 +186,8 @@ impl Interpreter {
         if let Some(value) = state.lookup.get(ident) {
             match value.clone() {
                 RuntimeValue::Function(func) => match func {
-                    Function::Composite(fsource, block) => {
-                        Interpreter::call(&block, state, &fsource)?;
-                    }
-                    Function::Builtin(op) => {
-                        Interpreter::apply(&op, state, source)?;
+                    Function { source, exprs } => {
+                        Interpreter::call(&exprs, state, &source)?;
                     }
                 },
                 value => state.stack.push(value),
@@ -228,6 +200,20 @@ impl Interpreter {
                 format!("Unknown variable '{}'", ident),
             ))
         }
+    }
+
+    fn assign(
+        var: &str,
+        state: &mut State,
+        source: &Rc<ProgramSource>,
+    ) -> Result<(), PileError> {
+        let value =
+            runtime_error::ensure_element(&mut state.stack).map_err(|msg| {
+                PileError::new(Rc::clone(&source), state.current_lines, msg)
+            })?;
+        state.lookup.insert(var.to_owned(), value);
+
+        Ok(())
     }
 }
 

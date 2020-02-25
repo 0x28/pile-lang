@@ -12,8 +12,8 @@ impl<'e> fmt::Display for TracedExpr<'e> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self.0 {
             Expr::Atom { token, .. } => write!(f, "{}", TracedToken(token)),
-            Expr::Quoted { token, .. } => {
-                write!(f, "quote {}", TracedToken(token))
+            Expr::Assignment { var, .. } => {
+                write!(f, "-> {}", var)
             }
             Expr::Block { expressions, .. } => {
                 write!(f, "begin")?;
@@ -38,7 +38,7 @@ impl<'t> fmt::Display for TracedToken<'t> {
         match self.0 {
             Token::Begin => write!(f, "begin"),
             Token::End => write!(f, "end"),
-            Token::Quote => write!(f, "quote"),
+            Token::Assign => write!(f, "->"),
             Token::Operator(op) => write!(f, "{}", op),
             Token::Number(n) => write!(f, "{}", n),
             Token::String(s) => write!(f, "\"{}\"", s),

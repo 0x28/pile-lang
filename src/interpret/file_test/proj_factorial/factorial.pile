@@ -1,9 +1,9 @@
 begin
-  quote n def
-  1 quote result def
+  -> n
+  1 -> result
   begin
-    n result * quote result def
-    n 1 - quote n def
+    n result * -> result
+    n 1 - -> n
   end
   begin
     n 0 >
@@ -11,4 +11,4 @@ begin
   while
   result
 end
-quote fact def
+-> fact

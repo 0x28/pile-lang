@@ -28,7 +28,6 @@ impl fmt::Display for Number {
 pub enum Operator {
     // control flow
     If,
-    Def,
     Dotimes,
     While,
     // arithmetic
@@ -57,7 +56,6 @@ impl fmt::Display for Operator {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Operator::If => write!(f, "if"),
-            Operator::Def => write!(f, "def"),
             Operator::Dotimes => write!(f, "dotimes"),
             Operator::While => write!(f, "while"),
             Operator::Plus => write!(f, "+"),
@@ -85,7 +83,7 @@ pub enum Token {
     // keywords
     Begin,
     End,
-    Quote,
+    Assign,
     Operator(Operator),
     // values
     Number(Number),
@@ -108,7 +106,7 @@ impl fmt::Display for Token {
             Token::Boolean(false) => write!(f, "boolean 'false'"),
             Token::Begin => write!(f, "token 'begin'"),
             Token::End => write!(f, "token 'end'"),
-            Token::Quote => write!(f, "token 'quote'"),
+            Token::Assign => write!(f, "token '->'"),
             Token::Operator(o) => write!(f, "operator '{}'", o),
             Token::Use => write!(f, "token 'use'"),
         }
@@ -202,10 +200,8 @@ impl<'a> Lexer<'a> {
             "begin" => Token::Begin,
             "end" => Token::End,
             "if" => Token::Operator(Operator::If),
-            "def" => Token::Operator(Operator::Def),
             "dotimes" => Token::Operator(Operator::Dotimes),
             "while" => Token::Operator(Operator::While),
-            "quote" => Token::Quote,
             "true" => Token::Boolean(true),
             "false" => Token::Boolean(false),
             "and" => Token::Operator(Operator::And),
@@ -319,6 +315,7 @@ impl<'a> Lexer<'a> {
             "=" => Ok(Token::Operator(Operator::Equal)),
             "<=" => Ok(Token::Operator(Operator::LessEqual)),
             "<" => Ok(Token::Operator(Operator::Less)),
+            "->" => Ok(Token::Assign),
             o => Err(self.lex_error(&format!("Unknown operator '{}'", o))),
         }
     }

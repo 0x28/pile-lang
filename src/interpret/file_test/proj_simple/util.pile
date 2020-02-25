@@ -1,5 +1,5 @@
 # add one to the argument
-begin 1 + end quote inc def
+begin 1 + end -> inc
 
 # subtract one from the argument
-begin 1 - end quote dec def
+begin 1 - end -> dec

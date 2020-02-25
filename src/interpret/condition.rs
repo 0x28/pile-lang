@@ -1,10 +1,8 @@
 use super::runtime_error;
-use super::runtime_value::Function;
 use super::Interpreter;
 use super::State;
-
-use crate::program_source::ProgramSource;
 use crate::pile_error::PileError;
+use crate::program_source::ProgramSource;
 
 use std::rc::Rc;
 
@@ -23,23 +21,9 @@ pub fn apply_if(
         runtime_error::ensure_function(state).map_err(to_pile_error)?;
 
     if condition {
-        match if_branch {
-            Function::Composite(fsource, block) => {
-                Interpreter::call(&block, state, &fsource)?
-            }
-            Function::Builtin(operator) => {
-                Interpreter::apply(&operator, state, source)?
-            }
-        }
+        Interpreter::call(&if_branch.exprs, state, &if_branch.source)?
     } else {
-        match else_branch {
-            Function::Composite(fsource, block) => {
-                Interpreter::call(&block, state, &fsource)?
-            }
-            Function::Builtin(operator) => {
-                Interpreter::apply(&operator, state, source)?
-            }
-        }
+        Interpreter::call(&else_branch.exprs, state, &else_branch.source)?
     }
 
     Ok(())
