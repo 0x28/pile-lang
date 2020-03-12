@@ -72,3 +72,6 @@ fn is_print(expr: &Expr) -> bool {
         _ => false,
     }
 }
+
+#[cfg(test)]
+mod test;
