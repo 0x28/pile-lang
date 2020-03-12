@@ -1,5 +1,3 @@
-extern crate clap;
-
 mod cli;
 mod interpret;
 mod lex;
