@@ -1,7 +1,7 @@
+use crate::program_source::ProgramSource;
 use crate::lex::Operator;
 use crate::lex::Token;
 use crate::parse::Expr;
-use crate::program_source::ProgramSource;
 
 use std::fmt;
 
@@ -12,7 +12,9 @@ impl<'e> fmt::Display for TracedExpr<'e> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self.0 {
             Expr::Atom { token, .. } => write!(f, "{}", TracedToken(token)),
-            Expr::Assignment { var, .. } => write!(f, "-> {}", var),
+            Expr::Assignment { var, .. } => {
+                write!(f, "-> {}", var)
+            }
             Expr::Block { expressions, .. } => {
                 write!(f, "begin")?;
                 for expr in expressions.iter() {
@@ -62,10 +64,13 @@ pub fn after_eval(expr: &Expr) {
 }
 
 fn is_print(expr: &Expr) -> bool {
-    matches!(expr, Expr::Atom {
-        token: Token::Operator(Operator::Print),
-        ..
-    })
+    match expr {
+        Expr::Atom {
+            token: Token::Operator(Operator::Print),
+            ..
+        } => true,
+        _ => false,
+    }
 }
 
 #[cfg(test)]
