@@ -1,15 +1,13 @@
-use super::runtime_value::RuntimeValue;
 use super::runtime_value::Function;
-pub use crate::lex::Number;
+use super::runtime_value::RuntimeValue;
 use super::State;
+pub use crate::lex::Number;
 
 pub fn ensure_element<T>(stack: &mut Vec<T>) -> Result<T, String> {
     stack.pop().ok_or_else(|| "Stack underflow".to_owned())
 }
 
-pub fn ensure_function(
-    state: &mut State,
-) -> Result<Function, String> {
+pub fn ensure_function(state: &mut State) -> Result<Function, String> {
     let func = ensure_element(&mut state.stack)?;
 
     match func {

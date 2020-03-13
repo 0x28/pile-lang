@@ -1,6 +1,10 @@
 use super::*;
 use crate::lex::{Number, Operator, Token};
-use crate::parse::Expr;
+use crate::parse::{Ast, Expr};
+use crate::program_source::ProgramSource;
+
+use std::path::PathBuf;
+use std::rc::Rc;
 
 #[test]
 fn test_is_print() {
@@ -60,5 +64,76 @@ fn test_fmt_traced_token() {
     assert_eq!(
         format!("{}", TracedToken(&Token::Identifier("var".to_owned()))),
         "var"
+    );
+}
+
+#[test]
+fn test_fmt_traced_expr() {
+    assert_eq!(
+        format!(
+            "{}",
+            TracedExpr(&Expr::Atom {
+                token: Token::Use,
+                line: 123
+            })
+        ),
+        "use"
+    );
+
+    assert_eq!(
+        format!(
+            "{}",
+            TracedExpr(&Expr::Assignment {
+                var: "n".to_owned(),
+                line: 123
+            })
+        ),
+        "-> n"
+    );
+
+    assert_eq!(
+        format!(
+            "{}",
+            TracedExpr(&Expr::Block {
+                expressions: Rc::new(vec!(Expr::Assignment {
+                    var: "x".to_owned(),
+                    line: 123
+                })),
+                begin: 1,
+                end: 2
+            })
+        ),
+        "begin -> x end"
+    );
+
+    assert_eq!(
+        format!(
+            "{}",
+            TracedExpr(&Expr::Block {
+                expressions: Rc::new(vec!(Expr::Atom {
+                    token: Token::Number(Number::Natural(111)),
+                    line: 123
+                })),
+                begin: 1,
+                end: 2
+            })
+        ),
+        "begin 111 end"
+    );
+
+    assert_eq!(
+        format!(
+            "{}",
+            TracedExpr(&Expr::Use {
+                subprogram: Ast {
+                    source: Rc::new(ProgramSource::File(PathBuf::from(
+                        "other_file.pile"
+                    ))),
+                    expressions: vec![],
+                },
+                line: 1,
+            })
+        ),
+        "use \"other_file.pile\""
     );
 }
