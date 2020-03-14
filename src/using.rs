@@ -1,9 +1,9 @@
-use crate::program_source::ProgramSource;
 use crate::lex::Lexer;
 use crate::parse::Ast;
 use crate::parse::Expr;
 use crate::parse::Parser;
 use crate::pile_error::PileError;
+use crate::program_source::ProgramSource;
 
 use std::fs;
 use std::path::Path;
@@ -64,64 +64,63 @@ pub fn resolve(ast: Ast) -> Result<Ast, PileError> {
 fn resolve_use(
     current_dir: &PathBuf,
     tree: &DependencyTree,
-    mut ast: Ast,
+    ast: Ast,
 ) -> Result<Ast, PileError> {
-    for expr in &mut ast.expressions {
-        if let Expr::Use { subprogram, line } = expr {
-            let component_path = match &subprogram.source.as_ref() {
-                ProgramSource::Repl | ProgramSource::Stdin => {
-                    panic!("applying 'use' to stdin or repl is impossible!")
-                }
-                ProgramSource::File(file) => file,
-            };
-            let component_path =
-                match normalize_path(&current_dir.join(&component_path)) {
-                    Ok(path) => path,
-                    Err(msg) => {
-                        return Err(PileError::new(
-                            ast.source,
-                            (*line, *line),
-                            msg,
-                        ))
+    let source = &ast.source;
+    let expressions: Result<Vec<Expr>, PileError> = ast
+        .expressions
+        .into_iter()
+        .map(|expr| {
+            if let Expr::Use { subprogram, line } = expr {
+                let component_path = match &subprogram.source.as_ref() {
+                    ProgramSource::Repl | ProgramSource::Stdin => {
+                        panic!("applying 'use' to stdin or repl is impossible!")
                     }
+                    ProgramSource::File(file) => file,
                 };
 
-            if tree.contains(&component_path) {
-                return Err(PileError::new(
-                    ast.source,
-                    (*line, *line),
-                    format!(
-                        "Found cyclic use of '{}'.",
-                        component_path.to_string_lossy()
-                    ),
-                ));
-            }
-            let program_text = match read_file(&component_path) {
-                Ok(ast) => ast,
-                Err(msg) => {
-                    return Err(PileError::new(ast.source, (*line, *line), msg))
+                let component_path =
+                    normalize_path(&current_dir.join(&component_path))
+                        .map_err(|msg| {
+                            PileError::new(
+                                Rc::clone(&source),
+                                (line, line),
+                                msg,
+                            )
+                        })?;
+
+                if tree.contains(&component_path) {
+                    return Err(PileError::new(
+                        Rc::clone(&source),
+                        (line, line),
+                        format!(
+                            "Found cyclic use of '{}'.",
+                            component_path.to_string_lossy()
+                        ),
+                    ));
                 }
-            };
 
-            let sub_source =
-                Rc::new(ProgramSource::File(PathBuf::from(&component_path)));
+                let sub_ast = read_program(&component_path, &source, line)?;
+                let subprogram = resolve_use(
+                    &component_path
+                        .parent()
+                        .map(&Path::to_owned)
+                        .unwrap_or_else(|| PathBuf::from(".")),
+                    &tree.add_node(&component_path),
+                    sub_ast,
+                )?;
 
-            let lexer = Lexer::new(&program_text, Rc::clone(&sub_source));
-            let sub_ast = Parser::new(lexer).parse()?;
+                Ok(Expr::Use { subprogram, line })
+            } else {
+                Ok(expr)
+            }
+        })
+        .collect();
 
-            *subprogram = resolve_use(
-                &component_path
-                    .parent()
-                    .map(&Path::to_owned)
-                    .unwrap_or_else(|| PathBuf::from(".")),
-                &tree.add_node(&component_path),
-                sub_ast,
-            )?;
-            subprogram.source = sub_source
-        }
-    }
-
-    Ok(ast)
+    Ok(Ast {
+        source: Rc::clone(source),
+        expressions: expressions?,
+    })
 }
 
 fn normalize_path(file: &PathBuf) -> Result<PathBuf, String> {
@@ -137,9 +136,22 @@ fn normalize_path(file: &PathBuf) -> Result<PathBuf, String> {
     Ok(path)
 }
 
-fn read_file(file: &PathBuf) -> Result<String, String> {
-    fs::read_to_string(&file)
-        .map_err(|err| format!("{}: {}", file.to_string_lossy(), err))
+fn read_program(
+    file: &PathBuf,
+    source: &Rc<ProgramSource>,
+    line: u64,
+) -> Result<Ast, PileError> {
+    let program_text = fs::read_to_string(&file).map_err(|err| {
+        PileError::new(
+            Rc::clone(source),
+            (line, line),
+            format!("{}: {}", file.to_string_lossy(), err),
+        )
+    })?;
+
+    let sub_source = Rc::new(ProgramSource::File(PathBuf::from(&file)));
+    let lexer = Lexer::new(&program_text, Rc::clone(&sub_source));
+    Parser::new(lexer).parse()
 }
 
 #[cfg(test)]
