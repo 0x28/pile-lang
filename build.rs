@@ -25,15 +25,20 @@ A simple stack-oriented toy programming language.
     };
 }
 
+fn use_example(file: &str) -> std::io::Result<String> {
+    println!("cargo:rerun-if-changed={}", file);
+    fs::read_to_string(file)
+}
+
 fn main() -> std::io::Result<()> {
     fs::write(
         "README.md",
         format!(
             readme!(),
-            fib = fs::read_to_string(
+            fib = use_example(
                 "src/interpret/file_test/proj_fibonacci/fibonacci.pile"
             )?,
-            fact = fs::read_to_string(
+            fact = use_example(
                 "src/interpret/file_test/proj_factorial/factorial.pile"
             )?
         ),
