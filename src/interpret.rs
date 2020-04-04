@@ -11,6 +11,7 @@ mod condition;
 mod dotimes;
 mod numeric;
 mod print;
+mod assert;
 mod runtime_error;
 mod tracer;
 mod while_loop;
@@ -166,6 +167,7 @@ impl Interpreter {
             Operator::Or => boolean::apply_or(stack),
             Operator::Not => boolean::apply_not(stack),
             Operator::Print => print::apply_print(stack),
+            Operator::Assert => assert::apply_assert(stack),
             Operator::Dotimes => return dotimes::apply_dotimes(state, source),
             Operator::While => return while_loop::apply_while(state, source),
             Operator::Natural => cast::apply_natural(stack),

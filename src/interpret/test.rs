@@ -366,6 +366,19 @@ fn test_print() {
 }
 
 #[test]
+fn test_assert() {
+    expect_value(
+        "0 1 > assert",
+        Err(PileError::new(
+            Rc::new(ProgramSource::Stdin),
+            (1, 1),
+            "Assertion failed".to_string(),
+        )),
+    );
+    expect_value("true 1 1 = assert", Ok(&RuntimeValue::Boolean(true)))
+}
+
+#[test]
 fn test_cast_to_natural() {
     expect_value("1 natural", Ok(&RuntimeValue::Number(Number::Natural(1))));
     expect_value(

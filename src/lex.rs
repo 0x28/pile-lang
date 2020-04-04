@@ -1,5 +1,5 @@
-use crate::program_source::ProgramSource;
 use crate::pile_error::PileError;
+use crate::program_source::ProgramSource;
 
 use std::fmt;
 use std::iter::Iterator;
@@ -46,6 +46,7 @@ pub enum Operator {
     Not,
     // builtins
     Print,
+    Assert,
     // casts
     Natural,
     Integer,
@@ -54,27 +55,32 @@ pub enum Operator {
 
 impl fmt::Display for Operator {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Operator::If => write!(f, "if"),
-            Operator::Dotimes => write!(f, "dotimes"),
-            Operator::While => write!(f, "while"),
-            Operator::Plus => write!(f, "+"),
-            Operator::Minus => write!(f, "-"),
-            Operator::Div => write!(f, "/"),
-            Operator::Mul => write!(f, "*"),
-            Operator::Greater => write!(f, ">"),
-            Operator::GreaterEqual => write!(f, ">="),
-            Operator::Equal => write!(f, "="),
-            Operator::LessEqual => write!(f, "<="),
-            Operator::And => write!(f, "and"),
-            Operator::Or => write!(f, "or"),
-            Operator::Not => write!(f, "not"),
-            Operator::Less => write!(f, "<"),
-            Operator::Print => write!(f, "print"),
-            Operator::Natural => write!(f, "natural"),
-            Operator::Integer => write!(f, "integer"),
-            Operator::Float => write!(f, "float"),
-        }
+        write!(
+            f,
+            "{}",
+            match self {
+                Operator::If => "if",
+                Operator::Dotimes => "dotimes",
+                Operator::While => "while",
+                Operator::Plus => "+",
+                Operator::Minus => "-",
+                Operator::Div => "/",
+                Operator::Mul => "*",
+                Operator::Greater => ">",
+                Operator::GreaterEqual => ">=",
+                Operator::Equal => "=",
+                Operator::LessEqual => "<=",
+                Operator::And => "and",
+                Operator::Or => "or",
+                Operator::Not => "not",
+                Operator::Less => "<",
+                Operator::Print => "print",
+                Operator::Assert => "assert",
+                Operator::Natural => "natural",
+                Operator::Integer => "integer",
+                Operator::Float => "float",
+            }
+        )
     }
 }
 
@@ -208,6 +214,7 @@ impl<'a> Lexer<'a> {
             "or" => Token::Operator(Operator::Or),
             "not" => Token::Operator(Operator::Not),
             "print" => Token::Operator(Operator::Print),
+            "assert" => Token::Operator(Operator::Assert),
             "natural" => Token::Operator(Operator::Natural),
             "integer" => Token::Operator(Operator::Integer),
             "float" => Token::Operator(Operator::Float),
