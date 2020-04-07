@@ -1,0 +1,20 @@
+### leibniz formular for pi ###
+begin
+    -> n      # number of iterations
+    1.0 -> result
+    3.0 -> divisor
+    -1.0 -> sign
+    begin
+        result sign 1.0 divisor / * + -> result
+        2.0 divisor + -> divisor
+        -1.0 sign * -> sign
+    end
+    n
+    dotimes
+    4.0 result *
+end -> calc_pi
+
+1000 calc_pi -> pi
+
+pi 3.14 > assert
+pi 3.15 < assert
