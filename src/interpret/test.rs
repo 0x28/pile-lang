@@ -191,6 +191,34 @@ fn test_greater_equal() {
 }
 
 #[test]
+fn test_invalid_compare() {
+    expect_value(
+        "1 \"str\" <",
+        Err(PileError::new(
+            Rc::new(ProgramSource::Stdin),
+            (1, 1),
+            "Can't compare natural '1' and string 'str'".to_string(),
+        )),
+    );
+    expect_value(
+        "1.1 1 =",
+        Err(PileError::new(
+            Rc::new(ProgramSource::Stdin),
+            (1, 1),
+            "Can't compare float '1.1' and natural '1'".to_string(),
+        )),
+    );
+    expect_value(
+        "-1 1 >=",
+        Err(PileError::new(
+            Rc::new(ProgramSource::Stdin),
+            (1, 1),
+            "Can't compare integer '-1' and natural '1'".to_string(),
+        )),
+    );
+}
+
+#[test]
 fn test_dotimes() {
     expect_value(
         "0 begin 1 + end 10 dotimes",
