@@ -389,6 +389,20 @@ fn test_dup() {
 }
 
 #[test]
+fn test_swap() {
+    expect_value("true false swap", Ok(&RuntimeValue::Boolean(true)));
+    expect_value("false true swap", Ok(&RuntimeValue::Boolean(false)));
+    expect_value(
+        "10 10 swap +",
+        Ok(&RuntimeValue::Number(Number::Natural(20))),
+    );
+    expect_value(
+        "10 20 swap -",
+        Ok(&RuntimeValue::Number(Number::Natural(10))),
+    );
+}
+
+#[test]
 fn test_drop() {
     expect_value(
         "0 drop drop",

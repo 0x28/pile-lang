@@ -649,5 +649,9 @@ fn test_token_fmt() {
         format!("{}", Token::Operator(Operator::Drop)),
         "operator 'drop'"
     );
+    assert_eq!(
+        format!("{}", Token::Operator(Operator::Swap)),
+        "operator 'swap'"
+    );
     assert_eq!(format!("{}", Token::Use), "token 'use'");
 }

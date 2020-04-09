@@ -15,3 +15,13 @@ pub fn apply_drop(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
 
     Ok(())
 }
+
+pub fn apply_swap(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
+    let top = runtime_error::ensure_element(stack)?;
+    let other = runtime_error::ensure_element(stack)?;
+
+    stack.push(top);
+    stack.push(other);
+
+    Ok(())
+}
