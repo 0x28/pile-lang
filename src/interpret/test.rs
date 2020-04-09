@@ -506,7 +506,7 @@ fn test_numeric_overflow() {
         Err(PileError::new(
             Rc::new(ProgramSource::Stdin),
             (1, 1),
-            "Numeric overflow".to_string(),
+            "Numeric overflow while adding '4294967295' and '1'".to_string(),
         )),
     );
     expect_value(
@@ -514,7 +514,7 @@ fn test_numeric_overflow() {
         Err(PileError::new(
             Rc::new(ProgramSource::Stdin),
             (1, 1),
-            "Numeric overflow".to_string(),
+            "Numeric overflow while subtracting '0' and '1'".to_string(),
         )),
     );
     expect_value(
@@ -522,7 +522,8 @@ fn test_numeric_overflow() {
         Err(PileError::new(
             Rc::new(ProgramSource::Stdin),
             (1, 1),
-            "Numeric overflow".to_string(),
+            "Numeric overflow while multiplying '1000000000' and '100000'"
+                .to_string(),
         )),
     );
     expect_value(
@@ -530,7 +531,8 @@ fn test_numeric_overflow() {
         Err(PileError::new(
             Rc::new(ProgramSource::Stdin),
             (1, 1),
-            "Numeric overflow".to_string(),
+            "Numeric overflow while adding '-2000000005' and '-2000000005'"
+                .to_string(),
         )),
     );
     expect_value(
@@ -538,7 +540,8 @@ fn test_numeric_overflow() {
         Err(PileError::new(
             Rc::new(ProgramSource::Stdin),
             (1, 1),
-            "Numeric overflow".to_string(),
+            "Numeric overflow while multiplying '-2000000005' and '-2000000005'"
+                .to_string(),
         )),
     );
 }

@@ -8,7 +8,8 @@ fn apply_numeric<N, I, F>(
     op_float: F,
     stack: &mut Vec<RuntimeValue>,
 ) -> Result<(), String>
-where N: Fn(&u32, &u32) -> Result<u32, String>,
+where
+    N: Fn(&u32, &u32) -> Result<u32, String>,
     I: Fn(&i32, &i32) -> Result<i32, String>,
     F: Fn(&f32, &f32) -> f32,
 {
@@ -53,12 +54,14 @@ where N: Fn(&u32, &u32) -> Result<u32, String>,
 pub fn apply_plus(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
     apply_numeric(
         |a, b| {
-            a.checked_add(*b)
-                .ok_or_else(|| "Numeric overflow".to_owned())
+            a.checked_add(*b).ok_or_else(|| {
+                format!("Numeric overflow while adding '{}' and '{}'", a, b)
+            })
         },
         |a, b| {
-            a.checked_add(*b)
-                .ok_or_else(|| "Numeric overflow".to_owned())
+            a.checked_add(*b).ok_or_else(|| {
+                format!("Numeric overflow while adding '{}' and '{}'", a, b)
+            })
         },
         |a, b| a + b,
         stack,
@@ -68,12 +71,20 @@ pub fn apply_plus(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
 pub fn apply_minus(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
     apply_numeric(
         |a, b| {
-            a.checked_sub(*b)
-                .ok_or_else(|| "Numeric overflow".to_owned())
+            a.checked_sub(*b).ok_or_else(|| {
+                format!(
+                    "Numeric overflow while subtracting '{}' and '{}'",
+                    a, b
+                )
+            })
         },
         |a, b| {
-            a.checked_sub(*b)
-                .ok_or_else(|| "Numeric overflow".to_owned())
+            a.checked_sub(*b).ok_or_else(|| {
+                format!(
+                    "Numeric overflow while subtracting '{}' and '{}'",
+                    a, b
+                )
+            })
         },
         |a, b| a - b,
         stack,
@@ -83,12 +94,20 @@ pub fn apply_minus(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
 pub fn apply_mul(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
     apply_numeric(
         |a, b| {
-            a.checked_mul(*b)
-                .ok_or_else(|| "Numeric overflow".to_owned())
+            a.checked_mul(*b).ok_or_else(|| {
+                format!(
+                    "Numeric overflow while multiplying '{}' and '{}'",
+                    a, b
+                )
+            })
         },
         |a, b| {
-            a.checked_mul(*b)
-                .ok_or_else(|| "Numeric overflow".to_owned())
+            a.checked_mul(*b).ok_or_else(|| {
+                format!(
+                    "Numeric overflow while multiplying '{}' and '{}'",
+                    a, b
+                )
+            })
         },
         |a, b| a * b,
         stack,
