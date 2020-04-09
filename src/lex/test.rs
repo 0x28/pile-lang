@@ -60,7 +60,10 @@ fn test_string_simple() {
 
 #[test]
 fn test_string_escaped() {
-    let lexer = Lexer::new("\"\\n\\n\\n\\t\\r\0#test#\"", Rc::new(ProgramSource::Stdin));
+    let lexer = Lexer::new(
+        "\"\\n\\n\\n\\t\\r\0#test#\"",
+        Rc::new(ProgramSource::Stdin),
+    );
     let expected =
         vec![(1, Ok(Token::String(String::from("\n\n\n\t\r\0#test#"))))];
 
@@ -167,8 +170,10 @@ fn test_numbers_float() {
 
 #[test]
 fn test_numbers_overflow() {
-    let lexer =
-        Lexer::new("8589934592 -8589934592 +8589934592", Rc::new(ProgramSource::Stdin));
+    let lexer = Lexer::new(
+        "8589934592 -8589934592 +8589934592",
+        Rc::new(ProgramSource::Stdin),
+    );
     let expected = vec![
         (
             1,
@@ -340,8 +345,10 @@ fn test_operators() {
 
 #[test]
 fn test_use() {
-    let lexer =
-        Lexer::new("use \"test.pile\"\n use \"file\"", Rc::new(ProgramSource::Stdin));
+    let lexer = Lexer::new(
+        "use \"test.pile\"\n use \"file\"",
+        Rc::new(ProgramSource::Stdin),
+    );
     let expected = vec![
         (1, Ok(Token::Use)),
         (1, Ok(Token::String("test.pile".to_owned()))),
@@ -354,7 +361,8 @@ fn test_use() {
 
 #[test]
 fn test_error_missing_backslash() {
-    let lexer = Lexer::new("1 2 3 * + \"cool string\\", Rc::new(ProgramSource::Stdin));
+    let lexer =
+        Lexer::new("1 2 3 * + \"cool string\\", Rc::new(ProgramSource::Stdin));
     let expected = vec![
         (1, Ok(Token::Number(Number::Natural(1)))),
         (1, Ok(Token::Number(Number::Natural(2)))),
@@ -628,6 +636,18 @@ fn test_token_fmt() {
     assert_eq!(
         format!("{}", Token::Operator(Operator::Float)),
         "operator 'float'"
+    );
+    assert_eq!(
+        format!("{}", Token::Operator(Operator::Assert)),
+        "operator 'assert'"
+    );
+    assert_eq!(
+        format!("{}", Token::Operator(Operator::Dup)),
+        "operator 'dup'"
+    );
+    assert_eq!(
+        format!("{}", Token::Operator(Operator::Drop)),
+        "operator 'drop'"
     );
     assert_eq!(format!("{}", Token::Use), "token 'use'");
 }
