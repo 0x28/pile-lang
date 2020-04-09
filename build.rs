@@ -12,9 +12,14 @@ A simple stack-oriented toy programming language.
 
 # Examples
 
-## Fibonacci
+## Fibonacci (iterative)
 ```
-{fib}
+{fib_iter}
+```
+
+## Fibonacci (recursive)
+```
+{fib_recur}
 ```
 
 ## Factorial
@@ -40,15 +45,14 @@ fn main() -> std::io::Result<()> {
         "README.md",
         format!(
             readme!(),
-            fib = use_example(
+            fib_iter = use_example(
                 "src/interpret/file_test/proj_fibonacci/fibonacci.pile"
             )?,
+            fib_recur = use_example("src/examples/fib_recur.pile")?,
             fact = use_example(
                 "src/interpret/file_test/proj_factorial/factorial.pile"
             )?,
-            pi = use_example(
-                "src/examples/pi.pile"
-            )?
+            pi = use_example("src/examples/pi.pile")?
         ),
     )?;
 

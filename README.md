@@ -8,7 +8,7 @@ A simple stack-oriented toy programming language.
 
 # Examples
 
-## Fibonacci
+## Fibonacci (iterative)
 ```
 begin
   -> number # arg1 = number
@@ -25,6 +25,41 @@ begin
   current
 end
 -> fib
+
+```
+
+## Fibonacci (recursive)
+```
+begin
+    -> a
+    a a
+end -> dup
+
+begin
+    -> a -> b
+    a b
+end -> swap
+
+begin
+    dup -> n
+    begin
+        dup
+        1 - fib
+        swap
+        2 - fib
+        +
+    end
+    begin end
+    n 2 >=
+    if
+end -> fib
+
+0 fib 0 = assert
+1 fib 1 = assert
+2 fib 1 = assert
+3 fib 2 = assert
+4 fib 3 = assert
+10 fib 55 = assert
 
 ```
 
