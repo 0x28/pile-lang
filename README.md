@@ -31,11 +31,6 @@ end
 ## Fibonacci (recursive)
 ```
 begin
-    -> a
-    a a
-end -> dup
-
-begin
     -> a -> b
     a b
 end -> swap

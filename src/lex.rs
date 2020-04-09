@@ -47,6 +47,8 @@ pub enum Operator {
     // builtins
     Print,
     Assert,
+    Dup,
+    Drop,
     // casts
     Natural,
     Integer,
@@ -76,6 +78,8 @@ impl fmt::Display for Operator {
                 Operator::Less => "<",
                 Operator::Print => "print",
                 Operator::Assert => "assert",
+                Operator::Dup => "dup",
+                Operator::Drop => "drop",
                 Operator::Natural => "natural",
                 Operator::Integer => "integer",
                 Operator::Float => "float",
@@ -215,6 +219,8 @@ impl<'a> Lexer<'a> {
             "not" => Token::Operator(Operator::Not),
             "print" => Token::Operator(Operator::Print),
             "assert" => Token::Operator(Operator::Assert),
+            "dup" => Token::Operator(Operator::Dup),
+            "drop" => Token::Operator(Operator::Drop),
             "natural" => Token::Operator(Operator::Natural),
             "integer" => Token::Operator(Operator::Integer),
             "float" => Token::Operator(Operator::Float),

@@ -379,6 +379,32 @@ fn test_assert() {
 }
 
 #[test]
+fn test_dup() {
+    expect_value("10 dup +", Ok(&RuntimeValue::Number(Number::Natural(20))));
+    expect_value("0 dup drop", Ok(&RuntimeValue::Number(Number::Natural(0))));
+    expect_value(
+        "\"hello dup\" dup drop",
+        Ok(&RuntimeValue::String("hello dup".to_owned())),
+    );
+}
+
+#[test]
+fn test_drop() {
+    expect_value(
+        "0 drop drop",
+        Err(PileError::new(
+            Rc::new(ProgramSource::Stdin),
+            (1, 1),
+            "Stack underflow".to_string(),
+        )),
+    );
+    expect_value(
+        "1 2 3 drop +",
+        Ok(&RuntimeValue::Number(Number::Natural(3))),
+    );
+}
+
+#[test]
 fn test_cast_to_natural() {
     expect_value("1 natural", Ok(&RuntimeValue::Number(Number::Natural(1))));
     expect_value(

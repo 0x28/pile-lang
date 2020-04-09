@@ -12,6 +12,7 @@ mod dotimes;
 mod numeric;
 mod print;
 mod assert;
+mod stackop;
 mod runtime_error;
 mod tracer;
 mod while_loop;
@@ -168,6 +169,8 @@ impl Interpreter {
             Operator::Not => boolean::apply_not(stack),
             Operator::Print => print::apply_print(stack),
             Operator::Assert => assert::apply_assert(stack),
+            Operator::Dup => stackop::apply_dup(stack),
+            Operator::Drop => stackop::apply_drop(stack),
             Operator::Dotimes => return dotimes::apply_dotimes(state, source),
             Operator::While => return while_loop::apply_while(state, source),
             Operator::Natural => cast::apply_natural(stack),
