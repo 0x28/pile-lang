@@ -92,7 +92,7 @@ impl Interpreter {
             state.current_lines = expr.lines();
 
             if state.trace {
-                tracer::before_eval(&expr);
+                tracer::before_eval(&expr, &state.lookup);
             }
 
             match expr {

@@ -1,8 +1,10 @@
+use super::runtime_value::RuntimeValue;
 use crate::lex::Operator;
 use crate::lex::Token;
 use crate::parse::Expr;
 use crate::program_source::ProgramSource;
 
+use std::collections::HashMap;
 use std::fmt;
 
 struct TracedExpr<'e>(&'e Expr);
@@ -47,11 +49,21 @@ impl<'t> fmt::Display for TracedToken<'t> {
     }
 }
 
-pub fn before_eval(expr: &Expr) {
-    println!("→ {}", TracedExpr(expr));
+pub fn before_eval(expr: &Expr, lookup: &HashMap<String, RuntimeValue>) {
+    if let Expr::Atom {
+        token: Token::Identifier(ident),
+        ..
+    } = expr
+    {
+        if let Some(value) = lookup.get(ident) {
+            println!("→ {:20} (= {})", ident, value)
+        }
+    } else {
+        println!("→ {}", TracedExpr(expr));
 
-    if is_print(expr) {
-        println!("──── stdout ────")
+        if is_print(expr) {
+            println!("──── stdout ────")
+        }
     }
 }
 
