@@ -125,7 +125,7 @@ fn proj_error_eval() {
         PileError::new(
             Rc::new(ProgramSource::File(PathBuf::from(&bad_file))),
             (1, 1),
-            "Division by zero".to_owned(),
+            "Division by zero while dividing '1' and '0'".to_owned(),
         ),
     )
 }

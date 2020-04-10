@@ -51,80 +51,43 @@ where
     Ok(())
 }
 
-pub fn apply_plus(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
-    apply_numeric(
-        |a, b| {
-            a.checked_add(*b).ok_or_else(|| {
-                format!("Numeric overflow while adding '{}' and '{}'", a, b)
-            })
-        },
-        |a, b| {
-            a.checked_add(*b).ok_or_else(|| {
-                format!("Numeric overflow while adding '{}' and '{}'", a, b)
-            })
-        },
-        |a, b| a + b,
-        stack,
-    )
+macro_rules! num_op {
+    ($name: ident, $checked_op: ident, $float_op: expr, $err: literal) => {
+        pub fn $name(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
+            apply_numeric(
+                |a, b| a.$checked_op(*b).ok_or_else(|| format!($err, a, b)),
+                |a, b| a.$checked_op(*b).ok_or_else(|| format!($err, a, b)),
+                $float_op,
+                stack,
+            )
+        }
+    };
 }
 
-pub fn apply_minus(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
-    apply_numeric(
-        |a, b| {
-            a.checked_sub(*b).ok_or_else(|| {
-                format!(
-                    "Numeric overflow while subtracting '{}' and '{}'",
-                    a, b
-                )
-            })
-        },
-        |a, b| {
-            a.checked_sub(*b).ok_or_else(|| {
-                format!(
-                    "Numeric overflow while subtracting '{}' and '{}'",
-                    a, b
-                )
-            })
-        },
-        |a, b| a - b,
-        stack,
-    )
-}
+num_op!(
+    apply_plus,
+    checked_add,
+    |a, b| a + b,
+    "Numeric overflow while adding '{}' and '{}'"
+);
 
-pub fn apply_mul(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
-    apply_numeric(
-        |a, b| {
-            a.checked_mul(*b).ok_or_else(|| {
-                format!(
-                    "Numeric overflow while multiplying '{}' and '{}'",
-                    a, b
-                )
-            })
-        },
-        |a, b| {
-            a.checked_mul(*b).ok_or_else(|| {
-                format!(
-                    "Numeric overflow while multiplying '{}' and '{}'",
-                    a, b
-                )
-            })
-        },
-        |a, b| a * b,
-        stack,
-    )
-}
+num_op!(
+    apply_minus,
+    checked_sub,
+    |a, b| a - b,
+    "Numeric overflow while subtracting '{}' and '{}'"
+);
 
-pub fn apply_div(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
-    apply_numeric(
-        |a, b| {
-            a.checked_div(*b)
-                .ok_or_else(|| "Division by zero".to_owned())
-        },
-        |a, b| {
-            a.checked_div(*b)
-                .ok_or_else(|| "Division by zero".to_owned())
-        },
-        |a, b| a / b,
-        stack,
-    )
-}
+num_op!(
+    apply_mul,
+    checked_mul,
+    |a, b| a * b,
+    "Numeric overflow while multiplying '{}' and '{}'"
+);
+
+num_op!(
+    apply_div,
+    checked_div,
+    |a, b| a / b,
+    "Division by zero while dividing '{}' and '{}'"
+);

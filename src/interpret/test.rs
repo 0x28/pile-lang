@@ -553,7 +553,7 @@ fn test_div_by_zero() {
         Err(PileError::new(
             Rc::new(ProgramSource::Stdin),
             (1, 1),
-            "Division by zero".to_string(),
+            "Division by zero while dividing '0' and '0'".to_string(),
         )),
     );
     expect_value(
@@ -561,7 +561,7 @@ fn test_div_by_zero() {
         Err(PileError::new(
             Rc::new(ProgramSource::Stdin),
             (1, 1),
-            "Division by zero".to_string(),
+            "Division by zero while dividing '0' and '0'".to_string(),
         )),
     );
 }
