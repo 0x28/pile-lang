@@ -75,6 +75,7 @@ fn proj_fib() {
     expect_stack(
         &test_file("proj_fibonacci/main.pile"),
         &vec![
+            RuntimeValue::Number(Number::Natural(0)),
             RuntimeValue::Number(Number::Natural(1)),
             RuntimeValue::Number(Number::Natural(1)),
             RuntimeValue::Number(Number::Natural(5)),

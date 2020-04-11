@@ -1,5 +1,6 @@
 use "fibonacci"
 
+0 fib
 1 fib
 2 fib
 5 fib
