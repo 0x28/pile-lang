@@ -56,17 +56,15 @@ end -> fib
 ## Factorial
 ```
 begin
-  -> n
-  1 -> result
-  begin
-    n result * -> result
-    n 1 - -> n
-  end
-  begin
-    n 0 >
-  end
-  while
-  result
+    -> n
+    1 -> result
+    begin
+        n result * -> result
+        n 1 - -> n
+    end
+    n
+    dotimes
+    result
 end
 -> fact
 
