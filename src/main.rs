@@ -3,53 +3,35 @@ mod interpret;
 mod lex;
 mod parse;
 mod pile_error;
+mod program_source;
 mod repl;
 mod using;
-mod program_source;
 
 fn main() {
-    let options = match cli::read_options(std::env::args_os()) {
-        Err(msg) => {
-            eprint!("{}", msg);
-            std::process::exit(1);
-        }
-        Ok(options) => options,
-    };
-
-    let program_text = match options.read_program() {
+    match pile() {
         Err(msg) => {
             eprintln!("{}", msg);
             std::process::exit(1);
         }
-        Ok(program) => program,
-    };
+        Ok(()) => (),
+    }
+}
+
+fn pile() -> Result<(), String> {
+    let options = cli::read_options(std::env::args_os())?;
+    let program_text = options.read_program()?;
 
     let lexer = lex::Lexer::new(program_text.as_ref(), options.source());
     let parser = parse::Parser::new(lexer);
-    let ast = match parser.parse() {
-        Err(error) => {
-            eprintln!("{}", error);
-            std::process::exit(1)
-        }
-        Ok(ast) => ast,
-    };
+    let ast = parser.parse().map_err(|e| e.to_string())?;
 
-    let ast = match using::resolve(ast) {
-        Err(error) => {
-            eprintln!("{}", error);
-            std::process::exit(1)
-        }
-        Ok(ast) => ast,
-    };
+    let ast = using::resolve(ast).map_err(|e| e.to_string())?;
 
     let mut interpreter =
         interpret::Interpreter::new(ast, options.stack_size(), options.trace());
-    let value = interpreter.run();
+    interpreter.run().map_err(|e| e.to_string())?;
 
-    if let Err(runtime_error) = value {
-        eprintln!("{}", runtime_error);
-        std::process::exit(1);
-    }
+    Ok(())
 }
 
 #[cfg(test)]
