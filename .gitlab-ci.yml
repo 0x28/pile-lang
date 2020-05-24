@@ -6,6 +6,7 @@ rust-latest:
   stage: build
   image: rust:latest
   script:
+    - cargo fmt --all -- --check
     - cargo build --verbose
     - cargo test --verbose
 
