@@ -1,9 +1,9 @@
-use crate::program_source::ProgramSource;
 use crate::lex::*;
 use crate::parse::Ast;
 use crate::parse::Expr;
 use crate::parse::Parser;
 use crate::pile_error::PileError;
+use crate::program_source::ProgramSource;
 use crate::using;
 
 use std::fs;
@@ -163,10 +163,7 @@ fn test_cycle1() {
         PileError::new(
             Rc::new(ProgramSource::File(PathBuf::from(&absolute_path))),
             (1, 1),
-            format!(
-                "Found cyclic use of '{}'.",
-                absolute_path
-            ),
+            format!("Found cyclic use of '{}'.", absolute_path),
         ),
     )
 }
