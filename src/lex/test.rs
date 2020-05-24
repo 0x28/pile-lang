@@ -394,7 +394,7 @@ fn test_error_unknown_escape() {
             Err(PileError::new(
                 Rc::new(ProgramSource::Stdin),
                 (1, 1),
-                "Unknown escape chars: \'\\z\'".to_owned(),
+                r"Unknown escape chars: '\z'".to_owned(),
             )),
         ),
         (1, Ok(Token::Number(Number::Float(3.14)))),
@@ -403,7 +403,7 @@ fn test_error_unknown_escape() {
             Err(PileError::new(
                 Rc::new(ProgramSource::Stdin),
                 (1, 1),
-                "Unknown escape chars: \'\\a\' \'\\b\' \'\\c\'".to_owned(),
+                r"Unknown escape chars: '\a' '\b' '\c'".to_owned(),
             )),
         ),
         (1, Ok(Token::Number(Number::Natural(100)))),
