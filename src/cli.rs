@@ -1,15 +1,16 @@
 use crate::program_source::ProgramSource;
 use crate::repl;
 
+use std::ffi::OsString;
 use std::fs;
 use std::io::{self, Read};
 use std::path::PathBuf;
 use std::rc::Rc;
-use std::ffi::OsString;
 
 use atty::Stream;
 use clap::{crate_version, App, Arg};
 
+#[derive(Debug, PartialEq)]
 pub struct CommandLineOptions {
     stack_size: usize,
     source: Rc<ProgramSource>,
@@ -45,7 +46,7 @@ impl CommandLineOptions {
     }
 }
 
-pub fn read_options<I, T>(itr: I) -> CommandLineOptions
+pub fn read_options<I, T>(itr: I) -> Result<CommandLineOptions, String>
 where
     I: IntoIterator<Item = T>,
     T: Into<OsString> + Clone,
@@ -78,13 +79,14 @@ where
             Arg::with_name("FILE")
                 .help("The program to run. Use '-' for stdin."),
         )
-        .get_matches_from(itr);
+        .get_matches_from_safe(itr)
+        .map_err(|e| e.to_string())?;
 
     let stack_size: usize = matches.value_of("size").unwrap().parse().unwrap();
     let file = matches.value_of("FILE");
     let trace = matches.is_present("trace");
 
-    CommandLineOptions {
+    Ok(CommandLineOptions {
         stack_size,
         source: Rc::new(match file {
             None => {
@@ -98,7 +100,7 @@ where
             Some(file) => ProgramSource::File(PathBuf::from(file)),
         }),
         trace,
-    }
+    })
 }
 
 #[cfg(test)]

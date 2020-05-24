@@ -24,25 +24,29 @@ fn get_test_source() -> ProgramSource {
 }
 
 #[test]
-fn test_read_options1() {
-    let options = read_options(vec!["test1"]);
+fn test_read_options1() -> Result<(), String> {
+    let options = read_options(vec!["test1"])?;
     assert_eq!(options.stack_size(), 100);
     assert_eq!(options.trace(), false);
     assert_eq!(options.source().as_ref(), &get_test_source());
+
+    Ok(())
 }
 
 #[test]
-fn test_read_options2() {
-    let options = read_options(vec!["test2", "-"]);
+fn test_read_options2() -> Result<(), String> {
+    let options = read_options(vec!["test2", "-"])?;
 
     assert_eq!(options.stack_size(), 100);
     assert_eq!(options.trace(), false);
     assert_eq!(options.source().as_ref(), &ProgramSource::Stdin);
+
+    Ok(())
 }
 
 #[test]
-fn test_read_options3() {
-    let options = read_options(vec!["test3", "./some_program.pile"]);
+fn test_read_options3() -> Result<(), String> {
+    let options = read_options(vec!["test3", "./some_program.pile"])?;
 
     assert_eq!(options.stack_size(), 100);
     assert_eq!(options.trace(), false);
@@ -50,13 +54,29 @@ fn test_read_options3() {
         options.source().as_ref(),
         &ProgramSource::File(PathBuf::from("./some_program.pile"))
     );
+
+    Ok(())
 }
 
 #[test]
-fn test_read_options4() {
-    let options = read_options(vec!["test4", "-t", "--stack-size", "123"]);
+fn test_read_options4() -> Result<(), String> {
+    let options = read_options(vec!["test4", "-t", "--stack-size", "123"])?;
 
     assert_eq!(options.stack_size(), 123);
     assert_eq!(options.trace(), true);
     assert_eq!(options.source().as_ref(), &get_test_source());
+
+    Ok(())
+}
+
+#[test]
+fn test_read_options5() {
+    let options = read_options(vec!["test5", "-t", "--stack-size", "yes"]);
+
+    assert_eq!(
+        options,
+        Err("error: Invalid value for \'--stack-size <size>\': \
+                    The value must be a natural number\n"
+            .to_owned())
+    );
 }

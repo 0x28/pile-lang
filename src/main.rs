@@ -8,7 +8,13 @@ mod using;
 mod program_source;
 
 fn main() {
-    let options = cli::read_options(std::env::args_os());
+    let options = match cli::read_options(std::env::args_os()) {
+        Err(msg) => {
+            eprint!("{}", msg);
+            std::process::exit(1);
+        }
+        Ok(options) => options,
+    };
 
     let program_text = match options.read_program() {
         Err(msg) => {
