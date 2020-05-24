@@ -5,15 +5,15 @@ use crate::program_source::ProgramSource;
 
 mod runtime_value;
 use runtime_value::*;
+mod assert;
 mod boolean;
 mod cast;
 mod condition;
 mod dotimes;
 mod numeric;
 mod print;
-mod assert;
-mod stackop;
 mod runtime_error;
+mod stackop;
 mod tracer;
 mod while_loop;
 
@@ -191,11 +191,10 @@ impl Interpreter {
     ) -> Result<(), PileError> {
         if let Some(value) = state.lookup.get(ident) {
             match value.clone() {
-                RuntimeValue::Function(func) => match func {
-                    Function { source, exprs } => {
-                        Interpreter::call(&exprs, state, &source)?;
-                    }
-                },
+                RuntimeValue::Function(func) => {
+                    let Function { source, exprs } = func;
+                    Interpreter::call(&exprs, state, &source)?;
+                }
                 value => state.stack.push(value),
             }
             Ok(())
