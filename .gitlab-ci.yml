@@ -5,6 +5,8 @@ stages:
 rust-latest:
   stage: build
   image: rust:latest
+  before_script:
+    - rustup component add rustfmt
   script:
     - cargo fmt --all -- --check
     - cargo build --verbose
