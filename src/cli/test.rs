@@ -73,10 +73,8 @@ fn test_read_options4() -> Result<(), String> {
 fn test_read_options5() {
     let options = read_options(vec!["test5", "-t", "--stack-size", "yes"]);
 
-    assert_eq!(
-        options,
-        Err("error: Invalid value for \'--stack-size <size>\': \
-                    The value must be a natural number\n"
-            .to_owned())
-    );
+    assert!(options.is_err());
+    assert!(options
+        .unwrap_err()
+        .contains("The value must be a natural number"));
 }
