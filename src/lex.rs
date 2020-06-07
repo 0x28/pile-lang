@@ -315,14 +315,25 @@ impl<'a> Lexer<'a> {
         }
     }
 
+    fn is_separating(c: char) -> bool {
+        match c {
+            '#' | '[' | ']' => true,
+            _ => false,
+        }
+    }
+
     fn number(&mut self) -> Result<Token, PileError> {
-        let number = self.collect_while(|c| !c.is_whitespace() && c != '#');
+        let number = self.collect_while(|c| {
+            !c.is_whitespace() && !Lexer::is_separating(c)
+        });
 
         self.parse_number(number.as_ref())
     }
 
     fn operator(&mut self) -> Result<Token, PileError> {
-        let operator = self.collect_while(|c| !c.is_whitespace() && c != '#');
+        let operator = self.collect_while(|c| {
+            !c.is_whitespace() && !Lexer::is_separating(c)
+        });
 
         if operator.chars().any(|c| c.is_digit(10)) {
             return self.parse_number(operator.as_ref());
