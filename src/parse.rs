@@ -121,7 +121,7 @@ impl<'a> Parser<'a> {
                 Some((_, token)) => {
                     return Err(self.parse_error(
                         self.lex_iter.line(),
-                        &format!("Expected ']' found {}.", token),
+                        &format!("Expected identifier found {}.", token),
                     ))
                 }
             }

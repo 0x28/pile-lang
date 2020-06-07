@@ -327,6 +327,46 @@ fn test_let3() {
 }
 
 #[test]
+fn test_let4() {
+    expect_error(
+        "
+let [1]
+    0
+end
+",
+        Err(PileError::new(
+            Rc::new(ProgramSource::Stdin),
+            (2, 2),
+            "Expected identifier found natural '1'.".to_owned(),
+        )),
+    )
+}
+
+#[test]
+fn test_let5() {
+    expect_error(
+        "let [",
+        Err(PileError::new(
+            Rc::new(ProgramSource::Stdin),
+            (1, 1),
+            "Expected ']' found end of file.".to_owned(),
+        )),
+    )
+}
+
+#[test]
+fn test_let6() {
+    expect_error(
+        "let x end",
+        Err(PileError::new(
+            Rc::new(ProgramSource::Stdin),
+            (1, 1),
+            "Expected token '[' found identifier 'x'.".to_owned(),
+        )),
+    )
+}
+
+#[test]
 fn test_use() {
     expect_ast(
         "
