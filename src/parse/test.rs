@@ -120,6 +120,7 @@ fn test_block1() {
                 Expr::Block {
                     begin: 1,
                     end: 1,
+                    locals: vec![],
                     expressions: Rc::new(vec![Expr::Atom {
                         line: 1,
                         token: Token::Number(Number::Natural(100)),
@@ -148,6 +149,7 @@ fn test_block2() {
                 Expr::Block {
                     begin: 1,
                     end: 1,
+                    locals: vec![],
                     expressions: Rc::new(vec![Expr::Atom {
                         line: 1,
                         token: Token::Number(Number::Natural(100)),
@@ -156,6 +158,7 @@ fn test_block2() {
                 Expr::Block {
                     begin: 1,
                     end: 1,
+                    locals: vec![],
                     expressions: Rc::new(vec![Expr::Atom {
                         line: 1,
                         token: Token::Number(Number::Integer(-100)),
@@ -200,10 +203,12 @@ end",
             expressions: vec![Expr::Block {
                 begin: 2,
                 end: 10,
+                locals: vec![],
                 expressions: Rc::new(vec![
                     Expr::Block {
                         begin: 3,
                         end: 5,
+                        locals: vec![],
                         expressions: Rc::new(vec![Expr::Atom {
                             line: 4,
                             token: Token::String(String::from("a")),
@@ -212,6 +217,7 @@ end",
                     Expr::Block {
                         begin: 7,
                         end: 9,
+                        locals: vec![],
                         expressions: Rc::new(vec![
                             Expr::Atom {
                                 line: 8,
@@ -231,6 +237,93 @@ end",
             }],
         },
     );
+}
+
+#[test]
+fn test_let1() {
+    expect_ast(
+        "let [a b c] a b c + + end",
+        Ast {
+            source: Rc::new(ProgramSource::Stdin),
+            expressions: vec![Expr::Block {
+                begin: 1,
+                end: 1,
+                locals: vec!["a".to_owned(), "b".to_owned(), "c".to_owned()],
+                expressions: Rc::new(vec![
+                    Expr::Atom {
+                        line: 1,
+                        token: Token::Identifier("a".to_owned()),
+                    },
+                    Expr::Atom {
+                        line: 1,
+                        token: Token::Identifier("b".to_owned()),
+                    },
+                    Expr::Atom {
+                        line: 1,
+                        token: Token::Identifier("c".to_owned()),
+                    },
+                    Expr::Atom {
+                        line: 1,
+                        token: Token::Operator(Operator::Plus),
+                    },
+                    Expr::Atom {
+                        line: 1,
+                        token: Token::Operator(Operator::Plus),
+                    },
+                ]),
+            }],
+        },
+    )
+}
+
+#[test]
+fn test_let2() {
+    expect_ast(
+        "let [] end",
+        Ast {
+            source: Rc::new(ProgramSource::Stdin),
+            expressions: vec![Expr::Block {
+                begin: 1,
+                end: 1,
+                locals: vec![],
+                expressions: Rc::new(vec![]),
+            }],
+        },
+    )
+}
+
+#[test]
+fn test_let3() {
+    expect_ast(
+        "let [a b c] let [ x ] a x + end end",
+        Ast {
+            source: Rc::new(ProgramSource::Stdin),
+            expressions: vec![Expr::Block {
+                begin: 1,
+                end: 1,
+                locals: vec!["a".to_owned(), "b".to_owned(), "c".to_owned()],
+                expressions: Rc::new(vec![Expr::Block {
+                    begin: 1,
+                    end: 1,
+                    locals: vec!["x".to_owned()],
+                    expressions: Rc::new(vec![
+                        Expr::Atom {
+                            line: 1,
+                            token: Token::Identifier("a".to_owned()),
+                        },
+                        Expr::Atom {
+                            line: 1,
+                            token: Token::Identifier("x".to_owned()),
+                        },
+                        Expr::Atom {
+                            line: 1,
+                            token: Token::Operator(Operator::Plus),
+                        },
+                    ]),
+                }]),
+            }],
+        },
+    )
 }
 
 #[test]

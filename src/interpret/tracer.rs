@@ -38,6 +38,9 @@ impl<'t> fmt::Display for TracedToken<'t> {
         match self.0 {
             Token::Begin => write!(f, "begin"),
             Token::End => write!(f, "end"),
+            Token::Let => write!(f, "let"),
+            Token::BracketLeft => write!(f, "["),
+            Token::BracketRight => write!(f, "]"),
             Token::Assign => write!(f, "->"),
             Token::Operator(op) => write!(f, "{}", op),
             Token::Number(n) => write!(f, "{}", n),

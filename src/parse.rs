@@ -26,6 +26,7 @@ pub enum Expr {
     Block {
         begin: u64,
         end: u64,
+        locals: Vec<String>,
         expressions: Rc<Vec<Expr>>,
     },
     Use {
@@ -69,6 +70,7 @@ impl<'a> Parser<'a> {
                     return Err(self.parse_error(line, "Unmatched 'end'."));
                 }
                 Some((_, Token::Begin)) => self.block()?,
+                Some((_, Token::Let)) => self.block()?,
                 Some((_, Token::Assign)) => self.assign()?,
                 Some((_, Token::Use)) => self.using()?,
                 Some((line, _)) => Expr::Atom {
@@ -95,10 +97,49 @@ impl<'a> Parser<'a> {
         )
     }
 
-    fn block(&mut self) -> Result<Expr, PileError> {
-        self.expect(Token::Begin)?;
+    fn locals(&mut self) -> Result<Vec<String>, PileError> {
+        self.expect(Token::Let)?;
+        self.consume()?;
+        self.expect(Token::BracketLeft)?;
 
-        let begin = self.lookahead.as_ref().unwrap().0;
+        let mut result = vec![];
+
+        loop {
+            self.consume()?;
+
+            match &self.lookahead {
+                Some((_, Token::BracketRight)) => {
+                    break;
+                }
+                Some((_, Token::Identifier(id))) => result.push(id.clone()),
+                None => {
+                    return Err(self.parse_error(
+                        self.lex_iter.line(),
+                        "Expected ']' found end of file.",
+                    ));
+                }
+                Some((_, token)) => {
+                    return Err(self.parse_error(
+                        self.lex_iter.line(),
+                        &format!("Expected ']' found {}.", token),
+                    ))
+                }
+            }
+        }
+
+        self.expect(Token::BracketRight)?;
+
+        Ok(result)
+    }
+
+    fn block(&mut self) -> Result<Expr, PileError> {
+        let (begin, locals) = if let Some((line, Token::Let)) = self.lookahead {
+            (line, self.locals()?)
+        } else {
+            self.expect(Token::Begin)?;
+            (self.lookahead.as_ref().unwrap().0, vec![])
+        };
+
         let end;
 
         let mut block = vec![];
@@ -110,7 +151,7 @@ impl<'a> Parser<'a> {
                 None => {
                     return Err(self.parse_error(
                         self.lex_iter.line(),
-                        &"Expected 'end' found end of file.".to_string(),
+                        "Expected 'end' found end of file.",
                     ));
                 }
 
@@ -119,6 +160,7 @@ impl<'a> Parser<'a> {
                     break;
                 }
                 Some((_, Token::Begin)) => block.push(self.block()?),
+                Some((_, Token::Let)) => block.push(self.block()?),
                 Some((_, Token::Assign)) => block.push(self.assign()?),
                 Some((line, Token::Use)) => {
                     return Err(self.parse_error(
@@ -136,6 +178,7 @@ impl<'a> Parser<'a> {
         Ok(Expr::Block {
             begin,
             end,
+            locals,
             expressions: Rc::new(block),
         })
     }
@@ -148,7 +191,7 @@ impl<'a> Parser<'a> {
         match self.lookahead.take() {
             None => Err(self.parse_error(
                 self.lex_iter.line(),
-                &"Expected identifier found end of file.".to_string(),
+                "Expected identifier found end of file.",
             )),
             Some((line, Token::Identifier(var))) => {
                 Ok(Expr::Assignment { line, var })

@@ -99,6 +99,7 @@ fn test_fmt_traced_expr() {
                     var: "x".to_owned(),
                     line: 123
                 })),
+                locals: vec![],
                 begin: 1,
                 end: 2
             })
@@ -114,6 +115,7 @@ fn test_fmt_traced_expr() {
                     token: Token::Number(Number::Natural(111)),
                     line: 123
                 })),
+                locals: vec![],
                 begin: 1,
                 end: 2
             })

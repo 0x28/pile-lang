@@ -237,7 +237,7 @@ fn test_keywords() {
 
         while dotimes DOTIMES END BEGIN -> if IF print
         and AND or OR not NOT
-        natural NATURAL integer INTEGER float FLOAT",
+        natural NATURAL integer INTEGER float FLOAT let LET [[[]]]",
         Rc::new(ProgramSource::Stdin),
     );
     let expected = vec![
@@ -268,6 +268,14 @@ fn test_keywords() {
         (9, Ok(Token::Operator(Operator::Integer))),
         (9, Ok(Token::Operator(Operator::Float))),
         (9, Ok(Token::Operator(Operator::Float))),
+        (9, Ok(Token::Let)),
+        (9, Ok(Token::Let)),
+        (9, Ok(Token::BracketLeft)),
+        (9, Ok(Token::BracketLeft)),
+        (9, Ok(Token::BracketLeft)),
+        (9, Ok(Token::BracketRight)),
+        (9, Ok(Token::BracketRight)),
+        (9, Ok(Token::BracketRight)),
     ];
 
     compare_token_lists(lexer, expected);

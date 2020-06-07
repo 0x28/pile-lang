@@ -95,6 +95,9 @@ pub enum Token {
     // keywords
     Begin,
     End,
+    Let,
+    BracketLeft,
+    BracketRight,
     Assign,
     Operator(Operator),
     // values
@@ -118,6 +121,9 @@ impl fmt::Display for Token {
             Token::Boolean(false) => write!(f, "boolean 'false'"),
             Token::Begin => write!(f, "token 'begin'"),
             Token::End => write!(f, "token 'end'"),
+            Token::Let => write!(f, "token 'let'"),
+            Token::BracketLeft => write!(f, "token 'let'"),
+            Token::BracketRight => write!(f, "token 'let'"),
             Token::Assign => write!(f, "token '->'"),
             Token::Operator(o) => write!(f, "operator '{}'", o),
             Token::Use => write!(f, "token 'use'"),
@@ -228,6 +234,7 @@ impl<'a> Lexer<'a> {
             "integer" => Token::Operator(Operator::Integer),
             "float" => Token::Operator(Operator::Float),
             "use" => Token::Use,
+            "let" => Token::Let,
             _ => Token::Identifier(ident),
         })
     }
@@ -356,6 +363,14 @@ impl<'a> Lexer<'a> {
                 '0'..='9' => self.number(),
                 '+' | '-' | '*' | '/' | '=' | '<' | '>' => self.operator(),
                 c if c.is_alphabetic() || c == '_' => self.identifier(),
+                '[' => {
+                    self.consume();
+                    Ok(Token::BracketLeft)
+                }
+                ']' => {
+                    self.consume();
+                    Ok(Token::BracketRight)
+                }
                 c => {
                     self.consume();
                     Err(self.lex_error(&format!("Unknown char '{}'", c)))
