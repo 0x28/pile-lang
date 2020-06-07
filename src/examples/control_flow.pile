@@ -1,0 +1,9 @@
+begin
+    "yes"
+end
+begin
+    "no"
+end
+true if
+
+"yes" = assert
