@@ -662,4 +662,7 @@ fn test_token_fmt() {
         "operator 'swap'"
     );
     assert_eq!(format!("{}", Token::Use), "token 'use'");
+    assert_eq!(format!("{}", Token::Let), "token 'let'");
+    assert_eq!(format!("{}", Token::BracketLeft), "token '['");
+    assert_eq!(format!("{}", Token::BracketRight), "token ']'");
 }
