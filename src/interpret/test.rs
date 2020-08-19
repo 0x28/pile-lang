@@ -553,6 +553,25 @@ end -> recur
 }
 
 #[test]
+fn test_dyn_scope() {
+    expect_value(
+        "
+begin
+    n n *
+end -> f1
+
+let [n]
+    23 -> n
+    f1
+end -> f2
+
+f2
+",
+        Ok(&RuntimeValue::Number(Number::Natural(529))),
+    )
+}
+
+#[test]
 fn test_numeric_overflow() {
     expect_value(
         "4294967295 1 +",
