@@ -55,7 +55,7 @@ end -> fib
 
 ## Factorial
 ```
-begin
+let [n result]
     -> n
     1 -> result
     begin
