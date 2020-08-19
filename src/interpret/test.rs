@@ -534,6 +534,25 @@ a",
 }
 
 #[test]
+fn test_let3() {
+    expect_value(
+        "
+let [n]
+    dup -> n
+    begin n end
+    begin n 1 + recur end
+    n 10 =
+    if
+    n # return 0 anyway
+end -> recur
+
+0 recur
+",
+        Ok(&RuntimeValue::Number(Number::Natural(0))),
+    )
+}
+
+#[test]
 fn test_numeric_overflow() {
     expect_value(
         "4294967295 1 +",
