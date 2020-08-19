@@ -1,13 +1,13 @@
-begin
-    dup -> n
+let [n]
+    -> n
     begin
-        dup
-        1 - fib
-        swap
-        2 - fib
+        n 1 - fib
+        n 2 - fib
         +
     end
-    begin end
+    begin
+        n
+    end
     n 2 >=
     if
 end -> fib

@@ -10,7 +10,7 @@ A simple stack-oriented toy programming language.
 
 ## Fibonacci (iterative)
 ```
-begin
+let [number current next]
   -> number # arg1 = number
   0 -> current
   1 -> next
@@ -30,16 +30,16 @@ end
 
 ## Fibonacci (recursive)
 ```
-begin
-    dup -> n
+let [n]
+    -> n
     begin
-        dup
-        1 - fib
-        swap
-        2 - fib
+        n 1 - fib
+        n 2 - fib
         +
     end
-    begin end
+    begin
+        n
+    end
     n 2 >=
     if
 end -> fib
@@ -73,7 +73,7 @@ end
 ## Calculating π
 ```
 ### leibniz formular for pi ###
-begin
+let [n result dividor sign]
     -> n      # number of iterations
     1.0 -> result
     3.0 -> divisor
