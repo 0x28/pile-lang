@@ -20,10 +20,10 @@ fn expect_ast(input: &str, ast: Ast) {
     let parser = Parser::new(lex);
     let result_ast = parser.parse().unwrap();
 
-    ast_assert_eq(&ast, &result_ast);
+    ast_assert_eq(&ast, &result_ast.0);
 }
 
-fn expect_error(input: &str, err: Result<Ast, PileError>) {
+fn expect_error(input: &str, err: Result<ParsedAst, PileError>) {
     let lex = Lexer::new(input, Rc::new(ProgramSource::Stdin));
     let parser = Parser::new(lex);
     let result_err = parser.parse();

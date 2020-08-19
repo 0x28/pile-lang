@@ -1,5 +1,6 @@
 use crate::interpret::Interpreter;
 use crate::lex::Lexer;
+use crate::locals;
 use crate::parse::Parser;
 use crate::program_source::ProgramSource;
 use crate::using;
@@ -31,8 +32,8 @@ pub fn repl() -> ! {
             }
         };
 
-        let expr = match using::resolve(ast) {
-            Ok(ast) => ast.expressions,
+        let expr = match using::resolve(locals::translate(ast)) {
+            Ok(ast) => ast.0.expressions,
             Err(msg) => {
                 eprintln!("{}", msg);
                 continue;

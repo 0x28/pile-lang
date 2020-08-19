@@ -1,4 +1,6 @@
 use crate::lex::Lexer;
+use crate::locals;
+use crate::locals::ScopedAst;
 use crate::parse::Ast;
 use crate::parse::Expr;
 use crate::parse::Parser;
@@ -9,6 +11,9 @@ use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
 use std::rc::Rc;
+
+#[derive(Debug, PartialEq)]
+pub struct ResolvedAst(pub Ast);
 
 struct DependencyTree<'d> {
     parent: Option<&'d DependencyTree<'d>>,
@@ -42,15 +47,15 @@ impl<'d> DependencyTree<'d> {
     }
 }
 
-pub fn resolve(ast: Ast) -> Result<Ast, PileError> {
-    let path = match ast.source.as_ref() {
+pub fn resolve(ast: ScopedAst) -> Result<ResolvedAst, PileError> {
+    let path = match ast.0.source.as_ref() {
         ProgramSource::File(file) => normalize_path(file).map_err(|err| {
-            PileError::new(Rc::clone(&ast.source), (0, 0), err)
+            PileError::new(Rc::clone(&ast.0.source), (0, 0), err)
         })?,
         _ => PathBuf::new(),
     };
 
-    let dir = match &ast.source.as_ref() {
+    let dir = match &ast.0.source.as_ref() {
         ProgramSource::Repl | ProgramSource::Stdin => PathBuf::from("."),
         ProgramSource::File(file) => file
             .parent()
@@ -64,10 +69,11 @@ pub fn resolve(ast: Ast) -> Result<Ast, PileError> {
 fn resolve_use(
     current_dir: &PathBuf,
     tree: &DependencyTree,
-    ast: Ast,
-) -> Result<Ast, PileError> {
-    let source = &ast.source;
+    ast: ScopedAst,
+) -> Result<ResolvedAst, PileError> {
+    let source = &ast.0.source;
     let expressions: Result<Vec<Expr>, PileError> = ast
+        .0
         .expressions
         .into_iter()
         .map(|expr| {
@@ -110,17 +116,20 @@ fn resolve_use(
                     sub_ast,
                 )?;
 
-                Ok(Expr::Use { subprogram, line })
+                Ok(Expr::Use {
+                    subprogram: subprogram.0,
+                    line,
+                })
             } else {
                 Ok(expr)
             }
         })
         .collect();
 
-    Ok(Ast {
+    Ok(ResolvedAst(Ast {
         source: Rc::clone(source),
         expressions: expressions?,
-    })
+    }))
 }
 
 fn normalize_path(file: &PathBuf) -> Result<PathBuf, String> {
@@ -140,7 +149,7 @@ fn read_program(
     file: &PathBuf,
     source: &Rc<ProgramSource>,
     line: u64,
-) -> Result<Ast, PileError> {
+) -> Result<ScopedAst, PileError> {
     let program_text = fs::read_to_string(&file).map_err(|err| {
         PileError::new(
             Rc::clone(source),
@@ -151,7 +160,7 @@ fn read_program(
 
     let sub_source = Rc::new(ProgramSource::File(PathBuf::from(&file)));
     let lexer = Lexer::new(&program_text, Rc::clone(&sub_source));
-    Parser::new(lexer).parse()
+    Ok(locals::translate(Parser::new(lexer).parse()?))
 }
 
 #[cfg(test)]

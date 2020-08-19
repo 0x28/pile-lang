@@ -1,14 +1,18 @@
 use super::*;
 use crate::lex::Lexer;
 use crate::lex::Number;
+use crate::locals;
 use crate::parse::Parser;
 use crate::program_source::ProgramSource;
+use crate::using;
 
 fn expect_value(prog: &str, value: Result<&RuntimeValue, PileError>) {
     let lexer = Lexer::new(prog, Rc::new(ProgramSource::Stdin));
     let parser = Parser::new(lexer);
-    let mut interpreter =
-        Interpreter::new(parser.parse().expect("invalid program"), 10, false);
+    let ast = parser.parse().expect("invalid program");
+    let ast = locals::translate(ast);
+    let ast = using::resolve(ast).expect("resolve failed");
+    let mut interpreter = Interpreter::new(ast, 10, false);
 
     let result = match interpreter.run() {
         Ok(Some(value)) => Ok(value),
@@ -500,6 +504,36 @@ fn test_cast_to_float() {
 }
 
 #[test]
+fn test_let1() {
+    expect_value(
+        "
+100 -> a
+let [a]
+    200 -> a # change local variable
+end -> let1
+
+let1
+a",
+        Ok(&RuntimeValue::Number(Number::Natural(100))),
+    )
+}
+
+#[test]
+fn test_let2() {
+    expect_value(
+        "
+21 -> a
+let [b]
+    42 -> a # change global variable
+end -> let1
+
+let1
+a",
+        Ok(&RuntimeValue::Number(Number::Natural(42))),
+    )
+}
+
+#[test]
 fn test_numeric_overflow() {
     expect_value(
         "4294967295 1 +",
@@ -672,10 +706,11 @@ fn test_runtime_error_fmt() {
 #[test]
 fn test_eval() -> Result<(), PileError> {
     fn read(input: &str) -> Vec<Expr> {
-        Parser::new(Lexer::new(input, Rc::new(ProgramSource::Stdin)))
+        let ast = Parser::new(Lexer::new(input, Rc::new(ProgramSource::Stdin)))
             .parse()
-            .unwrap()
-            .expressions
+            .unwrap();
+        let ast = locals::translate(ast);
+        using::resolve(ast).unwrap().0.expressions
     }
 
     let mut interpreter = Interpreter::empty();

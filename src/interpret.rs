@@ -2,6 +2,7 @@ use crate::lex::Token;
 use crate::parse::Ast;
 use crate::pile_error::PileError;
 use crate::program_source::ProgramSource;
+use crate::using::ResolvedAst;
 
 mod runtime_value;
 use runtime_value::*;
@@ -13,16 +14,17 @@ mod dotimes;
 mod numeric;
 mod print;
 mod runtime_error;
+mod scoping;
 mod stackop;
 mod tracer;
 mod while_loop;
+use scoping::ScopeStack;
 
-use std::collections::HashMap;
 use std::rc::Rc;
 
 pub struct State {
     stack: Vec<RuntimeValue>,
-    lookup: HashMap<String, RuntimeValue>,
+    lookup: ScopeStack,
     current_lines: (u64, u64),
     trace: bool,
 }
@@ -33,12 +35,16 @@ pub struct Interpreter {
 }
 
 impl Interpreter {
-    pub fn new(program: Ast, initial_size: usize, trace: bool) -> Interpreter {
+    pub fn new(
+        program: ResolvedAst,
+        initial_size: usize,
+        trace: bool,
+    ) -> Interpreter {
         Interpreter {
-            program,
+            program: program.0,
             state: State {
                 stack: Vec::with_capacity(initial_size),
-                lookup: HashMap::new(),
+                lookup: ScopeStack::new(),
                 current_lines: (1, 1),
                 trace,
             },
@@ -53,7 +59,7 @@ impl Interpreter {
             },
             state: State {
                 stack: vec![],
-                lookup: HashMap::new(),
+                lookup: ScopeStack::new(),
                 current_lines: (1, 1),
                 trace: false,
             },
@@ -137,6 +143,12 @@ impl Interpreter {
                         &subprogram.source,
                     )?;
                 }
+                Expr::Save { var, .. } => {
+                    state.lookup.save(var);
+                }
+                Expr::Restore { var, .. } => {
+                    state.lookup.restore(var);
+                }
             }
 
             if state.trace {
@@ -189,8 +201,8 @@ impl Interpreter {
         state: &mut State,
         source: &Rc<ProgramSource>,
     ) -> Result<(), PileError> {
-        if let Some(value) = state.lookup.get(ident) {
-            match value.clone() {
+        if let Some(value) = state.lookup.resolve(ident) {
+            match value {
                 RuntimeValue::Function(func) => {
                     let Function { source, exprs } = func;
                     Interpreter::call(&exprs, state, &source)?;
@@ -216,7 +228,8 @@ impl Interpreter {
             runtime_error::ensure_element(&mut state.stack).map_err(|msg| {
                 PileError::new(Rc::clone(&source), state.current_lines, msg)
             })?;
-        state.lookup.insert(var.to_owned(), value);
+
+        state.lookup.assign(var, value);
 
         Ok(())
     }

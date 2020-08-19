@@ -14,6 +14,9 @@ pub struct Ast {
 }
 
 #[derive(Debug, PartialEq)]
+pub struct ParsedAst(pub Ast);
+
+#[derive(Debug, PartialEq)]
 pub enum Expr {
     Atom {
         line: u64,
@@ -33,6 +36,14 @@ pub enum Expr {
         line: u64,
         subprogram: Ast,
     },
+    Save {
+        line: u64,
+        var: String,
+    },
+    Restore {
+        line: u64,
+        var: String,
+    },
 }
 
 impl Expr {
@@ -42,6 +53,8 @@ impl Expr {
             Self::Assignment { line, .. } => (*line, *line),
             Self::Block { begin, end, .. } => (*begin, *end),
             Self::Use { line, .. } => (*line, *line),
+            Self::Save { line, .. } => (*line, *line),
+            Self::Restore { line, .. } => (*line, *line),
         }
     }
 }
@@ -59,7 +72,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    pub fn parse(mut self) -> Result<Ast, PileError> {
+    pub fn parse(mut self) -> Result<ParsedAst, PileError> {
         let mut program = vec![];
 
         loop {
@@ -83,10 +96,10 @@ impl<'a> Parser<'a> {
             program.push(expr);
         }
 
-        Ok(Ast {
+        Ok(ParsedAst(Ast {
             source: Rc::clone(self.lex_iter.source()),
             expressions: program,
-        })
+        }))
     }
 
     fn parse_error(&self, line: u64, msg: &str) -> PileError {

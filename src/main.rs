@@ -1,6 +1,7 @@
 mod cli;
 mod interpret;
 mod lex;
+mod locals;
 mod parse;
 mod pile_error;
 mod program_source;
@@ -25,6 +26,7 @@ fn pile() -> Result<(), String> {
     let parser = parse::Parser::new(lexer);
     let ast = parser.parse().map_err(|e| e.to_string())?;
 
+    let ast = locals::translate(ast);
     let ast = using::resolve(ast).map_err(|e| e.to_string())?;
 
     let mut interpreter =

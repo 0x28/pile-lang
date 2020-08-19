@@ -1,10 +1,9 @@
-use super::runtime_value::RuntimeValue;
+use super::scoping::ScopeStack;
 use crate::lex::Operator;
 use crate::lex::Token;
 use crate::parse::Expr;
 use crate::program_source::ProgramSource;
 
-use std::collections::HashMap;
 use std::fmt;
 
 struct TracedExpr<'e>(&'e Expr);
@@ -29,6 +28,8 @@ impl<'e> fmt::Display for TracedExpr<'e> {
                 };
                 write!(f, "use \"{}\"", source_file)
             }
+            Expr::Save { var, .. } => write!(f, "save(\"{}\")", var),
+            Expr::Restore { var, .. } => write!(f, "restore(\"{}\")", var),
         }
     }
 }
@@ -52,13 +53,13 @@ impl<'t> fmt::Display for TracedToken<'t> {
     }
 }
 
-pub fn before_eval(expr: &Expr, lookup: &HashMap<String, RuntimeValue>) {
+pub fn before_eval(expr: &Expr, lookup: &ScopeStack) {
     if let Expr::Atom {
         token: Token::Identifier(ident),
         ..
     } = expr
     {
-        if let Some(value) = lookup.get(ident) {
+        if let Some(value) = lookup.resolve(ident) {
             println!("→ {:20} (= {})", ident, value)
         }
     } else {

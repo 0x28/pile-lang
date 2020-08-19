@@ -4,7 +4,7 @@ use crate::lex::Lexer;
 use crate::lex::*;
 use crate::parse::Parser;
 use crate::program_source::ProgramSource;
-use crate::using;
+use crate::{locals, using};
 
 use std::fs;
 use std::path::PathBuf;
@@ -23,9 +23,8 @@ fn expect_stack(filename: &str, expected: &Vec<RuntimeValue>) {
         Rc::new(ProgramSource::File(PathBuf::from(filename))),
     );
     let parser = Parser::new(lexer);
-
-    let ast = using::resolve(parser.parse().expect("invalid program"))
-        .expect("invalid 'use'");
+    let ast = locals::translate(parser.parse().expect("invalid program"));
+    let ast = using::resolve(ast).expect("invalid 'use'");
 
     let mut interpreter = Interpreter::new(ast, 10, false);
 
@@ -45,8 +44,8 @@ fn expect_error(filename: &str, expected: PileError) {
         Rc::new(ProgramSource::File(PathBuf::from(filename))),
     );
     let parser = Parser::new(lexer);
-    let ast = using::resolve(parser.parse().expect("invalid program"))
-        .expect("invalid 'use'");
+    let ast = locals::translate(parser.parse().expect("invalid program"));
+    let ast = using::resolve(ast).expect("invalid 'use'");
 
     let mut interpreter = Interpreter::new(ast, 10, false);
 

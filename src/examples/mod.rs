@@ -1,5 +1,6 @@
 use crate::interpret::Interpreter;
 use crate::lex::Lexer;
+use crate::locals;
 use crate::parse::Parser;
 use crate::program_source::ProgramSource;
 use crate::using;
@@ -14,6 +15,7 @@ fn run_example_file(path: PathBuf) {
         Lexer::new(program.as_ref(), Rc::new(ProgramSource::File(path)));
     let parser = Parser::new(lexer);
     let ast = parser.parse().unwrap();
+    let ast = locals::translate(ast);
     let ast = using::resolve(ast).unwrap();
 
     let mut interpreter = Interpreter::new(ast, 100, false);

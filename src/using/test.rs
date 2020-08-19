@@ -4,13 +4,14 @@ use crate::parse::Expr;
 use crate::parse::Parser;
 use crate::pile_error::PileError;
 use crate::program_source::ProgramSource;
-use crate::using;
+use crate::{locals, using};
+use using::ResolvedAst;
 
 use std::fs;
 use std::path::PathBuf;
 use std::rc::Rc;
 
-fn resolve_file(s: &str) -> Result<Ast, PileError> {
+fn resolve_file(s: &str) -> Result<ResolvedAst, PileError> {
     let input =
         fs::read_to_string(s).expect(&format!("couldn't read test file {}", s));
     let lexer =
@@ -18,6 +19,7 @@ fn resolve_file(s: &str) -> Result<Ast, PileError> {
     let parser = Parser::new(lexer);
 
     let ast = parser.parse().expect("couldn't parse test file");
+    let ast = locals::translate(ast);
     using::resolve(ast)
 }
 
@@ -29,10 +31,10 @@ fn assert_resolve_eq(s: &str, expr: Vec<Expr>) {
     let path = test_directory() + s;
     let actual_ast = resolve_file(&path).expect("resolve error");
     let path = PathBuf::from(path);
-    let expected_ast = Ast {
+    let expected_ast = ResolvedAst(Ast {
         source: Rc::new(ProgramSource::File(path)),
         expressions: expr,
-    };
+    });
 
     if actual_ast != expected_ast {
         panic!(format!(
