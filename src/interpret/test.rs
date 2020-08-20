@@ -741,16 +741,16 @@ fn test_runtime_error_fmt() {
     );
 }
 
+fn read(input: &str) -> Vec<Expr> {
+    let ast = Parser::new(Lexer::new(input, Rc::new(ProgramSource::Stdin)))
+        .parse()
+        .unwrap();
+    let ast = locals::translate(ast);
+    using::resolve(ast).unwrap().0.expressions
+}
+
 #[test]
 fn test_eval() -> Result<(), PileError> {
-    fn read(input: &str) -> Vec<Expr> {
-        let ast = Parser::new(Lexer::new(input, Rc::new(ProgramSource::Stdin)))
-            .parse()
-            .unwrap();
-        let ast = locals::translate(ast);
-        using::resolve(ast).unwrap().0.expressions
-    }
-
     let mut interpreter = Interpreter::empty();
     assert_eq!(
         interpreter.eval(read("1 2 +"))?,
@@ -769,6 +769,30 @@ fn test_eval() -> Result<(), PileError> {
     assert_eq!(
         interpreter.eval(read("20 inc"))?,
         Some(&RuntimeValue::Number(Number::Natural(21)))
+    );
+
+    Ok(())
+}
+
+#[test]
+fn test_eval_cleanup_vars() -> Result<(), PileError> {
+    let mut interpreter = Interpreter::empty();
+    interpreter.eval(read("let [x] 10 -> x 1 0 / end -> fun"))?;
+    assert_eq!(
+        interpreter.eval(read("fun")),
+        Err(PileError::new(
+            Rc::new(ProgramSource::Repl),
+            (1, 1),
+            "Division by zero while dividing '1' and '0'".to_string(),
+        )),
+    );
+    assert_eq!(
+        interpreter.eval(read("x")),
+        Err(PileError::new(
+            Rc::new(ProgramSource::Repl),
+            (1, 1),
+            "Unknown variable 'x'".to_string(),
+        )),
     );
 
     Ok(())
