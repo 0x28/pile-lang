@@ -154,9 +154,15 @@ impl Interpreter {
                     .take_while(|expr| matches!(expr, Expr::Restore{..}))
                     .map(|expr| {
                         if let Expr::Restore { var, .. } = expr {
-                            tracer::before_eval(expr, &state.lookup);
+                            if state.trace {
+                                tracer::before_eval(expr, &state.lookup);
+                            }
+
                             state.lookup.restore(var);
-                            tracer::after_eval(&expr);
+
+                            if state.trace {
+                                tracer::after_eval(&expr);
+                            }
                         }
                     })
                     .count();
