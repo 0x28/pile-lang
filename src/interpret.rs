@@ -102,57 +102,65 @@ impl Interpreter {
                 tracer::before_eval(&expr, &state.lookup);
             }
 
-            match expr {
+            let result = match expr {
                 Expr::Atom { token: atom, .. } => match atom {
                     Token::Operator(op) => {
-                        Interpreter::apply(op, state, source)?
+                        Interpreter::apply(op, state, source)
                     }
                     Token::Number(num) => {
-                        state.stack.push(RuntimeValue::Number(num.clone()));
+                        Ok(state.stack.push(RuntimeValue::Number(num.clone())))
                     }
                     Token::Identifier(ident) => {
-                        Interpreter::resolve(ident, state, source)?
+                        Interpreter::resolve(ident, state, source)
                     }
-                    Token::String(string) => {
-                        state.stack.push(RuntimeValue::String(string.clone()))
-                    }
+                    Token::String(string) => Ok(state
+                        .stack
+                        .push(RuntimeValue::String(string.clone()))),
                     Token::Boolean(b) => {
-                        state.stack.push(RuntimeValue::Boolean(*b))
+                        Ok(state.stack.push(RuntimeValue::Boolean(*b)))
                     }
-                    token => {
-                        return Err(PileError::new(
-                            Rc::clone(&source),
-                            state.current_lines,
-                            format!("Unexpected {}", token),
-                        ))
-                    }
+                    token => Err(PileError::new(
+                        Rc::clone(&source),
+                        state.current_lines,
+                        format!("Unexpected {}", token),
+                    )),
                 },
                 Expr::Assignment { var, .. } => {
-                    Interpreter::assign(var, state, source)?
+                    Interpreter::assign(var, state, source)
                 }
                 Expr::Block { expressions, .. } => {
-                    state.stack.push(RuntimeValue::Function(Function {
+                    Ok(state.stack.push(RuntimeValue::Function(Function {
                         source: Rc::clone(source),
                         exprs: Rc::clone(expressions),
-                    }))
+                    })))
                 }
-                Expr::Use { subprogram, .. } => {
-                    Interpreter::call(
-                        &subprogram.expressions,
-                        state,
-                        &subprogram.source,
-                    )?;
-                }
-                Expr::Save { var, .. } => {
-                    state.lookup.save(var);
-                }
-                Expr::Restore { var, .. } => {
-                    state.lookup.restore(var);
-                }
-            }
+                Expr::Use { subprogram, .. } => Interpreter::call(
+                    &subprogram.expressions,
+                    state,
+                    &subprogram.source,
+                ),
+                Expr::Save { var, .. } => Ok(state.lookup.save(var)),
+                Expr::Restore { var, .. } => Ok(state.lookup.restore(var)),
+            };
 
             if state.trace {
                 tracer::after_eval(&expr);
+            }
+
+            if let Err(e) = result {
+                expressions
+                    .iter()
+                    .rev()
+                    .take_while(|expr| matches!(expr, Expr::Restore{..}))
+                    .map(|expr| {
+                        if let Expr::Restore { var, .. } = expr {
+                            tracer::before_eval(expr, &state.lookup);
+                            state.lookup.restore(var);
+                            tracer::after_eval(&expr);
+                        }
+                    })
+                    .count();
+                return Err(e);
             }
         }
 

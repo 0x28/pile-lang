@@ -37,7 +37,7 @@ pub fn translate(ast: ParsedAst) -> ScopedAst {
 
     ScopedAst(Ast {
         source: Rc::clone(source),
-        expressions: expressions,
+        expressions,
     })
 }
 
@@ -50,7 +50,7 @@ fn translate_block(
     let mut expr = Rc::try_unwrap(expr)
         .expect("references to expressions while translating scope");
 
-    for var in locals {
+    for var in locals.into_iter().rev() {
         expr.insert(
             0,
             Expr::Save {
