@@ -11,10 +11,17 @@ use atty::Stream;
 use clap::{crate_version, App, Arg};
 
 #[derive(Debug, PartialEq)]
+pub struct CompletionOptions {
+    prefix: String,
+    line: u64,
+}
+
+#[derive(Debug, PartialEq)]
 pub struct CommandLineOptions {
     stack_size: usize,
     source: Rc<ProgramSource>,
     trace: bool,
+    completion: Option<CompletionOptions>,
 }
 
 impl CommandLineOptions {
@@ -79,27 +86,52 @@ where
             Arg::with_name("FILE")
                 .help("The program to run. Use '-' for stdin."),
         )
+        .arg(
+            Arg::with_name("complete")
+                .help(
+                    "Print symbols that start with <prefix> in context <line>",
+                )
+                .short("c")
+                .long("complete")
+                .value_names(&["prefix", "line"])
+                .requires("FILE"),
+        )
         .get_matches_from_safe(itr)
         .map_err(|e| e.to_string())?;
 
     let stack_size: usize = matches.value_of("size").unwrap().parse().unwrap();
     let file = matches.value_of("FILE");
     let trace = matches.is_present("trace");
+    let source = Rc::new(match file {
+        None => {
+            if atty::is(Stream::Stdin) {
+                ProgramSource::Repl
+            } else {
+                ProgramSource::Stdin
+            }
+        }
+        Some("-") => ProgramSource::Stdin,
+        Some(file) => ProgramSource::File(PathBuf::from(file)),
+    });
+    let completion: Option<CompletionOptions> =
+        match matches.values_of("complete") {
+            Some(values) => {
+                let values: Vec<&str> = values.collect();
+                Some(CompletionOptions {
+                    prefix: values[0].to_owned(),
+                    line: values[1].parse().map_err(|e| {
+                        format!("error parsing <line> in '--complete': {}", e)
+                    })?,
+                })
+            }
+            None => None,
+        };
 
     Ok(CommandLineOptions {
         stack_size,
-        source: Rc::new(match file {
-            None => {
-                if atty::is(Stream::Stdin) {
-                    ProgramSource::Repl
-                } else {
-                    ProgramSource::Stdin
-                }
-            }
-            Some("-") => ProgramSource::Stdin,
-            Some(file) => ProgramSource::File(PathBuf::from(file)),
-        }),
+        source,
         trace,
+        completion,
     })
 }
 

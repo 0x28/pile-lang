@@ -6,6 +6,7 @@ fn test_read_program() {
         stack_size: 100,
         source: Rc::new(ProgramSource::File(PathBuf::from("unknown.txt"))),
         trace: true,
+        completion: None,
     };
 
     assert_eq!(
