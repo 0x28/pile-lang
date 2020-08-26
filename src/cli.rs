@@ -12,8 +12,8 @@ use clap::{crate_version, App, Arg};
 
 #[derive(Debug, PartialEq)]
 pub struct CompletionOptions {
-    prefix: String,
-    line: u64,
+    pub prefix: String,
+    pub line: u64,
 }
 
 #[derive(Debug, PartialEq)]
@@ -50,6 +50,10 @@ impl CommandLineOptions {
 
     pub fn source(&self) -> Rc<ProgramSource> {
         Rc::clone(&self.source)
+    }
+
+    pub fn completion<'a>(&'a self) -> &'a Option<CompletionOptions> {
+        &self.completion
     }
 }
 
