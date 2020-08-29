@@ -8,7 +8,7 @@ use std::path::PathBuf;
 use std::rc::Rc;
 
 use atty::Stream;
-use clap::{crate_version, App, Arg};
+use clap::{crate_version, App, Arg, ErrorKind};
 
 #[derive(Debug, PartialEq)]
 pub struct CompletionOptions {
@@ -100,8 +100,18 @@ where
                 .value_names(&["prefix", "line"])
                 .requires("FILE"),
         )
-        .get_matches_from_safe(itr)
-        .map_err(|e| e.to_string())?;
+        .get_matches_from_safe(itr);
+
+    let matches = match matches {
+        Err(e) => match e.kind {
+            ErrorKind::HelpDisplayed | ErrorKind::VersionDisplayed => {
+                println!("{}", e.message);
+                std::process::exit(0);
+            }
+            _ => return Err(e.to_string()),
+        },
+        Ok(m) => m,
+    };
 
     let stack_size: usize = matches.value_of("size").unwrap().parse().unwrap();
     let file = matches.value_of("FILE");
