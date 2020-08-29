@@ -1,0 +1,90 @@
+;;; pile.el --- Major mode for the pile programming language  -*- lexical-binding: t; coding: utf-8 -*-
+;; Version: 0.1
+
+;;; Commentary:
+
+;; Provides syntax highlighting and completion for the pile programming
+;; language. Use M-x `package-install-from-buffer' to install this package.
+
+;;; Code:
+
+(defgroup pile nil
+  "Editing pile programs."
+  :group 'languages)
+
+(defcustom pile-executable-name "pile"
+  "Program invoked by completion functions."
+  :type 'file
+  :group 'pile)
+
+(defconst pile-font-lock-keywords
+  '("if" "dotimes" "while" "let" "begin" "end" "use"))
+
+(defconst pile-font-lock-builtins
+  '("print" "assert" "dup" "drop" "swap" "natural" "integer" "float"))
+
+(defvar pile--function-regexp
+  "end[[:space:]\n]*->[[:space:]\n]*\\([[:alpha:]][[:alnum:]]*\\)")
+
+;;;###autoload
+(define-derived-mode pile-mode prog-mode "pile"
+  "Major mode for the pile programming language."
+  (setq-local comment-start "#")
+  (setq-local comment-end "")
+  (setq-local comment-use-syntax t)
+  (setq-local imenu-create-index-function #'pile--imenu-create-index)
+  (add-hook 'completion-at-point-functions
+            #'pile-completion-at-point nil 'local)
+
+  (font-lock-add-keywords
+   nil
+   `(("\\_<[0-9].?[0-9]*\\_>" . font-lock-constant-face)
+     (,pile--function-regexp 1 font-lock-function-name-face)
+     (,(regexp-opt pile-font-lock-keywords 'words) . font-lock-keyword-face)
+     (,(regexp-opt pile-font-lock-builtins 'words) . font-lock-builtin-face)))
+
+  (modify-syntax-entry ?# "<" pile-mode-syntax-table)
+  (modify-syntax-entry ?\n ">" pile-mode-syntax-table))
+
+(defun pile--imenu-create-index ()
+  "Create a imenu index for pile files."
+  (let (index)
+    (save-excursion
+      (goto-char (point-max))
+      (while (search-backward-regexp pile--function-regexp nil t)
+        (push (cons (match-string-no-properties 1)
+                    (match-beginning 1))
+              index)))
+    index))
+
+(defun pile--get-completions (prefix)
+  "Get the completions starting with PREFIX for the current line."
+  (process-lines pile-executable-name
+                 "--complete"
+                 prefix
+                 (number-to-string (line-number-at-pos nil t))
+                 (buffer-file-name)))
+
+(defun pile-completion-at-point ()
+  "Function used for `completion-at-point-functions' in `pile-mode'."
+  (with-syntax-table pile-mode-syntax-table
+    (unless (or (nth 3 (syntax-ppss))
+                (nth 4 (syntax-ppss))
+                (not (executable-find pile-executable-name)))
+      (let ((start (condition-case nil
+                       (save-excursion
+                         (backward-sexp 1)
+                         (point))
+                     (scan-error (point))))
+            (end (point))
+            (collection (completion-table-dynamic #'pile--get-completions)))
+        (list start
+              end
+              collection)))))
+
+;;;###autoload
+(add-to-list 'auto-mode-alist
+             '("\\.pile\\'" . pile-mode))
+
+(provide 'pile)
+;;; pile.el ends here
