@@ -6,6 +6,7 @@ fn test_read_program() {
         stack_size: 100,
         source: Rc::new(ProgramSource::File(PathBuf::from("unknown.txt"))),
         trace: true,
+        completion: None,
     };
 
     assert_eq!(
@@ -29,6 +30,7 @@ fn test_read_options1() -> Result<(), String> {
     assert_eq!(options.stack_size(), 100);
     assert_eq!(options.trace(), false);
     assert_eq!(options.source().as_ref(), &get_test_source());
+    assert_eq!(options.completion, None);
 
     Ok(())
 }
@@ -77,4 +79,28 @@ fn test_read_options5() {
     assert!(options
         .unwrap_err()
         .contains("The value must be a natural number"));
+}
+
+#[test]
+fn test_read_completion1() -> Result<(), String> {
+    let completion =
+        read_options(vec!["test6", "-c", "prefix_", "100", "file.pile"])?
+            .completion
+            .unwrap();
+
+    assert_eq!(completion.prefix, "prefix_");
+    assert_eq!(completion.line, 100);
+
+    Ok(())
+}
+
+#[test]
+fn test_read_completion2() {
+    let options =
+        read_options(vec!["test7", "--complete", "var_", "nan", "file.pile"]);
+
+    assert!(options.is_err());
+    assert!(options
+        .unwrap_err()
+        .contains("error parsing <line> in '--complete':"));
 }

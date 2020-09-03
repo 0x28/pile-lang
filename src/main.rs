@@ -1,4 +1,5 @@
 mod cli;
+mod completion;
 mod interpret;
 mod lex;
 mod locals;
@@ -29,9 +30,19 @@ fn pile() -> Result<(), String> {
     let ast = locals::translate(ast);
     let ast = using::resolve(ast).map_err(|e| e.to_string())?;
 
-    let mut interpreter =
-        interpret::Interpreter::new(ast, options.stack_size(), options.trace());
-    interpreter.run().map_err(|e| e.to_string())?;
+    match options.completion() {
+        None => {
+            let mut interpreter = interpret::Interpreter::new(
+                ast,
+                options.stack_size(),
+                options.trace(),
+            );
+            interpreter.run().map_err(|e| e.to_string())?;
+        }
+        Some(cli::CompletionOptions { prefix, line }) => {
+            completion::complete_to_stdout(prefix, *line, ast)
+        }
+    }
 
     Ok(())
 }
