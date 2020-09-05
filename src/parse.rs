@@ -14,7 +14,13 @@ pub struct Ast {
 }
 
 #[derive(Debug, PartialEq)]
-pub struct ParsedAst(pub Ast);
+pub struct ParsedAst(Ast);
+
+impl ParsedAst {
+    pub fn as_ast(self) -> Ast {
+        self.0
+    }
+}
 
 #[derive(Debug, PartialEq)]
 pub enum Expr {

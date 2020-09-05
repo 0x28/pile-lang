@@ -13,7 +13,19 @@ use std::path::PathBuf;
 use std::rc::Rc;
 
 #[derive(Debug, PartialEq)]
-pub struct ResolvedAst(pub Ast);
+pub struct ResolvedAst(Ast);
+
+impl ResolvedAst {
+    pub fn as_ast(self) -> Ast {
+        self.0
+    }
+}
+
+impl AsRef<Ast> for ResolvedAst {
+    fn as_ref(&self) -> &Ast {
+        &self.0
+    }
+}
 
 struct DependencyTree<'d> {
     parent: Option<&'d DependencyTree<'d>>,
@@ -48,14 +60,14 @@ impl<'d> DependencyTree<'d> {
 }
 
 pub fn resolve(ast: ScopedAst) -> Result<ResolvedAst, PileError> {
-    let path = match ast.0.source.as_ref() {
+    let path = match ast.as_ref().source.as_ref() {
         ProgramSource::File(file) => normalize_path(file).map_err(|err| {
-            PileError::new(Rc::clone(&ast.0.source), (0, 0), err)
+            PileError::new(Rc::clone(&ast.as_ref().source), (0, 0), err)
         })?,
         _ => PathBuf::new(),
     };
 
-    let dir = match &ast.0.source.as_ref() {
+    let dir = match ast.as_ref().source.as_ref() {
         ProgramSource::Repl | ProgramSource::Stdin => PathBuf::from("."),
         ProgramSource::File(file) => file
             .parent()
@@ -71,9 +83,9 @@ fn resolve_use(
     tree: &DependencyTree,
     ast: ScopedAst,
 ) -> Result<ResolvedAst, PileError> {
-    let source = &ast.0.source;
+    let source = Rc::clone(&ast.as_ref().source);
     let expressions: Result<Vec<Expr>, PileError> = ast
-        .0
+        .as_ast()
         .expressions
         .into_iter()
         .map(|expr| {
@@ -127,7 +139,7 @@ fn resolve_use(
         .collect();
 
     Ok(ResolvedAst(Ast {
-        source: Rc::clone(source),
+        source,
         expressions: expressions?,
     }))
 }

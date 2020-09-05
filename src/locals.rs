@@ -4,12 +4,24 @@ use crate::parse::{Ast, ParsedAst};
 use std::rc::Rc;
 
 #[derive(Debug, PartialEq)]
-pub struct ScopedAst(pub Ast);
+pub struct ScopedAst(Ast);
+
+impl ScopedAst {
+    pub fn as_ast(self) -> Ast {
+        self.0
+    }
+}
+
+impl AsRef<Ast> for ScopedAst {
+    fn as_ref(&self) -> &Ast {
+        &self.0
+    }
+}
 
 pub fn translate(ast: ParsedAst) -> ScopedAst {
-    let source = &ast.0.source;
+    let ast = ast.as_ast();
+    let source = Rc::clone(&ast.source);
     let expressions: Vec<Expr> = ast
-        .0
         .expressions
         .into_iter()
         .map(|expr| {
@@ -36,7 +48,7 @@ pub fn translate(ast: ParsedAst) -> ScopedAst {
         .collect();
 
     ScopedAst(Ast {
-        source: Rc::clone(source),
+        source,
         expressions,
     })
 }

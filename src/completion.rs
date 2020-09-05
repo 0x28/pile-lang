@@ -133,7 +133,7 @@ pub fn map_completions<O>(
         filter(token)
     }
 
-    map_identifiers(&ast.0.expressions, (0, u64::MAX), line, &mut filter)
+    map_identifiers(&ast.as_ref().expressions, (0, u64::MAX), line, &mut filter)
 }
 
 pub fn complete_to_stdout(prefix: &str, line: u64, ast: ResolvedAst) {

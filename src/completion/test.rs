@@ -27,7 +27,7 @@ end
 ",
     );
 
-    map_identifiers(&ast.0.expressions, (0, u64::MAX), 3, &mut |ident| {
+    map_identifiers(&ast.as_ast().expressions, (0, u64::MAX), 3, &mut |ident| {
         comps.push(ident.to_owned())
     });
 
@@ -47,7 +47,7 @@ end
 ",
     );
 
-    map_identifiers(&ast.0.expressions, (0, u64::MAX), 5, &mut |ident| {
+    map_identifiers(&ast.as_ast().expressions, (0, u64::MAX), 5, &mut |ident| {
         comps.push(ident.to_owned())
     });
 
@@ -64,7 +64,7 @@ fn test_comp_none() {
 ",
     );
 
-    map_identifiers(&ast.0.expressions, (0, u64::MAX), 2, &mut |ident| {
+    map_identifiers(&ast.as_ast().expressions, (0, u64::MAX), 2, &mut |ident| {
         comps.push(ident.to_owned())
     });
 
@@ -82,7 +82,7 @@ use \"src/completion/comp_test\"
 ",
     );
 
-    map_identifiers(&ast.0.expressions, (0, u64::MAX), 3, &mut |ident| {
+    map_identifiers(&ast.as_ast().expressions, (0, u64::MAX), 3, &mut |ident| {
         comps.push(ident.to_owned())
     });
 
@@ -100,7 +100,7 @@ use \"src/completion/comp_test\"
 ",
     );
 
-    map_identifiers(&ast.0.expressions, (0, u64::MAX), 2, &mut |ident| {
+    map_identifiers(&ast.as_ast().expressions, (0, u64::MAX), 2, &mut |ident| {
         comps.push(ident.to_owned())
     });
 
@@ -119,7 +119,7 @@ end
 ",
     );
 
-    map_identifiers(&ast.0.expressions, (0, u64::MAX), 6, &mut |ident| {
+    map_identifiers(&ast.as_ast().expressions, (0, u64::MAX), 6, &mut |ident| {
         comps.push(ident.to_owned())
     });
 
@@ -138,7 +138,7 @@ end
 ",
     );
 
-    map_identifiers(&ast.0.expressions, (0, u64::MAX), 4, &mut |ident| {
+    map_identifiers(&ast.as_ast().expressions, (0, u64::MAX), 4, &mut |ident| {
         comps.push(ident.to_owned())
     });
 

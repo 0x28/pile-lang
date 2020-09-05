@@ -41,7 +41,7 @@ impl Interpreter {
         trace: bool,
     ) -> Interpreter {
         Interpreter {
-            program: program.0,
+            program: program.as_ast(),
             state: State {
                 stack: Vec::with_capacity(initial_size),
                 lookup: ScopeStack::new(),
