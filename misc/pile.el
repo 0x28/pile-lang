@@ -24,7 +24,7 @@
   '("print" "assert" "dup" "drop" "swap" "natural" "integer" "float"))
 
 (defvar pile--function-regexp
-  "end[[:space:]\n]*->[[:space:]\n]*\\([[:alpha:]][[:alnum:]]*\\)")
+  "end[[:space:]\n]*->[[:space:]\n]*\\([[:alpha:]][[:alnum:]_]*\\)")
 
 ;;;###autoload
 (define-derived-mode pile-mode prog-mode "pile"
