@@ -32,7 +32,7 @@
   (setq-local comment-start "#")
   (setq-local comment-end "")
   (setq-local comment-use-syntax t)
-  (setq-local imenu-create-index-function #'pile--imenu-create-index)
+  (setq-local imenu-generic-expression `(("function" ,pile--function-regexp 1)))
   (add-hook 'completion-at-point-functions
             #'pile-completion-at-point nil 'local)
 
@@ -45,17 +45,6 @@
 
   (modify-syntax-entry ?# "<" pile-mode-syntax-table)
   (modify-syntax-entry ?\n ">" pile-mode-syntax-table))
-
-(defun pile--imenu-create-index ()
-  "Create a imenu index for pile files."
-  (let (index)
-    (save-excursion
-      (goto-char (point-max))
-      (while (search-backward-regexp pile--function-regexp nil t)
-        (push (cons (match-string-no-properties 1)
-                    (match-beginning 1))
-              index)))
-    index))
 
 (defun pile--get-completions (prefix)
   "Get the completions starting with PREFIX for the current line."
