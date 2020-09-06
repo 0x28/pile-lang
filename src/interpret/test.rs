@@ -504,6 +504,19 @@ fn test_cast_to_float() {
 }
 
 #[test]
+fn test_concat() {
+    expect_value(
+        "\"hello\" \"_world\" concat",
+        Ok(&RuntimeValue::String("hello_world".to_owned())),
+    );
+    expect_value(
+        "\"a\" \"b\" \"c\" concat concat",
+        Ok(&RuntimeValue::String("abc".to_owned())),
+    );
+    expect_value("\"\" \"\" concat", Ok(&RuntimeValue::String("".to_owned())));
+}
+
+#[test]
 fn test_let1() {
     expect_value(
         "
@@ -710,6 +723,15 @@ fn test_type_errors() {
             Rc::new(ProgramSource::Stdin),
             (1, 1),
             "Expected boolean found string 'true'".to_string(),
+        )),
+    );
+
+    expect_value(
+        "10 \"test\" concat",
+        Err(PileError::new(
+            Rc::new(ProgramSource::Stdin),
+            (1, 1),
+            "Expected string found natural '10'".to_string(),
         )),
     );
 }

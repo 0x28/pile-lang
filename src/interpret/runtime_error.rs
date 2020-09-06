@@ -33,3 +33,12 @@ pub fn ensure_number(stack: &mut Vec<RuntimeValue>) -> Result<Number, String> {
         v => Err(format!("Expected number found {}", v.type_fmt())),
     }
 }
+
+pub fn ensure_string(stack: &mut Vec<RuntimeValue>) -> Result<String, String> {
+    let value = ensure_element(stack)?;
+
+    match value {
+        RuntimeValue::String(s) => Ok(s),
+        v => Err(format!("Expected string found {}", v.type_fmt())),
+    }
+}
