@@ -517,6 +517,23 @@ fn test_concat() {
 }
 
 #[test]
+fn test_length() {
+    expect_value(
+        "\"some_string\" length",
+        Ok(&RuntimeValue::Number(Number::Natural(11))),
+    );
+    expect_value("\"\" length", Ok(&RuntimeValue::Number(Number::Natural(0))));
+    expect_value(
+        "\"not_consumed\" length drop",
+        Ok(&RuntimeValue::String("not_consumed".to_owned())),
+    );
+    expect_value(
+        "\"ünicöde\" length", // NOTE: length returns the number of bytes
+        Ok(&RuntimeValue::Number(Number::Natural(9))),
+    );
+}
+
+#[test]
 fn test_let1() {
     expect_value(
         "

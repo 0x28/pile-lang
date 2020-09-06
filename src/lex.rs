@@ -56,6 +56,7 @@ pub enum Operator {
     Float,
     // string operators
     Concat,
+    Length,
 }
 
 impl fmt::Display for Operator {
@@ -88,6 +89,7 @@ impl fmt::Display for Operator {
                 Operator::Integer => "integer",
                 Operator::Float => "float",
                 Operator::Concat => "concat",
+                Operator::Length => "length",
             }
         )
     }
@@ -237,6 +239,7 @@ impl<'a> Lexer<'a> {
             "integer" => Token::Operator(Operator::Integer),
             "float" => Token::Operator(Operator::Float),
             "concat" => Token::Operator(Operator::Concat),
+            "length" => Token::Operator(Operator::Length),
             "use" => Token::Use,
             "let" => Token::Let,
             _ => Token::Identifier(ident),
