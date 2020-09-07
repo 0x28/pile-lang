@@ -24,3 +24,12 @@ pub fn apply_length(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
 
     Ok(())
 }
+
+pub fn apply_contains(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
+    let right = runtime_error::ensure_string(stack)?;
+    let left = runtime_error::ensure_string(stack)?;
+
+    stack.push(RuntimeValue::Boolean(left.contains(&right)));
+
+    Ok(())
+}

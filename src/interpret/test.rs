@@ -534,6 +534,20 @@ fn test_length() {
 }
 
 #[test]
+fn test_contains() {
+    expect_value(
+        "\"string\" \"s\" contains",
+        Ok(&RuntimeValue::Boolean(true)),
+    );
+
+    expect_value("\"\" \"str\" contains", Ok(&RuntimeValue::Boolean(false)));
+
+    expect_value("\"str\" \"\" contains", Ok(&RuntimeValue::Boolean(true)));
+
+    expect_value("\"pile\" \"pi\" contains", Ok(&RuntimeValue::Boolean(true)));
+}
+
+#[test]
 fn test_let1() {
     expect_value(
         "

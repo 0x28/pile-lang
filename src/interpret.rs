@@ -206,6 +206,7 @@ impl Interpreter {
             Operator::Float => cast::apply_float(stack),
             Operator::Concat => string::apply_concat(stack),
             Operator::Length => string::apply_length(stack),
+            Operator::Contains => string::apply_contains(stack),
         };
 
         operation_result.map_err(|msg| {

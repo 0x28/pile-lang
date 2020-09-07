@@ -49,6 +49,7 @@ fn token_completions() -> &'static [&'static str] {
         Token::Operator(Operator::Float)        => "float",
         Token::Operator(Operator::Concat)       => "concat",
         Token::Operator(Operator::Length)       => "length",
+        Token::Operator(Operator::Contains)     => "contains",
         Token::Assign                           => "->",
         Token::Begin                            => "begin",
         Token::End                              => "end",
