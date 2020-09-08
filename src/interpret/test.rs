@@ -548,6 +548,38 @@ fn test_contains() {
 }
 
 #[test]
+fn test_upcase() {
+    expect_value(
+        "\"pile\" upcase",
+        Ok(&RuntimeValue::String("PILE".to_owned())),
+    );
+    expect_value(
+        "\"ünicöde ß\" upcase",
+        Ok(&RuntimeValue::String("ÜNICÖDE SS".to_owned())),
+    );
+    expect_value(
+        "\"mIxEd_CaSe\" upcase",
+        Ok(&RuntimeValue::String("MIXED_CASE".to_owned())),
+    );
+}
+
+#[test]
+fn test_downcase() {
+    expect_value(
+        "\"PILE\" downcase",
+        Ok(&RuntimeValue::String("pile".to_owned())),
+    );
+    expect_value(
+        "\"ÜNICÖDE SS\" downcase",
+        Ok(&RuntimeValue::String("ünicöde ss".to_owned())),
+    );
+    expect_value(
+        "\"mIxEd_CaSe\" downcase",
+        Ok(&RuntimeValue::String("mixed_case".to_owned())),
+    );
+}
+
+#[test]
 fn test_let1() {
     expect_value(
         "

@@ -207,6 +207,8 @@ impl Interpreter {
             Operator::Concat => string::apply_concat(stack),
             Operator::Length => string::apply_length(stack),
             Operator::Contains => string::apply_contains(stack),
+            Operator::Downcase => string::apply_downcase(stack),
+            Operator::Upcase => string::apply_upcase(stack),
         };
 
         operation_result.map_err(|msg| {

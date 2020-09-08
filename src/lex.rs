@@ -58,6 +58,8 @@ pub enum Operator {
     Concat,
     Length,
     Contains,
+    Upcase,
+    Downcase,
 }
 
 impl fmt::Display for Operator {
@@ -92,6 +94,8 @@ impl fmt::Display for Operator {
                 Operator::Concat => "concat",
                 Operator::Length => "length",
                 Operator::Contains => "contains",
+                Operator::Downcase => "downcase",
+                Operator::Upcase => "upcase",
             }
         )
     }
@@ -243,6 +247,8 @@ impl<'a> Lexer<'a> {
             "concat" => Token::Operator(Operator::Concat),
             "length" => Token::Operator(Operator::Length),
             "contains" => Token::Operator(Operator::Contains),
+            "downcase" => Token::Operator(Operator::Downcase),
+            "upcase" => Token::Operator(Operator::Upcase),
             "use" => Token::Use,
             "let" => Token::Let,
             _ => Token::Identifier(ident),
