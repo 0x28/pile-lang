@@ -209,6 +209,7 @@ impl Interpreter {
             Operator::Contains => string::apply_contains(stack),
             Operator::Downcase => string::apply_downcase(stack),
             Operator::Upcase => string::apply_upcase(stack),
+            Operator::Trim => string::apply_trim(stack),
         };
 
         operation_result.map_err(|msg| {

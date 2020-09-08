@@ -49,3 +49,11 @@ pub fn apply_downcase(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
 
     Ok(())
 }
+
+pub fn apply_trim(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
+    let string = runtime_error::ensure_string_ref(stack)?;
+
+    *string = string.trim().to_owned();
+
+    Ok(())
+}

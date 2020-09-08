@@ -580,6 +580,22 @@ fn test_downcase() {
 }
 
 #[test]
+fn test_trim() {
+    expect_value("\" \" trim", Ok(&RuntimeValue::String("".to_owned())));
+    expect_value(
+        "\" xyz \" trim",
+        Ok(&RuntimeValue::String("xyz".to_owned())),
+    );
+    expect_value("\"a \" trim", Ok(&RuntimeValue::String("a".to_owned())));
+    expect_value("\" b\" trim", Ok(&RuntimeValue::String("b".to_owned())));
+    expect_value("\"\tx\t\" trim", Ok(&RuntimeValue::String("x".to_owned())));
+    expect_value(
+        "\"  \ty\t  \n\t\" trim",
+        Ok(&RuntimeValue::String("y".to_owned())),
+    );
+}
+
+#[test]
 fn test_let1() {
     expect_value(
         "

@@ -60,6 +60,7 @@ pub enum Operator {
     Contains,
     Upcase,
     Downcase,
+    Trim,
 }
 
 impl fmt::Display for Operator {
@@ -96,6 +97,7 @@ impl fmt::Display for Operator {
                 Operator::Contains => "contains",
                 Operator::Downcase => "downcase",
                 Operator::Upcase => "upcase",
+                Operator::Trim => "trim",
             }
         )
     }
@@ -249,6 +251,7 @@ impl<'a> Lexer<'a> {
             "contains" => Token::Operator(Operator::Contains),
             "downcase" => Token::Operator(Operator::Downcase),
             "upcase" => Token::Operator(Operator::Upcase),
+            "trim" => Token::Operator(Operator::Trim),
             "use" => Token::Use,
             "let" => Token::Let,
             _ => Token::Identifier(ident),
