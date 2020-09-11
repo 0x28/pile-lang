@@ -205,5 +205,5 @@ fn test_comp_prefix4() {
     let ast = parse_prog("");
 
     map_completions("f", 1, ast, &mut |name| comps.push(name.to_owned()));
-    assert_eq!(comps, vec!["float", "false"])
+    assert_eq!(comps, vec!["float", "format", "false"])
 }

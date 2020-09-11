@@ -210,6 +210,7 @@ impl Interpreter {
             Operator::Downcase => string::apply_downcase(stack),
             Operator::Upcase => string::apply_upcase(stack),
             Operator::Trim => string::apply_trim(stack),
+            Operator::Format => string::apply_format(stack),
         };
 
         operation_result.map_err(|msg| {

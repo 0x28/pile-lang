@@ -596,6 +596,48 @@ fn test_trim() {
 }
 
 #[test]
+fn test_format() {
+    expect_value(
+        r#"100 "{}" format"#,
+        Ok(&RuntimeValue::String("100".to_owned())),
+    );
+    expect_value(
+        r#"1 2 3 "{} {}_{}" format"#,
+        Ok(&RuntimeValue::String("1 2_3".to_owned())),
+    );
+    expect_value(
+        r#""no format" format"#,
+        Ok(&RuntimeValue::String("no format".to_owned())),
+    );
+
+    expect_value(r#""" format"#, Ok(&RuntimeValue::String("".to_owned())));
+    expect_value(
+        r#"1.23 "x" "{}-{}" format"#,
+        Ok(&RuntimeValue::String("1.23-x".to_owned())),
+    );
+    expect_value(
+        r#" "{}" "{}" format"#,
+        Ok(&RuntimeValue::String("{}".to_owned())),
+    );
+    expect_value(
+        r#" 2020 12 24 "{}/{}/{}" format"#,
+        Ok(&RuntimeValue::String("2020/12/24".to_owned())),
+    );
+    expect_value(
+        r#" -200 -10 - "~~[{}]~~" format"#,
+        Ok(&RuntimeValue::String("~~[-190]~~".to_owned())),
+    );
+    expect_value(
+        r#" 42 "{} -> {}" format"#,
+        Err(PileError::new(
+            Rc::new(ProgramSource::Stdin),
+            (1, 1),
+            "Stack underflow".to_owned(),
+        )),
+    );
+}
+
+#[test]
 fn test_let1() {
     expect_value(
         "

@@ -53,6 +53,7 @@ fn token_completions() -> &'static [&'static str] {
         Token::Operator(Operator::Upcase)       => "upcase",
         Token::Operator(Operator::Downcase)     => "downcase",
         Token::Operator(Operator::Trim)         => "trim",
+        Token::Operator(Operator::Format)       => "format",
         Token::Assign                           => "->",
         Token::Begin                            => "begin",
         Token::End                              => "end",

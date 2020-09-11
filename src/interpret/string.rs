@@ -57,3 +57,20 @@ pub fn apply_trim(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
 
     Ok(())
 }
+
+pub fn apply_format(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
+    let format = runtime_error::ensure_string(stack)?;
+    let mut split = format.rsplit("{}");
+    let mut result = vec![String::from(split.next().unwrap())];
+
+    for part in split {
+        let value = runtime_error::ensure_element(stack)?;
+        result.push(value.to_string());
+        result.push(part.to_string());
+    }
+
+    result.reverse();
+    stack.push(RuntimeValue::String(result.join("")));
+
+    Ok(())
+}
