@@ -62,6 +62,7 @@ pub enum Operator {
     Downcase,
     Trim,
     Format,
+    Index,
 }
 
 impl fmt::Display for Operator {
@@ -100,6 +101,7 @@ impl fmt::Display for Operator {
                 Operator::Upcase => "upcase",
                 Operator::Trim => "trim",
                 Operator::Format => "format",
+                Operator::Index => "index",
             }
         )
     }
@@ -255,6 +257,7 @@ impl<'a> Lexer<'a> {
             "upcase" => Token::Operator(Operator::Upcase),
             "trim" => Token::Operator(Operator::Trim),
             "format" => Token::Operator(Operator::Format),
+            "index" => Token::Operator(Operator::Index),
             "use" => Token::Use,
             "let" => Token::Let,
             _ => Token::Identifier(ident),

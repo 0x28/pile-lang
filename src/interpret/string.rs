@@ -15,7 +15,7 @@ pub fn apply_concat(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
 
 pub fn apply_length(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
     let string = runtime_error::ensure_string_ref(stack)?;
-    let length = string.len();
+    let length = string.chars().count();
     let length = length.try_into().map_err(|_| {
         format!("Can't convert string length '{}' to natural", length)
     })?;
@@ -71,6 +71,33 @@ pub fn apply_format(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
 
     result.reverse();
     stack.push(RuntimeValue::String(result.join("")));
+
+    Ok(())
+}
+
+pub fn apply_index(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
+    let index = runtime_error::ensure_element(stack)?;
+    let index = match index {
+        RuntimeValue::Number(Number::Natural(n)) => n,
+        _ => {
+            return Err(format!(
+                "Can't use {} as string index",
+                index.type_fmt()
+            ))
+        }
+    };
+    let string = runtime_error::ensure_string_ref(stack)?;
+    let c = match string.chars().nth(index as usize) {
+        Some(c) => c,
+        None => {
+            return Err(format!(
+                "Invalid index {} for string \"{}\"",
+                index, string
+            ));
+        }
+    };
+
+    stack.push(RuntimeValue::String(c.to_string()));
 
     Ok(())
 }

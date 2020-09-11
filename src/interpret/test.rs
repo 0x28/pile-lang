@@ -528,8 +528,8 @@ fn test_length() {
         Ok(&RuntimeValue::String("not_consumed".to_owned())),
     );
     expect_value(
-        "\"ünicöde\" length", // NOTE: length returns the number of bytes
-        Ok(&RuntimeValue::Number(Number::Natural(9))),
+        "\"ünicöde\" length",
+        Ok(&RuntimeValue::Number(Number::Natural(7))),
     );
 }
 
@@ -633,6 +633,46 @@ fn test_format() {
             Rc::new(ProgramSource::Stdin),
             (1, 1),
             "Stack underflow".to_owned(),
+        )),
+    );
+}
+
+#[test]
+fn test_index() {
+    expect_value(
+        r#" "hello" 0 index"#,
+        Ok(&RuntimeValue::String("h".to_owned())),
+    );
+    expect_value(
+        r#" "hello" 1 index"#,
+        Ok(&RuntimeValue::String("e".to_owned())),
+    );
+    expect_value(
+        r#" "ünicöde" 4 index"#,
+        Ok(&RuntimeValue::String("ö".to_owned())),
+    );
+    expect_value(
+        r#" "test" 0 index drop"#,
+        Ok(&RuntimeValue::String("test".to_owned())),
+    );
+    expect_value(
+        r#" "123ö" length 1 - index"#,
+        Ok(&RuntimeValue::String("ö".to_owned())),
+    );
+    expect_value(
+        r#" "shorty" 10 index"#,
+        Err(PileError::new(
+            Rc::new(ProgramSource::Stdin),
+            (1, 1),
+            r#"Invalid index 10 for string "shorty""#.to_owned(),
+        )),
+    );
+    expect_value(
+        r#" "str" 42.1 index"#,
+        Err(PileError::new(
+            Rc::new(ProgramSource::Stdin),
+            (1, 1),
+            "Can't use float '42.1' as string index".to_owned(),
         )),
     );
 }

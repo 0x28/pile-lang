@@ -211,6 +211,7 @@ impl Interpreter {
             Operator::Upcase => string::apply_upcase(stack),
             Operator::Trim => string::apply_trim(stack),
             Operator::Format => string::apply_format(stack),
+            Operator::Index => string::apply_index(stack),
         };
 
         operation_result.map_err(|msg| {
