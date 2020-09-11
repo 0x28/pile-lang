@@ -17,7 +17,7 @@ pub fn apply_natural(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
             })?),
         )),
         Number::Float(f) => {
-            stack.push(RuntimeValue::Number(Number::Natural(f as u32)))
+            stack.push(RuntimeValue::Number(Number::Natural(f as u64)))
         }
     }
 
@@ -37,7 +37,7 @@ pub fn apply_integer(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
             stack.push(RuntimeValue::Number(Number::Integer(i)))
         }
         Number::Float(f) => {
-            stack.push(RuntimeValue::Number(Number::Integer(f as i32)))
+            stack.push(RuntimeValue::Number(Number::Integer(f as i64)))
         }
     }
 
@@ -49,10 +49,10 @@ pub fn apply_float(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
 
     match element {
         Number::Natural(n) => {
-            stack.push(RuntimeValue::Number(Number::Float(n as f32)))
+            stack.push(RuntimeValue::Number(Number::Float(n as f64)))
         }
         Number::Integer(i) => {
-            stack.push(RuntimeValue::Number(Number::Float(i as f32)))
+            stack.push(RuntimeValue::Number(Number::Float(i as f64)))
         }
         Number::Float(f) => stack.push(RuntimeValue::Number(Number::Float(f))),
     }

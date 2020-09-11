@@ -9,9 +9,9 @@ use std::str::Chars;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Number {
-    Natural(u32),
-    Integer(i32),
-    Float(f32),
+    Natural(u64),
+    Integer(i64),
+    Float(f64),
 }
 
 impl fmt::Display for Number {

@@ -21,7 +21,7 @@ pub fn apply_dotimes(
 
     let count = match count {
         RuntimeValue::Number(Number::Natural(n)) => n,
-        RuntimeValue::Number(Number::Integer(i)) if i >= 0 => i as u32,
+        RuntimeValue::Number(Number::Integer(i)) if i >= 0 => i as u64,
         val => {
             return Err(PileError::new(
                 Rc::clone(&source),

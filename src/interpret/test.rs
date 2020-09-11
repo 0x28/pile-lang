@@ -480,11 +480,11 @@ fn test_cast_to_integer() {
         Ok(&RuntimeValue::Number(Number::Integer(-32))),
     );
     expect_value(
-        "4290000000 integer",
+        "9300000000000000000 integer",
         Err(PileError::new(
             Rc::new(ProgramSource::Stdin),
             (1, 1),
-            "Conversion from natural '4290000000' to integer is invalid"
+            "Conversion from natural '9300000000000000000' to integer is invalid"
                 .to_string(),
         )),
     )
@@ -748,11 +748,12 @@ f2
 #[test]
 fn test_numeric_overflow() {
     expect_value(
-        "4294967295 1 +",
+        "18446744073709551615 1 +",
         Err(PileError::new(
             Rc::new(ProgramSource::Stdin),
             (1, 1),
-            "Numeric overflow while adding '4294967295' and '1'".to_string(),
+            "Numeric overflow while adding '18446744073709551615' and '1'"
+                .to_string(),
         )),
     );
     expect_value(
@@ -764,29 +765,31 @@ fn test_numeric_overflow() {
         )),
     );
     expect_value(
-        "1000000000 100000 *",
+        "100000000000 1000000000 *",
         Err(PileError::new(
             Rc::new(ProgramSource::Stdin),
             (1, 1),
-            "Numeric overflow while multiplying '1000000000' and '100000'"
+            "Numeric overflow while multiplying '100000000000' and '1000000000'"
                 .to_string(),
         )),
     );
     expect_value(
-        "-2000000005 -2000000005 +",
+        "-9000000000000000005 -9000000000000000005 +",
         Err(PileError::new(
             Rc::new(ProgramSource::Stdin),
             (1, 1),
-            "Numeric overflow while adding '-2000000005' and '-2000000005'"
+            "Numeric overflow while adding '-9000000000000000005' \
+             and '-9000000000000000005'"
                 .to_string(),
         )),
     );
     expect_value(
-        "-2000000005 -2000000005 *",
+        "-200000000000005 -200000000000005 *",
         Err(PileError::new(
             Rc::new(ProgramSource::Stdin),
             (1, 1),
-            "Numeric overflow while multiplying '-2000000005' and '-2000000005'"
+            "Numeric overflow while multiplying '-200000000000005' \
+             and '-200000000000005'"
                 .to_string(),
         )),
     );

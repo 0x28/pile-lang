@@ -171,7 +171,7 @@ fn test_numbers_float() {
 #[test]
 fn test_numbers_overflow() {
     let lexer = Lexer::new(
-        "8589934592 -8589934592 +8589934592",
+        "85892349393234324592 -858243349923432034592 +85648993234023044592",
         Rc::new(ProgramSource::Stdin),
     );
     let expected = vec![
@@ -180,7 +180,8 @@ fn test_numbers_overflow() {
             Err(PileError::new(
                 Rc::new(ProgramSource::Stdin),
                 (1, 1),
-                "'8589934592' is too large to be represented as a number"
+                "'85892349393234324592' is too large to be represented as a \
+                 number"
                     .to_string(),
             )),
         ),
@@ -189,7 +190,8 @@ fn test_numbers_overflow() {
             Err(PileError::new(
                 Rc::new(ProgramSource::Stdin),
                 (1, 1),
-                "'-8589934592' is too small to be represented as a number"
+                "'-858243349923432034592' is too small to be represented as a \
+                 number"
                     .to_string(),
             )),
         ),
@@ -198,7 +200,8 @@ fn test_numbers_overflow() {
             Err(PileError::new(
                 Rc::new(ProgramSource::Stdin),
                 (1, 1),
-                "'+8589934592' is too large to be represented as a number"
+                "'+85648993234023044592' is too large to be represented as a \
+                 number"
                     .to_string(),
             )),
         ),

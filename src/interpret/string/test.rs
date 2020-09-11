@@ -4,9 +4,9 @@ use super::*;
 
 fn runtime_value_strategy() -> impl Strategy<Value = RuntimeValue> {
     prop_oneof![
-        any::<u32>().prop_map(|n| RuntimeValue::Number(Number::Natural(n))),
-        any::<f32>().prop_map(|f| RuntimeValue::Number(Number::Float(f))),
-        any::<i32>().prop_map(|i| RuntimeValue::Number(Number::Integer(i))),
+        any::<u64>().prop_map(|n| RuntimeValue::Number(Number::Natural(n))),
+        any::<f64>().prop_map(|f| RuntimeValue::Number(Number::Float(f))),
+        any::<i64>().prop_map(|i| RuntimeValue::Number(Number::Integer(i))),
         any::<bool>().prop_map(|b| RuntimeValue::Boolean(b)),
         ".*".prop_map(|s| RuntimeValue::String(s)),
     ]

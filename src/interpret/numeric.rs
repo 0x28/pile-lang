@@ -9,9 +9,9 @@ fn apply_numeric<N, I, F>(
     stack: &mut Vec<RuntimeValue>,
 ) -> Result<(), String>
 where
-    N: Fn(&u32, &u32) -> Result<u32, String>,
-    I: Fn(&i32, &i32) -> Result<i32, String>,
-    F: Fn(&f32, &f32) -> f32,
+    N: Fn(&u64, &u64) -> Result<u64, String>,
+    I: Fn(&i64, &i64) -> Result<i64, String>,
+    F: Fn(&f64, &f64) -> f64,
 {
     let right = runtime_error::ensure_element(stack)?;
     let left = runtime_error::ensure_element(stack)?;
