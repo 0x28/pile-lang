@@ -45,6 +45,9 @@ fn test_is_print() {
 fn test_fmt_traced_token() {
     assert_eq!(format!("{}", TracedToken(&Token::Begin)), "begin");
     assert_eq!(format!("{}", TracedToken(&Token::End)), "end");
+    assert_eq!(format!("{}", TracedToken(&Token::Let)), "let");
+    assert_eq!(format!("{}", TracedToken(&Token::BracketLeft)), "[");
+    assert_eq!(format!("{}", TracedToken(&Token::BracketRight)), "]");
     assert_eq!(format!("{}", TracedToken(&Token::Assign)), "->");
     assert_eq!(
         format!("{}", TracedToken(&Token::Operator(Operator::Plus))),
@@ -121,6 +124,32 @@ fn test_fmt_traced_expr() {
             })
         ),
         "begin 111 end"
+    );
+
+    assert_eq!(
+        format!(
+            "{}",
+            TracedExpr(&Expr::Block {
+                expressions: Rc::new(vec!(
+                    Expr::Save {
+                        line: 1,
+                        var: "a".to_owned()
+                    },
+                    Expr::Atom {
+                        token: Token::Number(Number::Natural(111)),
+                        line: 123
+                    },
+                    Expr::Restore {
+                        line: 1,
+                        var: "a".to_owned()
+                    },
+                )),
+                locals: vec!["a".to_owned()],
+                begin: 1,
+                end: 2
+            })
+        ),
+        r#"begin save("a") 111 restore("a") end"#
     );
 
     assert_eq!(
