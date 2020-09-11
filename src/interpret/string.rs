@@ -74,3 +74,6 @@ pub fn apply_format(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
 
     Ok(())
 }
+
+#[cfg(test)]
+mod test;

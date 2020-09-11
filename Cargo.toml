@@ -7,3 +7,6 @@ edition = "2018"
 [dependencies]
 clap = "2.33.0"
 atty = "0.2.14"
+
+[dev-dependencies]
+proptest = "0.10.1"
