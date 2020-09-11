@@ -54,6 +54,15 @@ pub enum Operator {
     Natural,
     Integer,
     Float,
+    // string operators
+    Concat,
+    Length,
+    Contains,
+    Upcase,
+    Downcase,
+    Trim,
+    Format,
+    Index,
 }
 
 impl fmt::Display for Operator {
@@ -85,6 +94,14 @@ impl fmt::Display for Operator {
                 Operator::Natural => "natural",
                 Operator::Integer => "integer",
                 Operator::Float => "float",
+                Operator::Concat => "concat",
+                Operator::Length => "length",
+                Operator::Contains => "contains",
+                Operator::Downcase => "downcase",
+                Operator::Upcase => "upcase",
+                Operator::Trim => "trim",
+                Operator::Format => "format",
+                Operator::Index => "index",
             }
         )
     }
@@ -233,6 +250,14 @@ impl<'a> Lexer<'a> {
             "natural" => Token::Operator(Operator::Natural),
             "integer" => Token::Operator(Operator::Integer),
             "float" => Token::Operator(Operator::Float),
+            "concat" => Token::Operator(Operator::Concat),
+            "length" => Token::Operator(Operator::Length),
+            "contains" => Token::Operator(Operator::Contains),
+            "downcase" => Token::Operator(Operator::Downcase),
+            "upcase" => Token::Operator(Operator::Upcase),
+            "trim" => Token::Operator(Operator::Trim),
+            "format" => Token::Operator(Operator::Format),
+            "index" => Token::Operator(Operator::Index),
             "use" => Token::Use,
             "let" => Token::Let,
             _ => Token::Identifier(ident),

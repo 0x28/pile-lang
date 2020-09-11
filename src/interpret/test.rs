@@ -504,6 +504,180 @@ fn test_cast_to_float() {
 }
 
 #[test]
+fn test_concat() {
+    expect_value(
+        "\"hello\" \"_world\" concat",
+        Ok(&RuntimeValue::String("hello_world".to_owned())),
+    );
+    expect_value(
+        "\"a\" \"b\" \"c\" concat concat",
+        Ok(&RuntimeValue::String("abc".to_owned())),
+    );
+    expect_value("\"\" \"\" concat", Ok(&RuntimeValue::String("".to_owned())));
+}
+
+#[test]
+fn test_length() {
+    expect_value(
+        "\"some_string\" length",
+        Ok(&RuntimeValue::Number(Number::Natural(11))),
+    );
+    expect_value("\"\" length", Ok(&RuntimeValue::Number(Number::Natural(0))));
+    expect_value(
+        "\"not_consumed\" length drop",
+        Ok(&RuntimeValue::String("not_consumed".to_owned())),
+    );
+    expect_value(
+        "\"ünicöde\" length",
+        Ok(&RuntimeValue::Number(Number::Natural(7))),
+    );
+}
+
+#[test]
+fn test_contains() {
+    expect_value(
+        "\"string\" \"s\" contains",
+        Ok(&RuntimeValue::Boolean(true)),
+    );
+
+    expect_value("\"\" \"str\" contains", Ok(&RuntimeValue::Boolean(false)));
+
+    expect_value("\"str\" \"\" contains", Ok(&RuntimeValue::Boolean(true)));
+
+    expect_value("\"pile\" \"pi\" contains", Ok(&RuntimeValue::Boolean(true)));
+}
+
+#[test]
+fn test_upcase() {
+    expect_value(
+        "\"pile\" upcase",
+        Ok(&RuntimeValue::String("PILE".to_owned())),
+    );
+    expect_value(
+        "\"ünicöde ß\" upcase",
+        Ok(&RuntimeValue::String("ÜNICÖDE SS".to_owned())),
+    );
+    expect_value(
+        "\"mIxEd_CaSe\" upcase",
+        Ok(&RuntimeValue::String("MIXED_CASE".to_owned())),
+    );
+}
+
+#[test]
+fn test_downcase() {
+    expect_value(
+        "\"PILE\" downcase",
+        Ok(&RuntimeValue::String("pile".to_owned())),
+    );
+    expect_value(
+        "\"ÜNICÖDE SS\" downcase",
+        Ok(&RuntimeValue::String("ünicöde ss".to_owned())),
+    );
+    expect_value(
+        "\"mIxEd_CaSe\" downcase",
+        Ok(&RuntimeValue::String("mixed_case".to_owned())),
+    );
+}
+
+#[test]
+fn test_trim() {
+    expect_value("\" \" trim", Ok(&RuntimeValue::String("".to_owned())));
+    expect_value(
+        "\" xyz \" trim",
+        Ok(&RuntimeValue::String("xyz".to_owned())),
+    );
+    expect_value("\"a \" trim", Ok(&RuntimeValue::String("a".to_owned())));
+    expect_value("\" b\" trim", Ok(&RuntimeValue::String("b".to_owned())));
+    expect_value("\"\tx\t\" trim", Ok(&RuntimeValue::String("x".to_owned())));
+    expect_value(
+        "\"  \ty\t  \n\t\" trim",
+        Ok(&RuntimeValue::String("y".to_owned())),
+    );
+}
+
+#[test]
+fn test_format() {
+    expect_value(
+        r#"100 "{}" format"#,
+        Ok(&RuntimeValue::String("100".to_owned())),
+    );
+    expect_value(
+        r#"1 2 3 "{} {}_{}" format"#,
+        Ok(&RuntimeValue::String("1 2_3".to_owned())),
+    );
+    expect_value(
+        r#""no format" format"#,
+        Ok(&RuntimeValue::String("no format".to_owned())),
+    );
+
+    expect_value(r#""" format"#, Ok(&RuntimeValue::String("".to_owned())));
+    expect_value(
+        r#"1.23 "x" "{}-{}" format"#,
+        Ok(&RuntimeValue::String("1.23-x".to_owned())),
+    );
+    expect_value(
+        r#" "{}" "{}" format"#,
+        Ok(&RuntimeValue::String("{}".to_owned())),
+    );
+    expect_value(
+        r#" 2020 12 24 "{}/{}/{}" format"#,
+        Ok(&RuntimeValue::String("2020/12/24".to_owned())),
+    );
+    expect_value(
+        r#" -200 -10 - "~~[{}]~~" format"#,
+        Ok(&RuntimeValue::String("~~[-190]~~".to_owned())),
+    );
+    expect_value(
+        r#" 42 "{} -> {}" format"#,
+        Err(PileError::new(
+            Rc::new(ProgramSource::Stdin),
+            (1, 1),
+            "Stack underflow".to_owned(),
+        )),
+    );
+}
+
+#[test]
+fn test_index() {
+    expect_value(
+        r#" "hello" 0 index"#,
+        Ok(&RuntimeValue::String("h".to_owned())),
+    );
+    expect_value(
+        r#" "hello" 1 index"#,
+        Ok(&RuntimeValue::String("e".to_owned())),
+    );
+    expect_value(
+        r#" "ünicöde" 4 index"#,
+        Ok(&RuntimeValue::String("ö".to_owned())),
+    );
+    expect_value(
+        r#" "test" 0 index drop"#,
+        Ok(&RuntimeValue::String("test".to_owned())),
+    );
+    expect_value(
+        r#" "123ö" length 1 - index"#,
+        Ok(&RuntimeValue::String("ö".to_owned())),
+    );
+    expect_value(
+        r#" "shorty" 10 index"#,
+        Err(PileError::new(
+            Rc::new(ProgramSource::Stdin),
+            (1, 1),
+            r#"Invalid index 10 for string "shorty""#.to_owned(),
+        )),
+    );
+    expect_value(
+        r#" "str" 42.1 index"#,
+        Err(PileError::new(
+            Rc::new(ProgramSource::Stdin),
+            (1, 1),
+            "Can't use float '42.1' as string index".to_owned(),
+        )),
+    );
+}
+
+#[test]
 fn test_let1() {
     expect_value(
         "
@@ -710,6 +884,15 @@ fn test_type_errors() {
             Rc::new(ProgramSource::Stdin),
             (1, 1),
             "Expected boolean found string 'true'".to_string(),
+        )),
+    );
+
+    expect_value(
+        "10 \"test\" concat",
+        Err(PileError::new(
+            Rc::new(ProgramSource::Stdin),
+            (1, 1),
+            "Expected string found natural '10'".to_string(),
         )),
     );
 }

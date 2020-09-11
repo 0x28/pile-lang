@@ -16,6 +16,7 @@ mod print;
 mod runtime_error;
 mod scoping;
 mod stackop;
+mod string;
 mod tracer;
 mod while_loop;
 use scoping::ScopeStack;
@@ -203,6 +204,14 @@ impl Interpreter {
             Operator::Natural => cast::apply_natural(stack),
             Operator::Integer => cast::apply_integer(stack),
             Operator::Float => cast::apply_float(stack),
+            Operator::Concat => string::apply_concat(stack),
+            Operator::Length => string::apply_length(stack),
+            Operator::Contains => string::apply_contains(stack),
+            Operator::Downcase => string::apply_downcase(stack),
+            Operator::Upcase => string::apply_upcase(stack),
+            Operator::Trim => string::apply_trim(stack),
+            Operator::Format => string::apply_format(stack),
+            Operator::Index => string::apply_index(stack),
         };
 
         operation_result.map_err(|msg| {
