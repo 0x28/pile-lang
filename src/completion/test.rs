@@ -84,11 +84,11 @@ fn test_comp_none() {
 fn test_comp_use() {
     let mut comps: Vec<String> = vec![];
     let ast = parse_prog(
-        "
-use \"src/completion/comp_test\"
+        r#"
+use "src/completion/comp_test"
 # --- current line ---
 1 2 + print
-",
+"#,
     );
 
     map_identifiers(
@@ -98,7 +98,7 @@ use \"src/completion/comp_test\"
         &mut |ident| comps.push(ident.to_owned()),
     );
 
-    assert_eq!(comps, vec!["inc", "dec"])
+    assert_eq!(comps, vec!["value", "inc", "dec"])
 }
 
 #[test]
