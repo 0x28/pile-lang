@@ -59,7 +59,8 @@
   (with-syntax-table pile-mode-syntax-table
     (unless (or (nth 3 (syntax-ppss))
                 (nth 4 (syntax-ppss))
-                (not (executable-find pile-executable-name)))
+                (not (executable-find pile-executable-name))
+                (not (buffer-file-name)))
       (let ((start (condition-case nil
                        (save-excursion
                          (backward-sexp 1)
