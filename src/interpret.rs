@@ -199,6 +199,7 @@ impl Interpreter {
             Operator::Dup => stackop::apply_dup(stack),
             Operator::Drop => stackop::apply_drop(stack),
             Operator::Swap => stackop::apply_swap(stack),
+            Operator::Pick => stackop::apply_pick(stack),
             Operator::Dotimes => return dotimes::apply_dotimes(state, source),
             Operator::While => return while_loop::apply_while(state, source),
             Operator::Natural => cast::apply_natural(stack),

@@ -33,7 +33,7 @@ proptest! {
         let stack = &mut vec![v1.clone(), v2.clone(), RuntimeValue::String(f)];
         apply_format(stack).unwrap();
 
-        prop_assert!(stack.len() == 1);
+        prop_assert_eq!(stack.len(), 1);
         match &stack[0] {
             RuntimeValue::String(s) => {
                 prop_assert!(s.contains(&v1.to_string()));

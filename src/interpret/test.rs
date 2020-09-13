@@ -451,6 +451,52 @@ fn test_drop() {
 }
 
 #[test]
+fn test_pick() {
+    expect_value(
+        r#" "pick me" 0 pick"#,
+        Ok(&RuntimeValue::String("pick me".to_owned())),
+    );
+
+    expect_value(
+        "100 200 300 2 pick",
+        Ok(&RuntimeValue::Number(Number::Natural(100))),
+    );
+    expect_value(
+        "100 200 300 1 pick",
+        Ok(&RuntimeValue::Number(Number::Natural(200))),
+    );
+    expect_value(
+        "100 200 300 0 pick",
+        Ok(&RuntimeValue::Number(Number::Natural(300))),
+    );
+    expect_value(
+        r#" 100 200 300 "index!" pick"#,
+        Err(PileError::new(
+            Rc::new(ProgramSource::Stdin),
+            (1, 1),
+            "Can't use string 'index!' as stack index".to_string(),
+        )),
+    );
+    expect_value(
+        "100 200 300 3 pick",
+        Err(PileError::new(
+            Rc::new(ProgramSource::Stdin),
+            (1, 1),
+            "Invalid index 3 for pick into stack of size 3".to_string(),
+        )),
+    );
+
+    expect_value(
+        "1000000 pick",
+        Err(PileError::new(
+            Rc::new(ProgramSource::Stdin),
+            (1, 1),
+            "Invalid index 1000000 for pick into stack of size 0".to_string(),
+        )),
+    );
+}
+
+#[test]
 fn test_cast_to_natural() {
     expect_value("1 natural", Ok(&RuntimeValue::Number(Number::Natural(1))));
     expect_value(

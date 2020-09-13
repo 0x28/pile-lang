@@ -50,6 +50,7 @@ pub enum Operator {
     Dup,
     Drop,
     Swap,
+    Pick,
     // casts
     Natural,
     Integer,
@@ -91,6 +92,7 @@ impl fmt::Display for Operator {
                 Operator::Dup => "dup",
                 Operator::Drop => "drop",
                 Operator::Swap => "swap",
+                Operator::Pick => "pick",
                 Operator::Natural => "natural",
                 Operator::Integer => "integer",
                 Operator::Float => "float",
@@ -247,6 +249,7 @@ impl<'a> Lexer<'a> {
             "dup" => Token::Operator(Operator::Dup),
             "drop" => Token::Operator(Operator::Drop),
             "swap" => Token::Operator(Operator::Swap),
+            "pick" => Token::Operator(Operator::Pick),
             "natural" => Token::Operator(Operator::Natural),
             "integer" => Token::Operator(Operator::Integer),
             "float" => Token::Operator(Operator::Float),
