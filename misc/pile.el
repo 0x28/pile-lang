@@ -21,7 +21,26 @@
   '("if" "dotimes" "while" "let" "begin" "end" "use"))
 
 (defconst pile-font-lock-builtins
-  '("print" "assert" "dup" "drop" "swap" "natural" "integer" "float"))
+  '("and"
+    "assert"
+    "concat"
+    "contains"
+    "downcase"
+    "drop"
+    "dup"
+    "float"
+    "format"
+    "index"
+    "integer"
+    "length"
+    "natural"
+    "not"
+    "or"
+    "pick"
+    "print"
+    "swap"
+    "trim"
+    "upcase"))
 
 (defvar pile--function-regexp
   "end[[:space:]\n]*->[[:space:]\n]*\\([[:alpha:]][[:alnum:]_]*\\)")
