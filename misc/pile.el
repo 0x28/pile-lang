@@ -39,6 +39,7 @@
   (font-lock-add-keywords
    nil
    `(("\\_<[+-]?[0-9].?[0-9]*\\_>" . font-lock-constant-face)
+     ("\\_<\\(true\\|false\\)\\_>" . font-lock-constant-face)
      (,pile--function-regexp 1 font-lock-function-name-face)
      (,(regexp-opt pile-font-lock-keywords 'words) . font-lock-keyword-face)
      (,(regexp-opt pile-font-lock-builtins 'words) . font-lock-builtin-face)))
