@@ -497,6 +497,31 @@ fn test_pick() {
 }
 
 #[test]
+fn test_stacksize() {
+    expect_value(
+        "1 2 3 stacksize",
+        Ok(&RuntimeValue::Number(Number::Natural(3))),
+    );
+    expect_value("stacksize", Ok(&RuntimeValue::Number(Number::Natural(0))));
+    expect_value(
+        r#" 3.42 "hello" -423 0 stacksize"#,
+        Ok(&RuntimeValue::Number(Number::Natural(4))),
+    );
+}
+
+#[test]
+fn test_clear() {
+    expect_value(
+        "100 200 300 clear stacksize",
+        Ok(&RuntimeValue::Number(Number::Natural(0))),
+    );
+    expect_value(
+        "clear clear stacksize",
+        Ok(&RuntimeValue::Number(Number::Natural(0))),
+    );
+}
+
+#[test]
 fn test_cast_to_natural() {
     expect_value("1 natural", Ok(&RuntimeValue::Number(Number::Natural(1))));
     expect_value(

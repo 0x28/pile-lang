@@ -23,6 +23,7 @@
 (defconst pile-font-lock-builtins
   '("and"
     "assert"
+    "clear"
     "concat"
     "contains"
     "downcase"
@@ -38,6 +39,7 @@
     "or"
     "pick"
     "print"
+    "stacksize"
     "swap"
     "trim"
     "upcase"))

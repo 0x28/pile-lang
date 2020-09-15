@@ -55,5 +55,16 @@ pub fn apply_pick(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
     Ok(())
 }
 
+pub fn apply_clear(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
+    stack.clear();
+    Ok(())
+}
+
+pub fn apply_stacksize(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
+    stack.push(RuntimeValue::Number(Number::Natural(stack.len() as u64)));
+
+    Ok(())
+}
+
 #[cfg(test)]
 mod test;

@@ -45,6 +45,8 @@ fn token_completions() -> &'static [&'static str] {
         Token::Operator(Operator::Drop)         => "drop",
         Token::Operator(Operator::Swap)         => "swap",
         Token::Operator(Operator::Pick)         => "pick",
+        Token::Operator(Operator::Clear)        => "clear",
+        Token::Operator(Operator::StackSize)    => "stacksize",
         Token::Operator(Operator::Natural)      => "natural",
         Token::Operator(Operator::Integer)      => "integer",
         Token::Operator(Operator::Float)        => "float",
