@@ -12,10 +12,8 @@ pub fn apply_showstack(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
         print!(" [{}]:\t", index);
 
         match element {
-            RuntimeValue::String(string) => {
-                println!("\"{}\"", string)
-            }
-            value => println!("{}", value)
+            RuntimeValue::String(string) => println!("\"{}\"", string),
+            value => println!("{}", value),
         }
     }
 
