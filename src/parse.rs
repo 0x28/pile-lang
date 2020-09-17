@@ -1,5 +1,4 @@
 use crate::lex::Lexer;
-use crate::lex::LexerIter;
 use crate::lex::Token;
 use crate::pile_error::PileError;
 use crate::program_source::ProgramSource;
@@ -66,7 +65,7 @@ impl Expr {
 }
 
 pub struct Parser<'a> {
-    lex_iter: LexerIter<'a>,
+    lex_iter: Lexer<'a>,
     lookahead: Option<(u64, Token)>,
 }
 

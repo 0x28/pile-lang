@@ -389,7 +389,7 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    fn next(&mut self) -> Option<LexerItem> {
+    fn next_token(&mut self) -> Option<LexerItem> {
         while let Some(&lookahead) = self.input.peek() {
             let token = match lookahead {
                 '#' => {
@@ -430,34 +430,11 @@ impl<'a> Lexer<'a> {
     }
 }
 
-pub struct LexerIter<'a> {
-    lexer: Lexer<'a>,
-}
-
-impl<'a> LexerIter<'a> {
-    pub fn source(&self) -> &Rc<ProgramSource> {
-        &self.lexer.source()
-    }
-
-    pub fn line(&self) -> u64 {
-        self.lexer.line()
-    }
-}
-
-impl<'a> Iterator for LexerIter<'a> {
+impl<'a> Iterator for Lexer<'a> {
     type Item = LexerItem;
 
     fn next(&mut self) -> Option<LexerItem> {
-        self.lexer.next()
-    }
-}
-
-impl<'a> IntoIterator for Lexer<'a> {
-    type Item = LexerItem;
-    type IntoIter = LexerIter<'a>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        LexerIter { lexer: self }
+        self.next_token()
     }
 }
 
