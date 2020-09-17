@@ -398,6 +398,18 @@ fn test_print() {
 }
 
 #[test]
+fn test_showstack() {
+    expect_value(
+        "true \"hello\" showstack",
+        Ok(&RuntimeValue::String("hello".to_owned())),
+    );
+    expect_value(
+        "1 2 showstack stacksize",
+        Ok(&RuntimeValue::Number(Number::Natural(2))),
+    );
+}
+
+#[test]
 fn test_assert() {
     expect_value(
         "0 1 > assert",

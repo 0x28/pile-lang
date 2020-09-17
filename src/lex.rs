@@ -46,6 +46,7 @@ pub enum Operator {
     Not,
     // builtins
     Print,
+    Showstack,
     Assert,
     Dup,
     Drop,
@@ -90,6 +91,7 @@ impl fmt::Display for Operator {
                 Operator::Not => "not",
                 Operator::Less => "<",
                 Operator::Print => "print",
+                Operator::Showstack => "showstack",
                 Operator::Assert => "assert",
                 Operator::Dup => "dup",
                 Operator::Drop => "drop",
@@ -249,6 +251,7 @@ impl<'a> Lexer<'a> {
             "or" => Token::Operator(Operator::Or),
             "not" => Token::Operator(Operator::Not),
             "print" => Token::Operator(Operator::Print),
+            "showstack" => Token::Operator(Operator::Showstack),
             "assert" => Token::Operator(Operator::Assert),
             "dup" => Token::Operator(Operator::Dup),
             "drop" => Token::Operator(Operator::Drop),

@@ -39,6 +39,7 @@
     "or"
     "pick"
     "print"
+    "showstack"
     "stacksize"
     "swap"
     "trim"

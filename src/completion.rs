@@ -40,6 +40,7 @@ fn token_completions() -> &'static [&'static str] {
         Token::Operator(Operator::Not)          => "not",
         Token::Operator(Operator::Less)         => "<",
         Token::Operator(Operator::Print)        => "print",
+        Token::Operator(Operator::Showstack)    => "showstack",
         Token::Operator(Operator::Assert)       => "assert",
         Token::Operator(Operator::Dup)          => "dup",
         Token::Operator(Operator::Drop)         => "drop",

@@ -6,3 +6,18 @@ pub fn apply_print(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
     print!("{}", value);
     Ok(())
 }
+
+pub fn apply_showstack(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
+    for (index, element) in stack.iter().rev().enumerate().rev() {
+        print!(" [{}]:\t", index);
+
+        match element {
+            RuntimeValue::String(string) => {
+                println!("\"{}\"", string)
+            }
+            value => println!("{}", value)
+        }
+    }
+
+    Ok(())
+}

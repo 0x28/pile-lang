@@ -195,6 +195,7 @@ impl Interpreter {
             Operator::Or => boolean::apply_or(stack),
             Operator::Not => boolean::apply_not(stack),
             Operator::Print => print::apply_print(stack),
+            Operator::Showstack => print::apply_showstack(stack),
             Operator::Assert => assert::apply_assert(stack),
             Operator::Dup => stackop::apply_dup(stack),
             Operator::Drop => stackop::apply_drop(stack),
