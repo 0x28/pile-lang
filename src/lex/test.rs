@@ -5,7 +5,7 @@ fn compare_token_lists(
     lexer: Lexer,
     expected: Vec<(u64, Result<Token, PileError>)>,
 ) {
-    let result: Vec<_> = lexer.into_iter().collect();
+    let result: Vec<_> = lexer.collect();
 
     assert_eq!(result.len(), expected.len());
 
@@ -18,7 +18,7 @@ fn compare_token_lists(
 fn test_empty_program() {
     let lexer = Lexer::new("", Rc::new(ProgramSource::Stdin));
 
-    assert_eq!(lexer.into_iter().count(), 0);
+    assert_eq!(lexer.count(), 0);
 }
 
 #[test]
@@ -41,7 +41,7 @@ fn test_comment_simple() {
 fn test_comment_only() {
     let lexer = Lexer::new("# empty program", Rc::new(ProgramSource::Stdin));
 
-    assert_eq!(lexer.into_iter().count(), 0);
+    assert_eq!(lexer.count(), 0);
 }
 
 #[test]

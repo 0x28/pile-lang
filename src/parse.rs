@@ -65,14 +65,14 @@ impl Expr {
 }
 
 pub struct Parser<'a> {
-    lex_iter: Lexer<'a>,
+    lexer: Lexer<'a>,
     lookahead: Option<(u64, Token)>,
 }
 
 impl<'a> Parser<'a> {
     pub fn new(lexer: Lexer) -> Parser {
         Parser {
-            lex_iter: lexer.into_iter(),
+            lexer,
             lookahead: None,
         }
     }
@@ -102,14 +102,14 @@ impl<'a> Parser<'a> {
         }
 
         Ok(ParsedAst(Ast {
-            source: Rc::clone(self.lex_iter.source()),
+            source: Rc::clone(self.lexer.source()),
             expressions: program,
         }))
     }
 
     fn parse_error(&self, line: u64, msg: &str) -> PileError {
         PileError::new(
-            Rc::clone(self.lex_iter.source()),
+            Rc::clone(self.lexer.source()),
             (line, line),
             msg.to_owned(),
         )
@@ -132,13 +132,13 @@ impl<'a> Parser<'a> {
                 Some((_, Token::Identifier(id))) => result.push(id.clone()),
                 None => {
                     return Err(self.parse_error(
-                        self.lex_iter.line(),
+                        self.lexer.line(),
                         "Expected ']' found end of file.",
                     ));
                 }
                 Some((_, token)) => {
                     return Err(self.parse_error(
-                        self.lex_iter.line(),
+                        self.lexer.line(),
                         &format!("Expected identifier found {}.", token),
                     ))
                 }
@@ -168,7 +168,7 @@ impl<'a> Parser<'a> {
             match self.lookahead {
                 None => {
                     return Err(self.parse_error(
-                        self.lex_iter.line(),
+                        self.lexer.line(),
                         "Expected 'end' found end of file.",
                     ));
                 }
@@ -208,7 +208,7 @@ impl<'a> Parser<'a> {
 
         match self.lookahead.take() {
             None => Err(self.parse_error(
-                self.lex_iter.line(),
+                self.lexer.line(),
                 "Expected identifier found end of file.",
             )),
             Some((line, Token::Identifier(var))) => {
@@ -241,7 +241,7 @@ impl<'a> Parser<'a> {
     }
 
     fn consume(&mut self) -> Result<(), PileError> {
-        self.lookahead = match self.lex_iter.next() {
+        self.lookahead = match self.lexer.next() {
             Some((line, current_token)) => Some((line, current_token?)),
             None => None,
         };
