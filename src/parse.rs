@@ -238,6 +238,7 @@ impl<'a> Parser<'a> {
 
     fn consume(&mut self) -> Result<(), PileError> {
         self.lookahead = match self.lexer.next() {
+            Some((_, Ok(Token::Comment(_)))) => return self.consume(),
             Some((line, current_token)) => Some((line, current_token?)),
             None => None,
         };

@@ -49,6 +49,7 @@ impl<'t> fmt::Display for TracedToken<'t> {
             Token::Use => write!(f, "use"),
             Token::Boolean(b) => write!(f, "{}", b),
             Token::Identifier(i) => write!(f, "{}", i),
+            Token::Comment(_) => Ok(()),
         }
     }
 }

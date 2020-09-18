@@ -29,6 +29,7 @@ fn test_comment_simple() {
         (1, Ok(Token::Number(Number::Natural(2)))),
         (1, Ok(Token::Number(Number::Natural(3)))),
         (1, Ok(Token::Operator(Operator::Mul))),
+        (1, Ok(Token::Comment(" hello world".to_owned()))),
         (2, Ok(Token::Number(Number::Natural(1)))),
         (2, Ok(Token::Number(Number::Natural(1)))),
         (2, Ok(Token::Operator(Operator::Plus))),
@@ -39,9 +40,10 @@ fn test_comment_simple() {
 
 #[test]
 fn test_comment_only() {
-    let lexer = Lexer::new("# empty program", Rc::new(ProgramSource::Stdin));
+    let lexer = Lexer::new("# empty #program", Rc::new(ProgramSource::Stdin));
 
-    assert_eq!(lexer.count(), 0);
+    let expected = vec![(1, Ok(Token::Comment(" empty #program".to_owned())))];
+    compare_token_lists(lexer, expected);
 }
 
 #[test]
@@ -50,10 +52,13 @@ fn test_string_simple() {
         "\"yay programming languages :)\"# comment",
         Rc::new(ProgramSource::Stdin),
     );
-    let expected = vec![(
-        1,
-        Ok(Token::String(String::from("yay programming languages :)"))),
-    )];
+    let expected = vec![
+        (
+            1,
+            Ok(Token::String(String::from("yay programming languages :)"))),
+        ),
+        (1, Ok(Token::Comment(" comment".to_owned()))),
+    ];
 
     compare_token_lists(lexer, expected);
 }
@@ -112,6 +117,7 @@ fn test_numbers_natural() {
         (1, Ok(Token::Number(Number::Natural(4543)))),
         (1, Ok(Token::Number(Number::Natural(123)))),
         (1, Ok(Token::Number(Number::Natural(21393)))),
+        (1, Ok(Token::Comment("123#123".to_owned()))),
         (2, Ok(Token::Number(Number::Natural(203)))),
         (2, Ok(Token::Number(Number::Natural(40)))),
         (2, Ok(Token::Number(Number::Natural(5060)))),
@@ -163,6 +169,7 @@ fn test_numbers_float() {
         (6, Ok(Token::Number(Number::Float(3.1415)))),
         (6, Ok(Token::Number(Number::Float(7777.7777)))),
         (6, Ok(Token::Number(Number::Float(-3e-10)))),
+        (6, Ok(Token::Comment("number :)".to_owned()))),
     ];
 
     compare_token_lists(lexer, expected);
@@ -245,10 +252,12 @@ fn test_keywords() {
     );
     let expected = vec![
         (2, Ok(Token::Begin)),
+        (2, Ok(Token::Comment("what".to_owned()))),
         (3, Ok(Token::Number(Number::Natural(10)))),
         (3, Ok(Token::Operator(Operator::Plus))),
         (4, Ok(Token::Number(Number::Natural(100)))),
         (4, Ok(Token::Operator(Operator::Mul))),
+        (4, Ok(Token::Comment(" this is a operator".to_owned()))),
         (5, Ok(Token::End)),
         (7, Ok(Token::Operator(Operator::While))),
         (7, Ok(Token::Operator(Operator::Dotimes))),
@@ -309,6 +318,7 @@ fn test_identifier() {
         (3, Ok(Token::Identifier(String::from("definition_var")))),
         (3, Ok(Token::Identifier(String::from("looped")))),
         (3, Ok(Token::Identifier(String::from("while_not")))),
+        (3, Ok(Token::Comment(" variable".to_owned()))),
     ];
 
     compare_token_lists(lexer, expected);
@@ -455,6 +465,7 @@ fn test_error_unknown_char() {
                 "Unknown char '}'".to_owned(),
             )),
         ),
+        (2, Ok(Token::Comment(" comment".to_owned()))),
     ];
 
     compare_token_lists(lexer, expected);

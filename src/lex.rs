@@ -132,6 +132,8 @@ pub enum Token {
     Boolean(bool),
     // use
     Use,
+    // comments
+    Comment(String),
 }
 
 impl fmt::Display for Token {
@@ -152,6 +154,7 @@ impl fmt::Display for Token {
             Token::Assign => write!(f, "token '->'"),
             Token::Operator(o) => write!(f, "operator '{}'", o),
             Token::Use => write!(f, "token 'use'"),
+            Token::Comment(_) => Ok(()),
         }
     }
 }
@@ -222,8 +225,8 @@ impl<'a> Lexer<'a> {
         word
     }
 
-    fn skip_comment(&mut self) {
-        self.skip(|c| c != '\n');
+    fn comment(&mut self) -> Result<Token, PileError> {
+        Ok(Token::Comment(self.collect_while(|c| c != '\n')))
     }
 
     fn skip_whitespace(&mut self) {
@@ -393,8 +396,8 @@ impl<'a> Lexer<'a> {
         while let Some(&lookahead) = self.input.peek() {
             let token = match lookahead {
                 '#' => {
-                    self.skip_comment();
-                    continue;
+                    self.consume();
+                    self.comment()
                 }
                 '\n' => {
                     self.line_number += 1;
