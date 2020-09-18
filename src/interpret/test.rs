@@ -795,7 +795,7 @@ fn test_let3() {
     expect_value(
         "
 let [n]
-    dup -> n
+    -> n
     begin n end
     begin n 1 + recur end
     n 10 =
