@@ -108,11 +108,7 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_error(&self, line: u64, msg: &str) -> PileError {
-        PileError::new(
-            Rc::clone(self.lexer.source()),
-            (line, line),
-            msg.to_owned(),
-        )
+        PileError::in_line(Rc::clone(self.lexer.source()), line, msg.to_owned())
     }
 
     fn locals(&mut self) -> Result<Vec<String>, PileError> {

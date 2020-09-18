@@ -184,9 +184,9 @@ impl<'a> Lexer<'a> {
     }
 
     fn lex_error(&self, msg: &str) -> PileError {
-        PileError::new(
+        PileError::in_line(
             Rc::clone(self.source()),
-            (self.line_number, self.line_number),
+            self.line_number,
             msg.to_owned(),
         )
     }

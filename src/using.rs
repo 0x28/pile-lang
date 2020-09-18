@@ -62,7 +62,7 @@ impl<'d> DependencyTree<'d> {
 pub fn resolve(ast: ScopedAst) -> Result<ResolvedAst, PileError> {
     let path = match ast.as_ref().source.as_ref() {
         ProgramSource::File(file) => normalize_path(file).map_err(|err| {
-            PileError::new(Rc::clone(&ast.as_ref().source), (0, 0), err)
+            PileError::in_file(Rc::clone(&ast.as_ref().source), err)
         })?,
         _ => PathBuf::new(),
     };
@@ -100,17 +100,13 @@ fn resolve_use(
                 let component_path =
                     normalize_path(&current_dir.join(&component_path))
                         .map_err(|msg| {
-                            PileError::new(
-                                Rc::clone(&source),
-                                (line, line),
-                                msg,
-                            )
+                            PileError::in_line(Rc::clone(&source), line, msg)
                         })?;
 
                 if tree.contains(&component_path) {
-                    return Err(PileError::new(
+                    return Err(PileError::in_line(
                         Rc::clone(&source),
-                        (line, line),
+                        line,
                         format!(
                             "Found cyclic use of '{}'.",
                             component_path.to_string_lossy()
@@ -163,9 +159,9 @@ fn read_program(
     line: u64,
 ) -> Result<ScopedAst, PileError> {
     let program_text = fs::read_to_string(&file).map_err(|err| {
-        PileError::new(
+        PileError::in_line(
             Rc::clone(source),
-            (line, line),
+            line,
             format!("{}: {}", file.to_string_lossy(), err),
         )
     })?;

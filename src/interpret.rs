@@ -120,7 +120,7 @@ impl Interpreter {
                     Token::Boolean(b) => {
                         Ok(state.stack.push(RuntimeValue::Boolean(*b)))
                     }
-                    token => Err(PileError::new(
+                    token => Err(PileError::in_range(
                         Rc::clone(&source),
                         state.current_lines,
                         format!("Unexpected {}", token),
@@ -219,7 +219,7 @@ impl Interpreter {
         };
 
         operation_result.map_err(|msg| {
-            PileError::new(Rc::clone(&source), state.current_lines, msg)
+            PileError::in_range(Rc::clone(&source), state.current_lines, msg)
         })
     }
 
@@ -238,7 +238,7 @@ impl Interpreter {
             }
             Ok(())
         } else {
-            Err(PileError::new(
+            Err(PileError::in_range(
                 Rc::clone(&source),
                 state.current_lines,
                 format!("Unknown variable '{}'", ident),
@@ -253,7 +253,11 @@ impl Interpreter {
     ) -> Result<(), PileError> {
         let value =
             runtime_error::ensure_element(&mut state.stack).map_err(|msg| {
-                PileError::new(Rc::clone(&source), state.current_lines, msg)
+                PileError::in_range(
+                    Rc::clone(&source),
+                    state.current_lines,
+                    msg,
+                )
             })?;
 
         state.lookup.assign(var, value);

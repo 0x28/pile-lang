@@ -108,9 +108,9 @@ fn proj_error_in_function() {
     let faulty_file = test_file("proj_error1/faulty_function.pile");
     expect_error(
         &main_file,
-        PileError::new(
+        PileError::in_line(
             Rc::new(ProgramSource::File(PathBuf::from(&faulty_file))),
-            (2, 2),
+            2,
             "Type error: string 'hello', natural '100'".to_owned(),
         ),
     )
@@ -122,9 +122,9 @@ fn proj_error_eval() {
     let bad_file = test_file("proj_error2/bad.pile");
     expect_error(
         &main_file,
-        PileError::new(
+        PileError::in_line(
             Rc::new(ProgramSource::File(PathBuf::from(&bad_file))),
-            (1, 1),
+            1,
             "Division by zero while dividing '1' and '0'".to_owned(),
         ),
     )

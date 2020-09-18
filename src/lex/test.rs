@@ -76,9 +76,9 @@ fn test_unknown_char() {
     let expected = vec![
         (
             1,
-            Err(PileError::new(
+            Err(PileError::in_line(
                 Rc::new(ProgramSource::Stdin),
-                (1, 1),
+                1,
                 "Unknown char '\\'".to_owned(),
             )),
         ),
@@ -86,9 +86,9 @@ fn test_unknown_char() {
         (1, Ok(Token::Identifier(String::from("world")))),
         (
             1,
-            Err(PileError::new(
+            Err(PileError::in_line(
                 Rc::new(ProgramSource::Stdin),
-                (1, 1),
+                1,
                 "Unknown char '\\'".to_owned(),
             )),
         ),
@@ -177,9 +177,9 @@ fn test_numbers_overflow() {
     let expected = vec![
         (
             1,
-            Err(PileError::new(
+            Err(PileError::in_line(
                 Rc::new(ProgramSource::Stdin),
-                (1, 1),
+                1,
                 "'85892349393234324592' is too large to be represented as a \
                  number"
                     .to_string(),
@@ -187,9 +187,9 @@ fn test_numbers_overflow() {
         ),
         (
             1,
-            Err(PileError::new(
+            Err(PileError::in_line(
                 Rc::new(ProgramSource::Stdin),
-                (1, 1),
+                1,
                 "'-858243349923432034592' is too small to be represented as a \
                  number"
                     .to_string(),
@@ -197,9 +197,9 @@ fn test_numbers_overflow() {
         ),
         (
             1,
-            Err(PileError::new(
+            Err(PileError::in_line(
                 Rc::new(ProgramSource::Stdin),
-                (1, 1),
+                1,
                 "'+85648993234023044592' is too large to be represented as a \
                  number"
                     .to_string(),
@@ -382,9 +382,9 @@ fn test_error_missing_backslash() {
         (1, Ok(Token::Operator(Operator::Plus))),
         (
             1,
-            Err(PileError::new(
+            Err(PileError::in_line(
                 Rc::new(ProgramSource::Stdin),
-                (1, 1),
+                1,
                 "Missing character after backslash.".to_owned(),
             )),
         ),
@@ -402,18 +402,18 @@ fn test_error_unknown_escape() {
     let expected = vec![
         (
             1,
-            Err(PileError::new(
+            Err(PileError::in_line(
                 Rc::new(ProgramSource::Stdin),
-                (1, 1),
+                1,
                 r"Unknown escape chars: '\z'".to_owned(),
             )),
         ),
         (1, Ok(Token::Number(Number::Float(3.14)))),
         (
             1,
-            Err(PileError::new(
+            Err(PileError::in_line(
                 Rc::new(ProgramSource::Stdin),
-                (1, 1),
+                1,
                 r"Unknown escape chars: '\a' '\b' '\c'".to_owned(),
             )),
         ),
@@ -439,9 +439,9 @@ fn test_error_unknown_char() {
         (1, Ok(Token::Operator(Operator::Mul))),
         (
             2,
-            Err(PileError::new(
+            Err(PileError::in_line(
                 Rc::new(ProgramSource::Stdin),
-                (2, 2),
+                2,
                 "Unknown char '{'".to_owned(),
             )),
         ),
@@ -449,9 +449,9 @@ fn test_error_unknown_char() {
         (2, Ok(Token::Identifier(String::from("append")))),
         (
             2,
-            Err(PileError::new(
+            Err(PileError::in_line(
                 Rc::new(ProgramSource::Stdin),
-                (2, 2),
+                2,
                 "Unknown char '}'".to_owned(),
             )),
         ),
@@ -473,25 +473,25 @@ fn test_error_invalid_number() {
         (1, Ok(Token::Operator(Operator::Plus))),
         (
             1,
-            Err(PileError::new(
+            Err(PileError::in_line(
                 Rc::new(ProgramSource::Stdin),
-                (1, 1),
+                1,
                 "'2f' isn't a number".to_owned(),
             )),
         ),
         (
             2,
-            Err(PileError::new(
+            Err(PileError::in_line(
                 Rc::new(ProgramSource::Stdin),
-                (2, 2),
+                2,
                 "'3d' isn't a number".to_owned(),
             )),
         ),
         (
             2,
-            Err(PileError::new(
+            Err(PileError::in_line(
                 Rc::new(ProgramSource::Stdin),
-                (2, 2),
+                2,
                 "'3y' isn't a number".to_owned(),
             )),
         ),
@@ -514,26 +514,26 @@ fn test_error_unknown_operator() {
         (1, Ok(Token::Identifier(String::from("x")))),
         (
             1,
-            Err(PileError::new(
+            Err(PileError::in_line(
                 Rc::new(ProgramSource::Stdin),
-                (1, 1),
+                1,
                 "Unknown operator '++'".to_owned(),
             )),
         ),
         (1, Ok(Token::Identifier(String::from("y")))),
         (
             2,
-            Err(PileError::new(
+            Err(PileError::in_line(
                 Rc::new(ProgramSource::Stdin),
-                (2, 2),
+                2,
                 "Unknown operator '--'".to_owned(),
             )),
         ),
         (
             2,
-            Err(PileError::new(
+            Err(PileError::in_line(
                 Rc::new(ProgramSource::Stdin),
-                (2, 2),
+                2,
                 "Unknown operator '/='".to_owned(),
             )),
         ),

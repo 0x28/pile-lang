@@ -13,7 +13,8 @@ pub fn apply_dotimes(
     source: &Rc<ProgramSource>,
 ) -> Result<(), PileError> {
     let lines = state.current_lines;
-    let to_pile_error = |msg| PileError::new(Rc::clone(&source), lines, msg);
+    let to_pile_error =
+        |msg| PileError::in_range(Rc::clone(&source), lines, msg);
 
     let stack = &mut state.stack;
     let count = runtime_error::ensure_element(stack).map_err(to_pile_error)?;
@@ -23,7 +24,7 @@ pub fn apply_dotimes(
         RuntimeValue::Number(Number::Natural(n)) => n,
         RuntimeValue::Number(Number::Integer(i)) if i >= 0 => i as u64,
         val => {
-            return Err(PileError::new(
+            return Err(PileError::in_range(
                 Rc::clone(&source),
                 state.current_lines,
                 format!("Expected positive number found {}", val.type_fmt()),

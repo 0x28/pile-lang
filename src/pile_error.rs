@@ -11,7 +11,7 @@ pub struct PileError {
 }
 
 impl PileError {
-    pub fn new(
+    pub fn in_range(
         source: Rc<ProgramSource>,
         lines: (u64, u64),
         message: String,
@@ -19,6 +19,26 @@ impl PileError {
         PileError {
             source,
             lines,
+            message,
+        }
+    }
+
+    pub fn in_line(
+        source: Rc<ProgramSource>,
+        line: u64,
+        message: String,
+    ) -> Self {
+        PileError {
+            source,
+            lines: (line, line),
+            message,
+        }
+    }
+
+    pub fn in_file(source: Rc<ProgramSource>, message: String) -> Self {
+        PileError {
+            source,
+            lines: (0, 0),
             message,
         }
     }

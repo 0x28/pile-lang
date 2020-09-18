@@ -162,9 +162,9 @@ fn test_cycle1() {
 
     assert_resolve_error(
         relative_path,
-        PileError::new(
+        PileError::in_line(
             Rc::new(ProgramSource::File(PathBuf::from(&absolute_path))),
-            (1, 1),
+            1,
             format!("Found cyclic use of '{}'.", absolute_path),
         ),
     )
@@ -177,11 +177,11 @@ fn test_cycle2() {
 
     assert_resolve_error(
         relative_path,
-        PileError::new(
+        PileError::in_line(
             Rc::new(ProgramSource::File(PathBuf::from(
                 test_directory() + "test_cycle2/c.pile",
             ))),
-            (1, 1),
+            1,
             format!(
                 "Found cyclic use of '{}'.",
                 absolute_path.to_string_lossy()
@@ -196,11 +196,11 @@ fn test_file_not_found() {
 
     assert_resolve_error(
         relative_path,
-        PileError::new(
+        PileError::in_line(
             Rc::new(ProgramSource::File(PathBuf::from(
                 test_directory() + "test_not_found/root.pile",
             ))),
-            (1, 1),
+            1,
             format!(
                 "{}: No such file or directory (os error 2)",
                 test_directory() + "test_not_found/unknown.pile"

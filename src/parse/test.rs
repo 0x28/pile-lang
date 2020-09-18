@@ -334,9 +334,9 @@ let [1]
     0
 end
 ",
-        Err(PileError::new(
+        Err(PileError::in_line(
             Rc::new(ProgramSource::Stdin),
-            (2, 2),
+            2,
             "Expected identifier found natural '1'.".to_owned(),
         )),
     )
@@ -346,9 +346,9 @@ end
 fn test_let5() {
     expect_error(
         "let [",
-        Err(PileError::new(
+        Err(PileError::in_line(
             Rc::new(ProgramSource::Stdin),
-            (1, 1),
+            1,
             "Expected ']' found end of file.".to_owned(),
         )),
     )
@@ -358,9 +358,9 @@ fn test_let5() {
 fn test_let6() {
     expect_error(
         "let x end",
-        Err(PileError::new(
+        Err(PileError::in_line(
             Rc::new(ProgramSource::Stdin),
-            (1, 1),
+            1,
             "Expected token '[' found identifier 'x'.".to_owned(),
         )),
     )
@@ -447,9 +447,9 @@ begin
     use \"file1\"
 end
 ",
-        Err(PileError::new(
+        Err(PileError::in_line(
             Rc::new(ProgramSource::Stdin),
-            (3, 3),
+            3,
             "'use' isn't allowed inside blocks.".to_owned(),
         )),
     )
@@ -461,9 +461,9 @@ fn test_error_use_in_assign() {
         "
 1 -> use
 ",
-        Err(PileError::new(
+        Err(PileError::in_line(
             Rc::new(ProgramSource::Stdin),
-            (2, 2),
+            2,
             "Expected identifier found token 'use'.".to_owned(),
         )),
     )
@@ -475,9 +475,9 @@ fn test_error_use_wrong_arg() {
         "
 use 42
 ",
-        Err(PileError::new(
+        Err(PileError::in_line(
             Rc::new(ProgramSource::Stdin),
-            (2, 2),
+            2,
             "Expected string found natural '42'.".to_owned(),
         )),
     )
@@ -492,9 +492,9 @@ begin
 end
 end
 ",
-        Err(PileError::new(
+        Err(PileError::in_line(
             Rc::new(ProgramSource::Stdin),
-            (5, 5),
+            5,
             "Unmatched 'end'.".to_owned(),
         )),
     )
@@ -512,9 +512,9 @@ begin
     +
     *
 ",
-        Err(PileError::new(
+        Err(PileError::in_line(
             Rc::new(ProgramSource::Stdin),
-            (9, 9),
+            9,
             "Expected 'end' found end of file.".to_owned(),
         )),
     )
@@ -537,9 +537,9 @@ begin 1
                     begin 1
                       begin 2
 ",
-        Err(PileError::new(
+        Err(PileError::in_line(
             Rc::new(ProgramSource::Stdin),
-            (14, 14),
+            14,
             "Expected 'end' found end of file.".to_owned(),
         )),
     )
@@ -549,9 +549,9 @@ begin 1
 fn test_error_bad_assign1() {
     expect_error(
         "->",
-        Err(PileError::new(
+        Err(PileError::in_line(
             Rc::new(ProgramSource::Stdin),
-            (1, 1),
+            1,
             "Expected identifier found end of file.".to_string(),
         )),
     )
@@ -561,9 +561,9 @@ fn test_error_bad_assign1() {
 fn test_error_bad_assign2() {
     expect_error(
         "-> end",
-        Err(PileError::new(
+        Err(PileError::in_line(
             Rc::new(ProgramSource::Stdin),
-            (1, 1),
+            1,
             "Expected identifier found token 'end'.".to_string(),
         )),
     )
@@ -573,9 +573,9 @@ fn test_error_bad_assign2() {
 fn test_error_bad_assign3() {
     expect_error(
         "-> -> x",
-        Err(PileError::new(
+        Err(PileError::in_line(
             Rc::new(ProgramSource::Stdin),
-            (1, 1),
+            1,
             "Expected identifier found token '->'.".to_string(),
         )),
     )

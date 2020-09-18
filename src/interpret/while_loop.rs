@@ -11,7 +11,8 @@ pub fn apply_while(
     source: &Rc<ProgramSource>,
 ) -> Result<(), PileError> {
     let lines = state.current_lines;
-    let to_pile_error = |msg| PileError::new(Rc::clone(&source), lines, msg);
+    let to_pile_error =
+        |msg| PileError::in_range(Rc::clone(&source), lines, msg);
 
     let condition =
         runtime_error::ensure_function(state).map_err(to_pile_error)?;
