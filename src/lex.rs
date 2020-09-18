@@ -136,25 +136,45 @@ pub enum Token {
     Comment(String),
 }
 
+impl Token {
+    pub fn error_fmt(&self) -> String {
+        match self {
+            Token::Number(Number::Natural(n)) => format!("natural '{}'", n),
+            Token::Number(Number::Integer(i)) => format!("integer '{}'", i),
+            Token::Number(Number::Float(fl)) => format!("float '{}'", fl),
+            Token::Identifier(ident) => format!("identifier '{}'", ident),
+            Token::String(s) => format!("string \"{}\"", s),
+            Token::Boolean(true) => "boolean 'true'".to_owned(),
+            Token::Boolean(false) => "boolean 'false'".to_owned(),
+            Token::Begin => "token 'begin'".to_owned(),
+            Token::End => "token 'end'".to_owned(),
+            Token::Let => "token 'let'".to_owned(),
+            Token::BracketLeft => "token '['".to_owned(),
+            Token::BracketRight => "token ']'".to_owned(),
+            Token::Assign => "token '->'".to_owned(),
+            Token::Operator(o) => format!("operator '{}'", o),
+            Token::Use => format!("token 'use'"),
+            Token::Comment(_) => "".to_owned(),
+        }
+    }
+}
+
 impl fmt::Display for Token {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Token::Number(Number::Natural(n)) => write!(f, "natural '{}'", n),
-            Token::Number(Number::Integer(i)) => write!(f, "integer '{}'", i),
-            Token::Number(Number::Float(fl)) => write!(f, "float '{}'", fl),
-            Token::Identifier(ident) => write!(f, "identifier '{}'", ident),
-            Token::String(s) => write!(f, "string \"{}\"", s),
-            Token::Boolean(true) => write!(f, "boolean 'true'"),
-            Token::Boolean(false) => write!(f, "boolean 'false'"),
-            Token::Begin => write!(f, "token 'begin'"),
-            Token::End => write!(f, "token 'end'"),
-            Token::Let => write!(f, "token 'let'"),
-            Token::BracketLeft => write!(f, "token '['"),
-            Token::BracketRight => write!(f, "token ']'"),
-            Token::Assign => write!(f, "token '->'"),
-            Token::Operator(o) => write!(f, "operator '{}'", o),
-            Token::Use => write!(f, "token 'use'"),
-            Token::Comment(_) => Ok(()),
+            Token::Begin => write!(f, "begin"),
+            Token::End => write!(f, "end"),
+            Token::Let => write!(f, "let"),
+            Token::BracketLeft => write!(f, "["),
+            Token::BracketRight => write!(f, "]"),
+            Token::Assign => write!(f, "->"),
+            Token::Operator(op) => write!(f, "{}", op),
+            Token::Number(n) => write!(f, "{}", n),
+            Token::String(s) => write!(f, "\"{}\"", s),
+            Token::Use => write!(f, "use"),
+            Token::Boolean(b) => write!(f, "{}", b),
+            Token::Identifier(i) => write!(f, "{}", i),
+            Token::Comment(c) => write!(f, "#{}", c),
         }
     }
 }

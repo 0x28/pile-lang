@@ -123,7 +123,7 @@ impl Interpreter {
                     token => Err(PileError::in_range(
                         Rc::clone(&source),
                         state.current_lines,
-                        format!("Unexpected {}", token),
+                        format!("Unexpected {}", token.error_fmt()),
                     )),
                 },
                 Expr::Assignment { var, .. } => {

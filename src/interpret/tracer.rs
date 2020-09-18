@@ -7,12 +7,11 @@ use crate::program_source::ProgramSource;
 use std::fmt;
 
 struct TracedExpr<'e>(&'e Expr);
-struct TracedToken<'t>(&'t Token);
 
 impl<'e> fmt::Display for TracedExpr<'e> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self.0 {
-            Expr::Atom { token, .. } => write!(f, "{}", TracedToken(token)),
+            Expr::Atom { token, .. } => write!(f, "{}", token),
             Expr::Assignment { var, .. } => write!(f, "-> {}", var),
             Expr::Block { expressions, .. } => {
                 write!(f, "begin")?;
@@ -30,26 +29,6 @@ impl<'e> fmt::Display for TracedExpr<'e> {
             }
             Expr::Save { var, .. } => write!(f, "save(\"{}\")", var),
             Expr::Restore { var, .. } => write!(f, "restore(\"{}\")", var),
-        }
-    }
-}
-
-impl<'t> fmt::Display for TracedToken<'t> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self.0 {
-            Token::Begin => write!(f, "begin"),
-            Token::End => write!(f, "end"),
-            Token::Let => write!(f, "let"),
-            Token::BracketLeft => write!(f, "["),
-            Token::BracketRight => write!(f, "]"),
-            Token::Assign => write!(f, "->"),
-            Token::Operator(op) => write!(f, "{}", op),
-            Token::Number(n) => write!(f, "{}", n),
-            Token::String(s) => write!(f, "\"{}\"", s),
-            Token::Use => write!(f, "use"),
-            Token::Boolean(b) => write!(f, "{}", b),
-            Token::Identifier(i) => write!(f, "{}", i),
-            Token::Comment(_) => Ok(()),
         }
     }
 }
