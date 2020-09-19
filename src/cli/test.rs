@@ -6,6 +6,7 @@ fn test_read_program() {
         stack_size: 100,
         source: Rc::new(ProgramSource::File(PathBuf::from("unknown.txt"))),
         trace: true,
+        format: false,
         completion: None,
     };
 
@@ -29,6 +30,7 @@ fn test_read_options1() -> Result<(), String> {
     let options = read_options(vec!["test1"])?;
     assert_eq!(options.stack_size(), 100);
     assert_eq!(options.trace(), false);
+    assert_eq!(options.format(), false);
     assert_eq!(options.source().as_ref(), &get_test_source());
     assert_eq!(options.completion, None);
 
@@ -41,6 +43,7 @@ fn test_read_options2() -> Result<(), String> {
 
     assert_eq!(options.stack_size(), 100);
     assert_eq!(options.trace(), false);
+    assert_eq!(options.format(), false);
     assert_eq!(options.source().as_ref(), &ProgramSource::Stdin);
 
     Ok(())
@@ -52,6 +55,7 @@ fn test_read_options3() -> Result<(), String> {
 
     assert_eq!(options.stack_size(), 100);
     assert_eq!(options.trace(), false);
+    assert_eq!(options.format(), false);
     assert_eq!(
         options.source().as_ref(),
         &ProgramSource::File(PathBuf::from("./some_program.pile"))
@@ -66,6 +70,7 @@ fn test_read_options4() -> Result<(), String> {
 
     assert_eq!(options.stack_size(), 123);
     assert_eq!(options.trace(), true);
+    assert_eq!(options.format(), false);
     assert_eq!(options.source().as_ref(), &get_test_source());
 
     Ok(())
@@ -103,4 +108,16 @@ fn test_read_completion2() {
     assert!(options
         .unwrap_err()
         .contains("error parsing <line> in '--complete':"));
+}
+
+#[test]
+fn test_read_format() {
+    let options = read_options(vec!["test8", "--format", "-"]);
+    assert!(options.unwrap().format(), true);
+
+    let options = read_options(vec!["test8", "-f", "test.pile"]);
+    assert!(options.unwrap().format(), true);
+
+    let options = read_options(vec!["test8", "-f"]);
+    assert!(options.is_err());
 }
