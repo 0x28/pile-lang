@@ -1,6 +1,7 @@
 use crate::program_source::ProgramSource;
 
 use std::fmt;
+use std::error::Error;
 use std::rc::Rc;
 
 #[derive(Debug, PartialEq)]
@@ -43,6 +44,8 @@ impl PileError {
         }
     }
 }
+
+impl Error for PileError {}
 
 impl fmt::Display for PileError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
