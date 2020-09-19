@@ -153,7 +153,7 @@ impl Token {
             Token::BracketRight => "token ']'".to_owned(),
             Token::Assign => "token '->'".to_owned(),
             Token::Operator(o) => format!("operator '{}'", o),
-            Token::Use => format!("token 'use'"),
+            Token::Use => "token 'use'".to_owned(),
             Token::Comment(_) => "".to_owned(),
         }
     }

@@ -33,7 +33,7 @@ pub fn repl() -> ! {
         };
 
         let expr = match using::resolve(locals::translate(ast)) {
-            Ok(ast) => ast.as_ast().expressions,
+            Ok(ast) => ast.ast().expressions,
             Err(msg) => {
                 eprintln!("{}", msg);
                 continue;

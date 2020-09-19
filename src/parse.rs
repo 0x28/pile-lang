@@ -16,7 +16,7 @@ pub struct Ast {
 pub struct ParsedAst(Ast);
 
 impl ParsedAst {
-    pub fn as_ast(self) -> Ast {
+    pub fn ast(self) -> Ast {
         self.0
     }
 }

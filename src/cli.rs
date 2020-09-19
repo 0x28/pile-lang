@@ -57,7 +57,7 @@ impl CommandLineOptions {
         Rc::clone(&self.source)
     }
 
-    pub fn completion<'a>(&'a self) -> &'a Option<CompletionOptions> {
+    pub fn completion(&self) -> &Option<CompletionOptions> {
         &self.completion
     }
 }

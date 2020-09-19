@@ -16,7 +16,7 @@ use std::rc::Rc;
 pub struct ResolvedAst(Ast);
 
 impl ResolvedAst {
-    pub fn as_ast(self) -> Ast {
+    pub fn ast(self) -> Ast {
         self.0
     }
 }
@@ -85,7 +85,7 @@ fn resolve_use(
 ) -> Result<ResolvedAst, PileError> {
     let source = Rc::clone(&ast.as_ref().source);
     let expressions: Result<Vec<Expr>, PileError> = ast
-        .as_ast()
+        .ast()
         .expressions
         .into_iter()
         .map(|expr| {
