@@ -1,7 +1,7 @@
 use crate::program_source::ProgramSource;
 
-use std::fmt;
 use std::error::Error;
+use std::fmt;
 use std::rc::Rc;
 
 #[derive(Debug, PartialEq)]

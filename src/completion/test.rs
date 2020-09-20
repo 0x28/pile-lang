@@ -27,12 +27,9 @@ end
 ",
     );
 
-    map_identifiers(
-        &ast.ast().expressions,
-        (0, u64::MAX),
-        3,
-        &mut |ident| comps.push(ident.to_owned()),
-    );
+    map_identifiers(&ast.ast().expressions, (0, u64::MAX), 3, &mut |ident| {
+        comps.push(ident.to_owned())
+    });
 
     assert_eq!(comps, vec!["var1"])
 }
@@ -50,12 +47,9 @@ end
 ",
     );
 
-    map_identifiers(
-        &ast.ast().expressions,
-        (0, u64::MAX),
-        5,
-        &mut |ident| comps.push(ident.to_owned()),
-    );
+    map_identifiers(&ast.ast().expressions, (0, u64::MAX), 5, &mut |ident| {
+        comps.push(ident.to_owned())
+    });
 
     assert_eq!(comps, vec!["var1", "a", "b", "c"])
 }
@@ -70,12 +64,9 @@ fn test_comp_none() {
 ",
     );
 
-    map_identifiers(
-        &ast.ast().expressions,
-        (0, u64::MAX),
-        2,
-        &mut |ident| comps.push(ident.to_owned()),
-    );
+    map_identifiers(&ast.ast().expressions, (0, u64::MAX), 2, &mut |ident| {
+        comps.push(ident.to_owned())
+    });
 
     assert!(comps.is_empty())
 }
@@ -91,12 +82,9 @@ use "src/completion/comp_test"
 "#,
     );
 
-    map_identifiers(
-        &ast.ast().expressions,
-        (0, u64::MAX),
-        3,
-        &mut |ident| comps.push(ident.to_owned()),
-    );
+    map_identifiers(&ast.ast().expressions, (0, u64::MAX), 3, &mut |ident| {
+        comps.push(ident.to_owned())
+    });
 
     assert_eq!(comps, vec!["value", "inc", "dec"])
 }
@@ -112,12 +100,9 @@ use \"src/completion/comp_test\"
 ",
     );
 
-    map_identifiers(
-        &ast.ast().expressions,
-        (0, u64::MAX),
-        2,
-        &mut |ident| comps.push(ident.to_owned()),
-    );
+    map_identifiers(&ast.ast().expressions, (0, u64::MAX), 2, &mut |ident| {
+        comps.push(ident.to_owned())
+    });
 
     assert!(comps.is_empty())
 }
@@ -134,12 +119,9 @@ end
 ",
     );
 
-    map_identifiers(
-        &ast.ast().expressions,
-        (0, u64::MAX),
-        6,
-        &mut |ident| comps.push(ident.to_owned()),
-    );
+    map_identifiers(&ast.ast().expressions, (0, u64::MAX), 6, &mut |ident| {
+        comps.push(ident.to_owned())
+    });
 
     assert!(comps.is_empty())
 }
@@ -156,12 +138,9 @@ end
 ",
     );
 
-    map_identifiers(
-        &ast.ast().expressions,
-        (0, u64::MAX),
-        4,
-        &mut |ident| comps.push(ident.to_owned()),
-    );
+    map_identifiers(&ast.ast().expressions, (0, u64::MAX), 4, &mut |ident| {
+        comps.push(ident.to_owned())
+    });
 
     assert_eq!(comps, vec!["a1"])
 }
