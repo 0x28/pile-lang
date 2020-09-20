@@ -156,19 +156,19 @@ fn test_numbers_integer() {
 #[test]
 fn test_numbers_float() {
     let lexer = Lexer::new(
-        "1.1\n2.2\n3.3\n-10e20\n 20E3
-         3.1415 7777.7777 -3e-10#number :)",
+        "1.1\n2.2\n3.3\n-10000000.0\n 20000.0
+         3.1415 7777.7777 -0.00000003#number :)",
         Rc::new(ProgramSource::Stdin),
     );
     let expected = vec![
         (1, Ok(Token::Number(Number::Float(1.1)))),
         (2, Ok(Token::Number(Number::Float(2.2)))),
         (3, Ok(Token::Number(Number::Float(3.3)))),
-        (4, Ok(Token::Number(Number::Float(-10e20)))),
-        (5, Ok(Token::Number(Number::Float(20e3)))),
+        (4, Ok(Token::Number(Number::Float(-10000000.0)))),
+        (5, Ok(Token::Number(Number::Float(20000.0)))),
         (6, Ok(Token::Number(Number::Float(3.1415)))),
         (6, Ok(Token::Number(Number::Float(7777.7777)))),
-        (6, Ok(Token::Number(Number::Float(-3e-10)))),
+        (6, Ok(Token::Number(Number::Float(-0.00000003)))),
         (6, Ok(Token::Comment("number :)".to_owned()))),
     ];
 

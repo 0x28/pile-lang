@@ -19,7 +19,7 @@ impl fmt::Display for Number {
         match self {
             Number::Natural(n) => write!(f, "{}", n),
             Number::Integer(n) => write!(f, "{}", n),
-            Number::Float(n) => write!(f, "{}", n),
+            Number::Float(n) => write!(f, "{:?}", n),
         }
     }
 }
@@ -141,7 +141,7 @@ impl Token {
         match self {
             Token::Number(Number::Natural(n)) => format!("natural '{}'", n),
             Token::Number(Number::Integer(i)) => format!("integer '{}'", i),
-            Token::Number(Number::Float(fl)) => format!("float '{}'", fl),
+            Token::Number(Number::Float(fl)) => format!("float '{:?}'", fl),
             Token::Identifier(ident) => format!("identifier '{}'", ident),
             Token::String(s) => format!("string \"{}\"", s),
             Token::Boolean(true) => "boolean 'true'".to_owned(),
@@ -365,13 +365,15 @@ impl<'a> Lexer<'a> {
                     s
                 ))),
             }
-        } else {
+        } else if s.chars().all(|c| "+-0123456789.".contains(c)) {
             match s.parse() {
                 Ok(float) => Ok(Token::Number(Number::Float(float))),
                 Err(_) => {
                     Err(self.lex_error(&format!("'{}' isn't a number", s)))
                 }
             }
+        } else {
+            Err(self.lex_error(&format!("'{}' isn't a number", s)))
         }
     }
 
