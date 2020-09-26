@@ -474,7 +474,7 @@ fn test_error_unknown_char() {
 #[test]
 fn test_error_invalid_number() {
     let lexer = Lexer::new(
-        "BEGIN 002 122 + 2f \n 3d 3y * \n END append",
+        "BEGIN 002 122 + 2f \n -3d 3y * \n END append",
         Rc::new(ProgramSource::Stdin),
     );
     let expected = vec![
@@ -495,7 +495,7 @@ fn test_error_invalid_number() {
             Err(PileError::in_line(
                 Rc::new(ProgramSource::Stdin),
                 2,
-                "'3d' isn't a number".to_owned(),
+                "'-3d' isn't a number".to_owned(),
             )),
         ),
         (
