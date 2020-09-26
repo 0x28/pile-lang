@@ -1,0 +1,5 @@
+begin
++ # don't touch file!
+end
+>> # unknown operator
+1 2 + print

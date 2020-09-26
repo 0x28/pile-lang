@@ -16,7 +16,7 @@ pub struct Ast {
 pub struct ParsedAst(Ast);
 
 impl ParsedAst {
-    pub fn as_ast(self) -> Ast {
+    pub fn ast(self) -> Ast {
         self.0
     }
 }
@@ -135,7 +135,10 @@ impl<'a> Parser<'a> {
                 Some((_, token)) => {
                     return Err(self.parse_error(
                         self.lexer.line(),
-                        &format!("Expected identifier found {}.", token),
+                        &format!(
+                            "Expected identifier found {}.",
+                            token.error_fmt()
+                        ),
                     ))
                 }
             }
@@ -212,7 +215,7 @@ impl<'a> Parser<'a> {
             }
             Some((line, token)) => Err(self.parse_error(
                 line,
-                &format!("Expected identifier found {}.", token),
+                &format!("Expected identifier found {}.", token.error_fmt()),
             )),
         }
     }
@@ -230,7 +233,7 @@ impl<'a> Parser<'a> {
             }),
             Some((line, token)) => Err(self.parse_error(
                 *line,
-                &format!("Expected string found {}.", token),
+                &format!("Expected string found {}.", token.error_fmt()),
             )),
             None => Err(self.parse_error(0, "No lookahead found.")),
         }
@@ -238,6 +241,7 @@ impl<'a> Parser<'a> {
 
     fn consume(&mut self) -> Result<(), PileError> {
         self.lookahead = match self.lexer.next() {
+            Some((_, Ok(Token::Comment(_)))) => return self.consume(),
             Some((line, current_token)) => Some((line, current_token?)),
             None => None,
         };
@@ -253,7 +257,8 @@ impl<'a> Parser<'a> {
                         *line,
                         &format!(
                             "Expected {} found {}.",
-                            expected, current_token
+                            expected.error_fmt(),
+                            current_token.error_fmt()
                         ),
                     ))
                 } else {

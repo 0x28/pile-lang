@@ -1014,7 +1014,7 @@ fn read(input: &str) -> Vec<Expr> {
         .parse()
         .unwrap();
     let ast = locals::translate(ast);
-    using::resolve(ast).unwrap().as_ast().expressions
+    using::resolve(ast).unwrap().ast().expressions
 }
 
 #[test]

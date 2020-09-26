@@ -1,5 +1,6 @@
 mod cli;
 mod completion;
+mod formatting;
 mod interpret;
 mod lex;
 mod locals;
@@ -24,6 +25,12 @@ fn pile() -> Result<(), String> {
     let program_text = options.read_program()?;
 
     let lexer = lex::Lexer::new(program_text.as_ref(), options.source());
+
+    if options.format() {
+        formatting::format(lexer).map_err(|e| e.to_string())?;
+        return Ok(());
+    }
+
     let parser = parse::Parser::new(lexer);
     let ast = parser.parse().map_err(|e| e.to_string())?;
 

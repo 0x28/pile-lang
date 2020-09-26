@@ -7,7 +7,7 @@ use std::rc::Rc;
 pub struct ScopedAst(Ast);
 
 impl ScopedAst {
-    pub fn as_ast(self) -> Ast {
+    pub fn ast(self) -> Ast {
         self.0
     }
 }
@@ -19,7 +19,7 @@ impl AsRef<Ast> for ScopedAst {
 }
 
 pub fn translate(ast: ParsedAst) -> ScopedAst {
-    let ast = ast.as_ast();
+    let ast = ast.ast();
     let source = Rc::clone(&ast.source);
     let expressions: Vec<Expr> = ast
         .expressions

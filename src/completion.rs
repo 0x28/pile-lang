@@ -16,6 +16,7 @@ macro_rules! ensure_token_completion {
                 Token::Number(_)     => {},
                 Token::Identifier(_) => {},
                 Token::String(_)     => {},
+                Token::Comment(_)    => {},
             }
         }
         &[$($tok_string,)+]

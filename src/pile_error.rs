@@ -1,5 +1,6 @@
 use crate::program_source::ProgramSource;
 
+use std::error::Error;
 use std::fmt;
 use std::rc::Rc;
 
@@ -43,6 +44,8 @@ impl PileError {
         }
     }
 }
+
+impl Error for PileError {}
 
 impl fmt::Display for PileError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

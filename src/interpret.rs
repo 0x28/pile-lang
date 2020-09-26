@@ -42,7 +42,7 @@ impl Interpreter {
         trace: bool,
     ) -> Interpreter {
         Interpreter {
-            program: program.as_ast(),
+            program: program.ast(),
             state: State {
                 stack: Vec::with_capacity(initial_size),
                 lookup: ScopeStack::new(),
@@ -109,39 +109,49 @@ impl Interpreter {
                         Interpreter::apply(op, state, source)
                     }
                     Token::Number(num) => {
-                        Ok(state.stack.push(RuntimeValue::Number(num.clone())))
+                        state.stack.push(RuntimeValue::Number(num.clone()));
+                        Ok(())
                     }
                     Token::Identifier(ident) => {
                         Interpreter::resolve(ident, state, source)
                     }
-                    Token::String(string) => Ok(state
-                        .stack
-                        .push(RuntimeValue::String(string.clone()))),
+                    Token::String(string) => {
+                        state.stack.push(RuntimeValue::String(string.clone()));
+                        Ok(())
+                    }
                     Token::Boolean(b) => {
-                        Ok(state.stack.push(RuntimeValue::Boolean(*b)))
+                        state.stack.push(RuntimeValue::Boolean(*b));
+                        Ok(())
                     }
                     token => Err(PileError::in_range(
                         Rc::clone(&source),
                         state.current_lines,
-                        format!("Unexpected {}", token),
+                        format!("Unexpected {}", token.error_fmt()),
                     )),
                 },
                 Expr::Assignment { var, .. } => {
                     Interpreter::assign(var, state, source)
                 }
                 Expr::Block { expressions, .. } => {
-                    Ok(state.stack.push(RuntimeValue::Function(Function {
+                    state.stack.push(RuntimeValue::Function(Function {
                         source: Rc::clone(source),
                         exprs: Rc::clone(expressions),
-                    })))
+                    }));
+                    Ok(())
                 }
                 Expr::Use { subprogram, .. } => Interpreter::call(
                     &subprogram.expressions,
                     state,
                     &subprogram.source,
                 ),
-                Expr::Save { var, .. } => Ok(state.lookup.save(var)),
-                Expr::Restore { var, .. } => Ok(state.lookup.restore(var)),
+                Expr::Save { var, .. } => {
+                    state.lookup.save(var);
+                    Ok(())
+                }
+                Expr::Restore { var, .. } => {
+                    state.lookup.restore(var);
+                    Ok(())
+                }
             };
 
             if state.trace {
@@ -153,7 +163,7 @@ impl Interpreter {
                     .iter()
                     .rev()
                     .take_while(|expr| matches!(expr, Expr::Restore{..}))
-                    .map(|expr| {
+                    .for_each(|expr| {
                         if let Expr::Restore { var, .. } = expr {
                             if state.trace {
                                 tracer::before_eval(expr, &state.lookup);
@@ -165,8 +175,7 @@ impl Interpreter {
                                 tracer::after_eval(&expr);
                             }
                         }
-                    })
-                    .count();
+                    });
                 return Err(e);
             }
         }

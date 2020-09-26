@@ -21,6 +21,7 @@ pub struct CommandLineOptions {
     stack_size: usize,
     source: Rc<ProgramSource>,
     trace: bool,
+    format: bool,
     completion: Option<CompletionOptions>,
 }
 
@@ -48,11 +49,15 @@ impl CommandLineOptions {
         self.trace
     }
 
+    pub fn format(&self) -> bool {
+        self.format
+    }
+
     pub fn source(&self) -> Rc<ProgramSource> {
         Rc::clone(&self.source)
     }
 
-    pub fn completion<'a>(&'a self) -> &'a Option<CompletionOptions> {
+    pub fn completion(&self) -> &Option<CompletionOptions> {
         &self.completion
     }
 }
@@ -100,6 +105,13 @@ where
                 .value_names(&["prefix", "line"])
                 .requires("FILE"),
         )
+        .arg(
+            Arg::with_name("format")
+                .help("Format the given program.")
+                .short("f")
+                .long("format")
+                .requires("FILE"),
+        )
         .get_matches_from_safe(itr);
 
     let matches = match matches {
@@ -116,6 +128,7 @@ where
     let stack_size: usize = matches.value_of("size").unwrap().parse().unwrap();
     let file = matches.value_of("FILE");
     let trace = matches.is_present("trace");
+    let format = matches.is_present("format");
     let source = Rc::new(match file {
         None => {
             if atty::is(Stream::Stdin) {
@@ -145,6 +158,7 @@ where
         stack_size,
         source,
         trace,
+        format,
         completion,
     })
 }

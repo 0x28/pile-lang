@@ -8,12 +8,14 @@
 
 ;;; Code:
 
+(eval-when-compile (require 'subr-x))
+
 (defgroup pile nil
   "Editing pile programs."
   :group 'languages)
 
 (defcustom pile-executable-name "pile"
-  "Program invoked by completion functions."
+  "Program invoked by pile-mode."
   :type 'file
   :group 'pile)
 
@@ -55,6 +57,7 @@
   (setq-local comment-end "")
   (setq-local comment-use-syntax t)
   (setq-local imenu-generic-expression `(("function" ,pile--function-regexp 1)))
+  (setq-local indent-region-function #'pile-indent-region)
   (add-hook 'completion-at-point-functions
             #'pile-completion-at-point nil 'local)
 
@@ -94,6 +97,24 @@
         (list start
               end
               collection)))))
+
+(defun pile-indent-region (start end)
+  "Indent the pile program between START and END."
+  (let ((format-buffer " *pile-format*"))
+    (save-restriction
+      (narrow-to-region start end)
+      (if (= 0 (call-process-region start
+                                    end
+                                    pile-executable-name
+                                    nil
+                                    format-buffer
+                                    nil
+                                    "--format" "-"))
+          (replace-buffer-contents format-buffer)
+        (message "Formatting with 'pile --format' failed:\n%s"
+                 (with-current-buffer format-buffer
+                   (string-trim (buffer-string)))))
+      (kill-buffer format-buffer))))
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist

@@ -29,6 +29,7 @@ fn test_comment_simple() {
         (1, Ok(Token::Number(Number::Natural(2)))),
         (1, Ok(Token::Number(Number::Natural(3)))),
         (1, Ok(Token::Operator(Operator::Mul))),
+        (1, Ok(Token::Comment(" hello world".to_owned()))),
         (2, Ok(Token::Number(Number::Natural(1)))),
         (2, Ok(Token::Number(Number::Natural(1)))),
         (2, Ok(Token::Operator(Operator::Plus))),
@@ -39,9 +40,10 @@ fn test_comment_simple() {
 
 #[test]
 fn test_comment_only() {
-    let lexer = Lexer::new("# empty program", Rc::new(ProgramSource::Stdin));
+    let lexer = Lexer::new("# empty #program", Rc::new(ProgramSource::Stdin));
 
-    assert_eq!(lexer.count(), 0);
+    let expected = vec![(1, Ok(Token::Comment(" empty #program".to_owned())))];
+    compare_token_lists(lexer, expected);
 }
 
 #[test]
@@ -50,10 +52,13 @@ fn test_string_simple() {
         "\"yay programming languages :)\"# comment",
         Rc::new(ProgramSource::Stdin),
     );
-    let expected = vec![(
-        1,
-        Ok(Token::String(String::from("yay programming languages :)"))),
-    )];
+    let expected = vec![
+        (
+            1,
+            Ok(Token::String(String::from("yay programming languages :)"))),
+        ),
+        (1, Ok(Token::Comment(" comment".to_owned()))),
+    ];
 
     compare_token_lists(lexer, expected);
 }
@@ -112,6 +117,7 @@ fn test_numbers_natural() {
         (1, Ok(Token::Number(Number::Natural(4543)))),
         (1, Ok(Token::Number(Number::Natural(123)))),
         (1, Ok(Token::Number(Number::Natural(21393)))),
+        (1, Ok(Token::Comment("123#123".to_owned()))),
         (2, Ok(Token::Number(Number::Natural(203)))),
         (2, Ok(Token::Number(Number::Natural(40)))),
         (2, Ok(Token::Number(Number::Natural(5060)))),
@@ -150,19 +156,20 @@ fn test_numbers_integer() {
 #[test]
 fn test_numbers_float() {
     let lexer = Lexer::new(
-        "1.1\n2.2\n3.3\n-10e20\n 20E3
-         3.1415 7777.7777 -3e-10#number :)",
+        "1.1\n2.2\n3.3\n-10000000.0\n 20000.0
+         3.1415 7777.7777 -0.00000003#number :)",
         Rc::new(ProgramSource::Stdin),
     );
     let expected = vec![
         (1, Ok(Token::Number(Number::Float(1.1)))),
         (2, Ok(Token::Number(Number::Float(2.2)))),
         (3, Ok(Token::Number(Number::Float(3.3)))),
-        (4, Ok(Token::Number(Number::Float(-10e20)))),
-        (5, Ok(Token::Number(Number::Float(20e3)))),
+        (4, Ok(Token::Number(Number::Float(-10000000.0)))),
+        (5, Ok(Token::Number(Number::Float(20000.0)))),
         (6, Ok(Token::Number(Number::Float(3.1415)))),
         (6, Ok(Token::Number(Number::Float(7777.7777)))),
-        (6, Ok(Token::Number(Number::Float(-3e-10)))),
+        (6, Ok(Token::Number(Number::Float(-0.00000003)))),
+        (6, Ok(Token::Comment("number :)".to_owned()))),
     ];
 
     compare_token_lists(lexer, expected);
@@ -245,10 +252,12 @@ fn test_keywords() {
     );
     let expected = vec![
         (2, Ok(Token::Begin)),
+        (2, Ok(Token::Comment("what".to_owned()))),
         (3, Ok(Token::Number(Number::Natural(10)))),
         (3, Ok(Token::Operator(Operator::Plus))),
         (4, Ok(Token::Number(Number::Natural(100)))),
         (4, Ok(Token::Operator(Operator::Mul))),
+        (4, Ok(Token::Comment(" this is a operator".to_owned()))),
         (5, Ok(Token::End)),
         (7, Ok(Token::Operator(Operator::While))),
         (7, Ok(Token::Operator(Operator::Dotimes))),
@@ -309,6 +318,7 @@ fn test_identifier() {
         (3, Ok(Token::Identifier(String::from("definition_var")))),
         (3, Ok(Token::Identifier(String::from("looped")))),
         (3, Ok(Token::Identifier(String::from("while_not")))),
+        (3, Ok(Token::Comment(" variable".to_owned()))),
     ];
 
     compare_token_lists(lexer, expected);
@@ -455,6 +465,7 @@ fn test_error_unknown_char() {
                 "Unknown char '}'".to_owned(),
             )),
         ),
+        (2, Ok(Token::Comment(" comment".to_owned()))),
     ];
 
     compare_token_lists(lexer, expected);
@@ -546,126 +557,113 @@ fn test_error_unknown_operator() {
 }
 
 #[test]
-fn test_token_fmt() {
+fn test_token_error_fmt() {
     assert_eq!(
-        format!("{}", Token::Number(Number::Natural(10))),
+        Token::Number(Number::Natural(10)).error_fmt(),
         "natural '10'"
     );
     assert_eq!(
-        format!("{}", Token::Number(Number::Integer(-10))),
+        Token::Number(Number::Integer(-10)).error_fmt(),
         "integer '-10'"
     );
     assert_eq!(
-        format!("{}", Token::Number(Number::Float(42.42))),
+        Token::Number(Number::Float(42.42)).error_fmt(),
         "float '42.42'"
     );
     assert_eq!(
-        format!("{}", Token::Identifier("var".to_owned())),
+        Token::Identifier("var".to_owned()).error_fmt(),
         "identifier 'var'"
     );
     assert_eq!(
-        format!("{}", Token::String("hello".to_owned())),
+        Token::String("hello".to_owned()).error_fmt(),
         "string \"hello\""
     );
-    assert_eq!(format!("{}", Token::Boolean(true)), "boolean 'true'");
-    assert_eq!(format!("{}", Token::Boolean(false)), "boolean 'false'");
-    assert_eq!(format!("{}", Token::Begin), "token 'begin'");
-    assert_eq!(format!("{}", Token::End), "token 'end'");
+    assert_eq!(Token::Boolean(true).error_fmt(), "boolean 'true'");
+    assert_eq!(Token::Boolean(false).error_fmt(), "boolean 'false'");
+    assert_eq!(Token::Begin.error_fmt(), "token 'begin'");
+    assert_eq!(Token::End.error_fmt(), "token 'end'");
+    assert_eq!(Token::Operator(Operator::If).error_fmt(), "operator 'if'");
     assert_eq!(
-        format!("{}", Token::Operator(Operator::If)),
-        "operator 'if'"
-    );
-    assert_eq!(
-        format!("{}", Token::Operator(Operator::Dotimes)),
+        Token::Operator(Operator::Dotimes).error_fmt(),
         "operator 'dotimes'"
     );
     assert_eq!(
-        format!("{}", Token::Operator(Operator::While)),
+        Token::Operator(Operator::While).error_fmt(),
         "operator 'while'"
     );
-    assert_eq!(format!("{}", Token::Assign), "token '->'");
+    assert_eq!(Token::Assign.error_fmt(), "token '->'");
+    assert_eq!(Token::Operator(Operator::Plus).error_fmt(), "operator '+'");
+    assert_eq!(Token::Operator(Operator::Minus).error_fmt(), "operator '-'");
+    assert_eq!(Token::Operator(Operator::Div).error_fmt(), "operator '/'");
+    assert_eq!(Token::Operator(Operator::Mul).error_fmt(), "operator '*'");
     assert_eq!(
-        format!("{}", Token::Operator(Operator::Plus)),
-        "operator '+'"
-    );
-    assert_eq!(
-        format!("{}", Token::Operator(Operator::Minus)),
-        "operator '-'"
-    );
-    assert_eq!(
-        format!("{}", Token::Operator(Operator::Div)),
-        "operator '/'"
-    );
-    assert_eq!(
-        format!("{}", Token::Operator(Operator::Mul)),
-        "operator '*'"
-    );
-    assert_eq!(
-        format!("{}", Token::Operator(Operator::Greater)),
+        Token::Operator(Operator::Greater).error_fmt(),
         "operator '>'"
     );
     assert_eq!(
-        format!("{}", Token::Operator(Operator::GreaterEqual)),
+        Token::Operator(Operator::GreaterEqual).error_fmt(),
         "operator '>='"
     );
+    assert_eq!(Token::Operator(Operator::Equal).error_fmt(), "operator '='");
     assert_eq!(
-        format!("{}", Token::Operator(Operator::Equal)),
-        "operator '='"
-    );
-    assert_eq!(
-        format!("{}", Token::Operator(Operator::LessEqual)),
+        Token::Operator(Operator::LessEqual).error_fmt(),
         "operator '<='"
     );
+    assert_eq!(Token::Operator(Operator::Less).error_fmt(), "operator '<'");
+    assert_eq!(Token::Operator(Operator::And).error_fmt(), "operator 'and'");
+    assert_eq!(Token::Operator(Operator::Or).error_fmt(), "operator 'or'");
+    assert_eq!(Token::Operator(Operator::Not).error_fmt(), "operator 'not'");
     assert_eq!(
-        format!("{}", Token::Operator(Operator::Less)),
-        "operator '<'"
-    );
-    assert_eq!(
-        format!("{}", Token::Operator(Operator::And)),
-        "operator 'and'"
-    );
-    assert_eq!(
-        format!("{}", Token::Operator(Operator::Or)),
-        "operator 'or'"
-    );
-    assert_eq!(
-        format!("{}", Token::Operator(Operator::Not)),
-        "operator 'not'"
-    );
-    assert_eq!(
-        format!("{}", Token::Operator(Operator::Print)),
+        Token::Operator(Operator::Print).error_fmt(),
         "operator 'print'"
     );
     assert_eq!(
-        format!("{}", Token::Operator(Operator::Natural)),
+        Token::Operator(Operator::Natural).error_fmt(),
         "operator 'natural'"
     );
     assert_eq!(
-        format!("{}", Token::Operator(Operator::Integer)),
+        Token::Operator(Operator::Integer).error_fmt(),
         "operator 'integer'"
     );
     assert_eq!(
-        format!("{}", Token::Operator(Operator::Float)),
+        Token::Operator(Operator::Float).error_fmt(),
         "operator 'float'"
     );
     assert_eq!(
-        format!("{}", Token::Operator(Operator::Assert)),
+        Token::Operator(Operator::Assert).error_fmt(),
         "operator 'assert'"
     );
+    assert_eq!(Token::Operator(Operator::Dup).error_fmt(), "operator 'dup'");
     assert_eq!(
-        format!("{}", Token::Operator(Operator::Dup)),
-        "operator 'dup'"
-    );
-    assert_eq!(
-        format!("{}", Token::Operator(Operator::Drop)),
+        Token::Operator(Operator::Drop).error_fmt(),
         "operator 'drop'"
     );
     assert_eq!(
-        format!("{}", Token::Operator(Operator::Swap)),
+        Token::Operator(Operator::Swap).error_fmt(),
         "operator 'swap'"
     );
-    assert_eq!(format!("{}", Token::Use), "token 'use'");
-    assert_eq!(format!("{}", Token::Let), "token 'let'");
-    assert_eq!(format!("{}", Token::BracketLeft), "token '['");
-    assert_eq!(format!("{}", Token::BracketRight), "token ']'");
+    assert_eq!(Token::Use.error_fmt(), "token 'use'");
+    assert_eq!(Token::Let.error_fmt(), "token 'let'");
+    assert_eq!(Token::BracketLeft.error_fmt(), "token '['");
+    assert_eq!(Token::BracketRight.error_fmt(), "token ']'");
+}
+
+#[test]
+fn test_token_fmt() {
+    assert_eq!(format!("{}", Token::Begin), "begin");
+    assert_eq!(format!("{}", Token::End), "end");
+    assert_eq!(format!("{}", Token::Let), "let");
+    assert_eq!(format!("{}", Token::BracketLeft), "[");
+    assert_eq!(format!("{}", Token::BracketRight), "]");
+    assert_eq!(format!("{}", Token::Assign), "->");
+    assert_eq!(format!("{}", Token::Operator(Operator::Plus)), "+");
+    assert_eq!(format!("{}", Token::Number(Number::Float(12.34))), "12.34");
+    assert_eq!(
+        format!("{}", Token::String("hello".to_owned())),
+        "\"hello\""
+    );
+    assert_eq!(format!("{}", Token::Use), "use");
+    assert_eq!(format!("{}", Token::Boolean(true)), "true");
+    assert_eq!(format!("{}", Token::Boolean(false)), "false");
+    assert_eq!(format!("{}", Token::Identifier("var".to_owned())), "var");
 }

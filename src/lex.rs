@@ -19,7 +19,7 @@ impl fmt::Display for Number {
         match self {
             Number::Natural(n) => write!(f, "{}", n),
             Number::Integer(n) => write!(f, "{}", n),
-            Number::Float(n) => write!(f, "{}", n),
+            Number::Float(n) => write!(f, "{:?}", n),
         }
     }
 }
@@ -132,26 +132,49 @@ pub enum Token {
     Boolean(bool),
     // use
     Use,
+    // comments
+    Comment(String),
+}
+
+impl Token {
+    pub fn error_fmt(&self) -> String {
+        match self {
+            Token::Number(Number::Natural(n)) => format!("natural '{}'", n),
+            Token::Number(Number::Integer(i)) => format!("integer '{}'", i),
+            Token::Number(Number::Float(fl)) => format!("float '{:?}'", fl),
+            Token::Identifier(ident) => format!("identifier '{}'", ident),
+            Token::String(s) => format!("string \"{}\"", s),
+            Token::Boolean(true) => "boolean 'true'".to_owned(),
+            Token::Boolean(false) => "boolean 'false'".to_owned(),
+            Token::Begin => "token 'begin'".to_owned(),
+            Token::End => "token 'end'".to_owned(),
+            Token::Let => "token 'let'".to_owned(),
+            Token::BracketLeft => "token '['".to_owned(),
+            Token::BracketRight => "token ']'".to_owned(),
+            Token::Assign => "token '->'".to_owned(),
+            Token::Operator(o) => format!("operator '{}'", o),
+            Token::Use => "token 'use'".to_owned(),
+            Token::Comment(_) => "".to_owned(),
+        }
+    }
 }
 
 impl fmt::Display for Token {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Token::Number(Number::Natural(n)) => write!(f, "natural '{}'", n),
-            Token::Number(Number::Integer(i)) => write!(f, "integer '{}'", i),
-            Token::Number(Number::Float(fl)) => write!(f, "float '{}'", fl),
-            Token::Identifier(ident) => write!(f, "identifier '{}'", ident),
-            Token::String(s) => write!(f, "string \"{}\"", s),
-            Token::Boolean(true) => write!(f, "boolean 'true'"),
-            Token::Boolean(false) => write!(f, "boolean 'false'"),
-            Token::Begin => write!(f, "token 'begin'"),
-            Token::End => write!(f, "token 'end'"),
-            Token::Let => write!(f, "token 'let'"),
-            Token::BracketLeft => write!(f, "token '['"),
-            Token::BracketRight => write!(f, "token ']'"),
-            Token::Assign => write!(f, "token '->'"),
-            Token::Operator(o) => write!(f, "operator '{}'", o),
-            Token::Use => write!(f, "token 'use'"),
+            Token::Begin => write!(f, "begin"),
+            Token::End => write!(f, "end"),
+            Token::Let => write!(f, "let"),
+            Token::BracketLeft => write!(f, "["),
+            Token::BracketRight => write!(f, "]"),
+            Token::Assign => write!(f, "->"),
+            Token::Operator(op) => write!(f, "{}", op),
+            Token::Number(n) => write!(f, "{}", n),
+            Token::String(s) => write!(f, "\"{}\"", s),
+            Token::Use => write!(f, "use"),
+            Token::Boolean(b) => write!(f, "{}", b),
+            Token::Identifier(i) => write!(f, "{}", i),
+            Token::Comment(c) => write!(f, "#{}", c),
         }
     }
 }
@@ -222,8 +245,8 @@ impl<'a> Lexer<'a> {
         word
     }
 
-    fn skip_comment(&mut self) {
-        self.skip(|c| c != '\n');
+    fn comment(&mut self) -> Result<Token, PileError> {
+        Ok(Token::Comment(self.collect_while(|c| c != '\n')))
     }
 
     fn skip_whitespace(&mut self) {
@@ -342,13 +365,15 @@ impl<'a> Lexer<'a> {
                     s
                 ))),
             }
-        } else {
+        } else if s.chars().all(|c| "+-0123456789.".contains(c)) {
             match s.parse() {
                 Ok(float) => Ok(Token::Number(Number::Float(float))),
                 Err(_) => {
                     Err(self.lex_error(&format!("'{}' isn't a number", s)))
                 }
             }
+        } else {
+            Err(self.lex_error(&format!("'{}' isn't a number", s)))
         }
     }
 
@@ -393,8 +418,8 @@ impl<'a> Lexer<'a> {
         while let Some(&lookahead) = self.input.peek() {
             let token = match lookahead {
                 '#' => {
-                    self.skip_comment();
-                    continue;
+                    self.consume();
+                    self.comment()
                 }
                 '\n' => {
                     self.line_number += 1;
