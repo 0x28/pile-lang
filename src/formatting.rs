@@ -24,7 +24,7 @@ pub fn format(lexer: Lexer) -> Result<(), PileError> {
             Ok(())
         }
         ProgramSource::File(file) => {
-            let file_name = file.to_string_lossy().to_string();
+            let file_name = file.clone();
 
             write_formatting(&mut content, lexer)?;
 
@@ -35,7 +35,7 @@ pub fn format(lexer: Lexer) -> Result<(), PileError> {
             file.write_all(&content)
                 .map_err(|e| PileError::in_file(source, e.to_string()))?;
 
-            println!("Formatted file '{}'.", file_name);
+            println!("Formatted file '{}'.", file_name.to_string_lossy());
 
             Ok(())
         }
