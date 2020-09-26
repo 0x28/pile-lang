@@ -2,6 +2,8 @@ use super::*;
 use crate::lex::Lexer;
 use crate::program_source::ProgramSource;
 
+use std::fs;
+use std::path::PathBuf;
 use std::rc::Rc;
 
 fn expect_formatting(original: &str, formatted: &str) {
@@ -204,4 +206,42 @@ test
 "
 "#,
     );
+}
+
+fn expect_formatted_file(file: &str, content: &str) -> Result<(), PileError> {
+    let test_dir = env!("CARGO_MANIFEST_DIR").to_owned() + "/src/formatting";
+    let file = &format!("{}/{}", test_dir, file);
+
+    let program_text = fs::read_to_string(file).unwrap();
+    let lexer = Lexer::new(
+        &program_text,
+        Rc::new(ProgramSource::File(PathBuf::from(file))),
+    );
+    let result = format(lexer);
+    let formatted = fs::read_to_string(file).unwrap();
+
+    if formatted != content {
+        eprintln!("===\n{}\n===\n{}\n===", formatted, content);
+        assert_eq!(formatted, content);
+    }
+
+    result
+}
+
+#[test]
+fn test_formatting_files() {
+    let result = expect_formatted_file(
+        "format_a.pile",
+        "\
+begin
++ # don't touch file!
+end
+>> # unknown operator
+1 2 + print
+",
+    );
+    assert!(result
+        .unwrap_err()
+        .to_string()
+        .ends_with("format_a.pile:4: Unknown operator '>>'"));
 }
