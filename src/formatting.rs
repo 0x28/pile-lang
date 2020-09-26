@@ -11,13 +11,20 @@ use std::rc::Rc;
 const FILE_BUFFER_SIZE: usize = 1000;
 
 pub fn format(lexer: Lexer) -> Result<(), PileError> {
+    let mut content = Vec::<u8>::with_capacity(FILE_BUFFER_SIZE);
+    let source = Rc::clone(lexer.source());
+
     match lexer.source().as_ref() {
         ProgramSource::Repl => panic!("Can't format repl program!"),
-        ProgramSource::Stdin => write_formatting(&mut io::stdout(), lexer),
+        ProgramSource::Stdin => {
+            write_formatting(&mut content, lexer)?;
+            io::stdout()
+                .write_all(&content)
+                .map_err(|e| PileError::in_file(source, e.to_string()))?;
+            Ok(())
+        }
         ProgramSource::File(file) => {
             let file_name = file.to_string_lossy().to_string();
-            let mut content = Vec::<u8>::with_capacity(FILE_BUFFER_SIZE);
-            let source = Rc::clone(lexer.source());
 
             write_formatting(&mut content, lexer)?;
 

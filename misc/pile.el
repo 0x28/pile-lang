@@ -8,6 +8,8 @@
 
 ;;; Code:
 
+(eval-when-compile (require 'subr-x))
+
 (defgroup pile nil
   "Editing pile programs."
   :group 'languages)
@@ -101,14 +103,17 @@
   (let ((format-buffer " *pile-format*"))
     (save-restriction
       (narrow-to-region start end)
-      (call-process-region start
-                           end
-                           pile-executable-name
-                           nil
-                           format-buffer
-                           nil
-                           "--format" "-")
-      (replace-buffer-contents format-buffer)
+      (if (= 0 (call-process-region start
+                                    end
+                                    pile-executable-name
+                                    nil
+                                    format-buffer
+                                    nil
+                                    "--format" "-"))
+          (replace-buffer-contents format-buffer)
+        (message "Formatting with 'pile --format' failed:\n%s"
+                 (with-current-buffer format-buffer
+                   (string-trim (buffer-string)))))
       (kill-buffer format-buffer))))
 
 ;;;###autoload
