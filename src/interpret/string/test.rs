@@ -7,8 +7,8 @@ fn runtime_value_strategy() -> impl Strategy<Value = RuntimeValue> {
         any::<u64>().prop_map(|n| RuntimeValue::Number(Number::Natural(n))),
         any::<f64>().prop_map(|f| RuntimeValue::Number(Number::Float(f))),
         any::<i64>().prop_map(|i| RuntimeValue::Number(Number::Integer(i))),
-        any::<bool>().prop_map(|b| RuntimeValue::Boolean(b)),
-        ".*".prop_map(|s| RuntimeValue::String(s)),
+        any::<bool>().prop_map(RuntimeValue::Boolean),
+        ".*".prop_map(RuntimeValue::String),
     ]
 }
 

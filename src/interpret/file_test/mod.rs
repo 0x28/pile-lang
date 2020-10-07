@@ -15,9 +15,9 @@ impl Interpreter {
     }
 }
 
-fn expect_stack(filename: &str, expected: &Vec<RuntimeValue>) {
+fn expect_stack(filename: &str, expected: &[RuntimeValue]) {
     let prog = fs::read_to_string(filename)
-        .expect(&format!("{}: can't read file", filename));
+        .unwrap_or_else(|filename| format!("{}: can't read file", filename));
     let lexer = Lexer::new(
         &prog,
         Rc::new(ProgramSource::File(PathBuf::from(filename))),
@@ -28,17 +28,16 @@ fn expect_stack(filename: &str, expected: &Vec<RuntimeValue>) {
 
     let mut interpreter = Interpreter::new(ast, 10, false);
 
-    match interpreter.run() {
-        Err(e) => panic!("interpreter failed: {}", e),
-        _ => (),
+    if let Err(e) = interpreter.run() {
+        panic!("interpreter failed: {}", e)
     }
 
-    assert_eq!(interpreter.stack(), expected);
+    assert_eq!(&interpreter.stack()[..], expected);
 }
 
 fn expect_error(filename: &str, expected: PileError) {
     let prog = fs::read_to_string(filename)
-        .expect(&format!("{}: can't read file", filename));
+        .unwrap_or_else(|filename| format!("{}: can't read file", filename));
     let lexer = Lexer::new(
         &prog,
         Rc::new(ProgramSource::File(PathBuf::from(filename))),
@@ -62,7 +61,7 @@ fn test_file(filename: &str) -> String {
 fn proj_simple() {
     expect_stack(
         &test_file("proj_simple/main.pile"),
-        &vec![
+        &[
             RuntimeValue::Number(Number::Natural(11)),
             RuntimeValue::Number(Number::Natural(19)),
         ],
@@ -73,7 +72,7 @@ fn proj_simple() {
 fn proj_fib() {
     expect_stack(
         &test_file("proj_fibonacci/main.pile"),
-        &vec![
+        &[
             RuntimeValue::Number(Number::Natural(0)),
             RuntimeValue::Number(Number::Natural(1)),
             RuntimeValue::Number(Number::Natural(1)),
@@ -87,7 +86,7 @@ fn proj_fib() {
 fn proj_factorial() {
     expect_stack(
         &test_file("proj_factorial/main.pile"),
-        &vec![
+        &[
             RuntimeValue::Number(Number::Natural(1)),
             RuntimeValue::Number(Number::Natural(1)),
             RuntimeValue::Number(Number::Natural(2)),

@@ -195,7 +195,7 @@ begin
     end
 
     begin
-        \"b\" 3.14 +
+        \"b\" 3.33 +
     end
 end",
         Ast {
@@ -225,7 +225,7 @@ end",
                             },
                             Expr::Atom {
                                 line: 8,
-                                token: Token::Number(Number::Float(3.14)),
+                                token: Token::Number(Number::Float(3.33)),
                             },
                             Expr::Atom {
                                 line: 8,

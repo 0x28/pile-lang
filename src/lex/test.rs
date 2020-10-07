@@ -157,7 +157,7 @@ fn test_numbers_integer() {
 fn test_numbers_float() {
     let lexer = Lexer::new(
         "1.1\n2.2\n3.3\n-10000000.0\n 20000.0
-         3.1415 7777.7777 -0.00000003#number :)",
+         3.2211 7777.7777 -0.00000003#number :)",
         Rc::new(ProgramSource::Stdin),
     );
     let expected = vec![
@@ -166,7 +166,7 @@ fn test_numbers_float() {
         (3, Ok(Token::Number(Number::Float(3.3)))),
         (4, Ok(Token::Number(Number::Float(-10000000.0)))),
         (5, Ok(Token::Number(Number::Float(20000.0)))),
-        (6, Ok(Token::Number(Number::Float(3.1415)))),
+        (6, Ok(Token::Number(Number::Float(3.2211)))),
         (6, Ok(Token::Number(Number::Float(7777.7777)))),
         (6, Ok(Token::Number(Number::Float(-0.00000003)))),
         (6, Ok(Token::Comment("number :)".to_owned()))),
@@ -406,7 +406,7 @@ fn test_error_missing_backslash() {
 #[test]
 fn test_error_unknown_escape() {
     let lexer = Lexer::new(
-        "\"cool string\\t\\z\" 3.14 \"some string\\a\\b\\c \\\"test\" 100",
+        "\"cool string\\t\\z\" 3.33 \"some string\\a\\b\\c \\\"test\" 100",
         Rc::new(ProgramSource::Stdin),
     );
     let expected = vec![
@@ -418,7 +418,7 @@ fn test_error_unknown_escape() {
                 r"Unknown escape chars: '\z'".to_owned(),
             )),
         ),
-        (1, Ok(Token::Number(Number::Float(3.14)))),
+        (1, Ok(Token::Number(Number::Float(3.33)))),
         (
             1,
             Err(PileError::in_line(

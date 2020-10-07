@@ -12,8 +12,8 @@ use std::path::PathBuf;
 use std::rc::Rc;
 
 fn resolve_file(s: &str) -> Result<ResolvedAst, PileError> {
-    let input =
-        fs::read_to_string(s).expect(&format!("couldn't read test file {}", s));
+    let input = fs::read_to_string(s)
+        .unwrap_or_else(|s| format!("couldn't read test file {}", s));
     let lexer =
         Lexer::new(&input, Rc::new(ProgramSource::File(PathBuf::from(s))));
     let parser = Parser::new(lexer);
