@@ -73,7 +73,7 @@ end
 ## Calculating π
 ```
 ### leibniz formular for pi ###
-let [n result dividor sign]
+let [n result divisor sign]
     -> n      # number of iterations
     1.0 -> result
     3.0 -> divisor
