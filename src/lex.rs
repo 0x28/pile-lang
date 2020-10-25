@@ -378,10 +378,7 @@ impl<'a> Lexer<'a> {
     }
 
     fn is_separating(c: char) -> bool {
-        match c {
-            '#' | '[' | ']' => true,
-            _ => false,
-        }
+        matches!(c, '#' | '[' | ']')
     }
 
     fn number(&mut self) -> Result<Token, PileError> {
