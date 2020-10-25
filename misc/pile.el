@@ -74,11 +74,22 @@
 
 (defun pile--get-completions (prefix)
   "Get the completions starting with PREFIX for the current line."
-  (process-lines pile-executable-name
-                 "--complete"
-                 prefix
-                 (number-to-string (line-number-at-pos nil t))
-                 (buffer-file-name)))
+  (let ((completion-buffer " *pile-completion*")
+        (completions))
+    (when (= 0 (call-process-region nil
+                                    nil
+                                    pile-executable-name
+                                    nil
+                                    completion-buffer
+                                    nil
+                                    "--complete"
+                                    prefix
+                                    (number-to-string (line-number-at-pos nil t))
+                                    "-"))
+      (with-current-buffer completion-buffer
+        (setq completions (split-string (buffer-string) "[\n\r]+"))))
+    (kill-buffer completion-buffer)
+    completions))
 
 (defun pile-completion-at-point ()
   "Function used for `completion-at-point-functions' in `pile-mode'."
