@@ -217,6 +217,15 @@ fn test_string_escape() {
     )
 }
 
+#[test]
+fn test_e_notation() {
+    expect_formatting(
+        "11e3 -40e2 10e-10",
+        "11e3 -40e2 10e-10
+",
+    )
+}
+
 fn expect_formatted_file(file: &str, content: &str) -> Result<(), PileError> {
     let test_dir = env!("CARGO_MANIFEST_DIR").to_owned() + "/src/formatting";
     let file = &format!("{}/{}", test_dir, file);
