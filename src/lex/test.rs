@@ -173,7 +173,7 @@ fn test_numbers_integer() {
 #[test]
 fn test_numbers_float() {
     let lexer = Lexer::new(
-        "1.1\n2.2\n3.3\n-10000000.0\n 20000.0
+        "1.1\n2.2\n3.3\n-10000000.0\n 20000.0 30E5
          3.2211 7777.7777 -0.00000003#number :)",
         Rc::new(ProgramSource::Stdin),
     );
@@ -187,6 +187,7 @@ fn test_numbers_float() {
             "-10000000.0",
         ),
         (5, Ok(Token::Number(Number::Float(20000.0))), "20000.0"),
+        (5, Ok(Token::Number(Number::Float(3000000.0))), "30E5"),
         (6, Ok(Token::Number(Number::Float(3.2211))), "3.2211"),
         (6, Ok(Token::Number(Number::Float(7777.7777))), "7777.7777"),
         (
