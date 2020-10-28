@@ -1,4 +1,4 @@
-use crate::lex::{Lexer, Token};
+use crate::lex::{Lexer, LexerItem, Token};
 use crate::pile_error::PileError;
 use crate::program_source::ProgramSource;
 
@@ -56,7 +56,12 @@ where
     let to_pile_err =
         |e: io::Error| PileError::in_file(Rc::clone(&source), e.to_string());
 
-    for (line, token) in lexer {
+    for LexerItem {
+        line,
+        token,
+        lexeme,
+    } in lexer
+    {
         let token = token?;
 
         if let Token::End = token {
@@ -86,7 +91,7 @@ where
             indent_level += 1;
         }
 
-        write!(writer, "{}", &token).map_err(to_pile_err)?;
+        write!(writer, "{}", lexeme).map_err(to_pile_err)?;
         previous_token = Some(token);
     }
 

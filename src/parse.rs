@@ -1,4 +1,5 @@
 use crate::lex::Lexer;
+use crate::lex::LexerItem;
 use crate::lex::Token;
 use crate::pile_error::PileError;
 use crate::program_source::ProgramSource;
@@ -241,8 +242,11 @@ impl<'a> Parser<'a> {
 
     fn consume(&mut self) -> Result<(), PileError> {
         self.lookahead = match self.lexer.next() {
-            Some((_, Ok(Token::Comment(_)))) => return self.consume(),
-            Some((line, current_token)) => Some((line, current_token?)),
+            Some(LexerItem {
+                token: Ok(Token::Comment(_)),
+                ..
+            }) => return self.consume(),
+            Some(LexerItem { line, token, .. }) => Some((line, token?)),
             None => None,
         };
 

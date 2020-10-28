@@ -208,6 +208,15 @@ test
     );
 }
 
+#[test]
+fn test_string_escape() {
+    expect_formatting(
+        r#""\t\r\n\0""#,
+        r#""\t\r\n\0"
+"#,
+    )
+}
+
 fn expect_formatted_file(file: &str, content: &str) -> Result<(), PileError> {
     let test_dir = env!("CARGO_MANIFEST_DIR").to_owned() + "/src/formatting";
     let file = &format!("{}/{}", test_dir, file);

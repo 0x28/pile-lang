@@ -183,9 +183,14 @@ pub struct Lexer<'a> {
     source: Rc<ProgramSource>,
     input: Peekable<Chars<'a>>,
     line_number: u64,
+    current_lexeme: String,
 }
 
-type LexerItem = (u64, Result<Token, PileError>);
+pub struct LexerItem {
+    pub line: u64,
+    pub token: Result<Token, PileError>,
+    pub lexeme: String,
+}
 
 impl<'a> Lexer<'a> {
     const DEFAULT_CAPACITY: usize = 16;
@@ -195,6 +200,7 @@ impl<'a> Lexer<'a> {
             source,
             input: text.chars().peekable(),
             line_number: 1,
+            current_lexeme: String::new(),
         }
     }
 
@@ -220,7 +226,7 @@ impl<'a> Lexer<'a> {
     {
         while let Some(&lookahead) = self.input.peek() {
             if predicate(lookahead) {
-                self.consume()
+                self.skip_one()
             } else {
                 break;
             }
@@ -253,8 +259,15 @@ impl<'a> Lexer<'a> {
         self.skip(|c| c.is_whitespace() && c != '\n');
     }
 
-    fn consume(&mut self) {
+    fn skip_one(&mut self) {
         self.input.next();
+    }
+
+    fn consume(&mut self) {
+        match self.input.next() {
+            Some(c) => self.current_lexeme.push(c),
+            None => {}
+        }
     }
 
     fn identifier(&mut self) -> Result<Token, PileError> {
@@ -420,7 +433,7 @@ impl<'a> Lexer<'a> {
                 }
                 '\n' => {
                     self.line_number += 1;
-                    self.consume();
+                    self.skip_one();
                     continue;
                 }
                 c if c.is_whitespace() => {
@@ -445,7 +458,14 @@ impl<'a> Lexer<'a> {
                 }
             };
 
-            return Some((self.line_number, token));
+            return Some(LexerItem {
+                line: self.line_number,
+                token,
+                lexeme: std::mem::replace(
+                    &mut self.current_lexeme,
+                    String::new(),
+                ),
+            });
         }
 
         None
