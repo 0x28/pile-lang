@@ -9,10 +9,16 @@ fn compare_token_lists(
 
     assert_eq!(result.len(), expected.len());
 
-    for (actual, expected) in result.iter().zip(expected.iter()) {
+    for (actual, expected) in result.into_iter().zip(expected.into_iter()) {
+        let (line, token, lexeme) = expected;
+        let lexeme = lexeme.to_owned();
         assert_eq!(
-            (actual.line, &actual.token, actual.lexeme.as_ref()),
-            (expected.0, &expected.1, expected.2)
+            actual,
+            LexerItem {
+                line,
+                token,
+                lexeme
+            }
         );
     }
 }

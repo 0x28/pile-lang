@@ -186,6 +186,7 @@ pub struct Lexer<'a> {
     current_lexeme: String,
 }
 
+#[derive(PartialEq, Debug)]
 pub struct LexerItem {
     pub line: u64,
     pub token: Result<Token, PileError>,
