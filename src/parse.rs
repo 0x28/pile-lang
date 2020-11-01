@@ -243,7 +243,7 @@ impl<'a> Parser<'a> {
     fn consume(&mut self) -> Result<(), PileError> {
         self.lookahead = match self.lexer.next() {
             Some(LexerItem {
-                token: Ok(Token::Comment(_)),
+                token: Ok(Token::Comment),
                 ..
             }) => return self.consume(),
             Some(LexerItem { line, token, .. }) => Some((line, token?)),

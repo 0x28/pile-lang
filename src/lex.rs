@@ -133,7 +133,7 @@ pub enum Token {
     // use
     Use,
     // comments
-    Comment(String),
+    Comment,
 }
 
 impl Token {
@@ -154,7 +154,7 @@ impl Token {
             Token::Assign => "token '->'".to_owned(),
             Token::Operator(o) => format!("operator '{}'", o),
             Token::Use => "token 'use'".to_owned(),
-            Token::Comment(_) => "".to_owned(),
+            Token::Comment => "".to_owned(),
         }
     }
 }
@@ -174,7 +174,7 @@ impl fmt::Display for Token {
             Token::Use => write!(f, "use"),
             Token::Boolean(b) => write!(f, "{}", b),
             Token::Identifier(i) => write!(f, "{}", i),
-            Token::Comment(c) => write!(f, "#{}", c),
+            Token::Comment => write!(f, ""),
         }
     }
 }
@@ -253,7 +253,8 @@ impl<'a> Lexer<'a> {
     }
 
     fn comment(&mut self) -> Result<Token, PileError> {
-        Ok(Token::Comment(self.collect_while(|c| c != '\n')))
+        self.collect_while(|c| c != '\n');
+        Ok(Token::Comment)
     }
 
     fn skip_whitespace(&mut self) {
