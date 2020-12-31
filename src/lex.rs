@@ -266,9 +266,8 @@ impl<'a> Lexer<'a> {
     }
 
     fn consume(&mut self) {
-        match self.input.next() {
-            Some(c) => self.current_lexeme.push(c),
-            None => {}
+        if let Some(c) = self.input.next() {
+            self.current_lexeme.push(c)
         }
     }
 

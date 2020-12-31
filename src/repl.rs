@@ -12,7 +12,7 @@ use rustyline::error::ReadlineError;
 use rustyline::{Config, EditMode, Editor};
 
 fn pile_history() -> PathBuf {
-    let home = dirs::home_dir().unwrap_or(PathBuf::from("."));
+    let home = dirs::home_dir().unwrap_or_else(|| PathBuf::from("."));
 
     home.join(".pile_history")
 }
