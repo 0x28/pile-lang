@@ -252,9 +252,9 @@ impl<'a> Lexer<'a> {
         word
     }
 
-    fn comment(&mut self) -> Result<Token, PileError> {
+    fn comment(&mut self) -> Token {
         self.collect_while(|c| c != '\n');
-        Ok(Token::Comment)
+        Token::Comment
     }
 
     fn skip_whitespace(&mut self) {
@@ -271,12 +271,12 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    fn identifier(&mut self) -> Result<Token, PileError> {
+    fn identifier(&mut self) -> Token {
         let ident = self
             .collect_while(|c| c.is_alphanumeric() || c == '_')
             .to_lowercase();
 
-        Ok(match ident.as_ref() {
+        match ident.as_ref() {
             "begin" => Token::Begin,
             "end" => Token::End,
             "if" => Token::Operator(Operator::If),
@@ -310,7 +310,7 @@ impl<'a> Lexer<'a> {
             "use" => Token::Use,
             "let" => Token::Let,
             _ => Token::Identifier(ident),
-        })
+        }
     }
 
     fn escape_char(c: char) -> Result<char, char> {
@@ -428,7 +428,7 @@ impl<'a> Lexer<'a> {
             let token = match lookahead {
                 '#' => {
                     self.consume();
-                    self.comment()
+                    Ok(self.comment())
                 }
                 '\n' => {
                     self.line_number += 1;
@@ -442,7 +442,7 @@ impl<'a> Lexer<'a> {
                 '"' => self.string(),
                 '0'..='9' => self.number(),
                 '+' | '-' | '*' | '/' | '=' | '<' | '>' => self.operator(),
-                c if c.is_alphabetic() || c == '_' => self.identifier(),
+                c if c.is_alphabetic() || c == '_' => Ok(self.identifier()),
                 '[' => {
                     self.consume();
                     Ok(Token::BracketLeft)
