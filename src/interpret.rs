@@ -162,7 +162,7 @@ impl Interpreter {
                 expressions
                     .iter()
                     .rev()
-                    .take_while(|expr| matches!(expr, Expr::Restore{..}))
+                    .take_while(|expr| matches!(expr, Expr::Restore { .. }))
                     .for_each(|expr| {
                         if let Expr::Restore { var, .. } = expr {
                             if state.trace {

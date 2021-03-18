@@ -58,10 +58,13 @@ pub fn after_eval(expr: &Expr) {
 }
 
 fn is_print(expr: &Expr) -> bool {
-    matches!(expr, Expr::Atom {
-        token: Token::Operator(Operator::Print),
-        ..
-    })
+    matches!(
+        expr,
+        Expr::Atom {
+            token: Token::Operator(Operator::Print),
+            ..
+        }
+    )
 }
 
 #[cfg(test)]
