@@ -37,6 +37,7 @@ fn run_example_files() {
 }
 
 #[test]
+#[cfg(not(tarpaulin))] // NOTE: causes a timeout for tarpaulin!
 fn test_quine() {
     let quine_file =
         env!("CARGO_MANIFEST_DIR").to_owned() + "/src/examples/quine.pile";
