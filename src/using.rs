@@ -16,8 +16,20 @@ use std::rc::Rc;
 pub struct ResolvedAst(Ast);
 
 impl ResolvedAst {
+    #[allow(dead_code)] // used in the tests
     pub fn ast(self) -> Ast {
         self.0
+    }
+
+    pub fn repl_ast() -> ResolvedAst {
+        ResolvedAst(Ast {
+            source: Rc::new(ProgramSource::Repl),
+            expressions: vec![],
+        })
+    }
+
+    pub fn append(&mut self, mut other: ResolvedAst) {
+        self.0.expressions.append(&mut other.0.expressions)
     }
 }
 

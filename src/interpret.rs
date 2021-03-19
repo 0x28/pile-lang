@@ -1,5 +1,4 @@
 use crate::lex::Token;
-use crate::parse::Ast;
 use crate::pile_error::PileError;
 use crate::program_source::ProgramSource;
 use crate::using::ResolvedAst;
@@ -31,7 +30,7 @@ pub struct State {
 }
 
 pub struct Interpreter {
-    program: Ast,
+    program: ResolvedAst,
     state: State,
 }
 
@@ -42,7 +41,7 @@ impl Interpreter {
         trace: bool,
     ) -> Interpreter {
         Interpreter {
-            program: program.ast(),
+            program,
             state: State {
                 stack: Vec::with_capacity(initial_size),
                 lookup: ScopeStack::new(),
@@ -54,10 +53,7 @@ impl Interpreter {
 
     pub fn empty() -> Interpreter {
         Interpreter {
-            program: Ast {
-                source: Rc::new(ProgramSource::Repl),
-                expressions: vec![],
-            },
+            program: ResolvedAst::repl_ast(),
             state: State {
                 stack: vec![],
                 lookup: ScopeStack::new(),
@@ -67,26 +63,30 @@ impl Interpreter {
         }
     }
 
+    pub fn ast(&self) -> &ResolvedAst {
+        &self.program
+    }
+
     pub fn run(&mut self) -> Result<Option<&RuntimeValue>, PileError> {
         Interpreter::call(
-            &self.program.expressions,
+            &self.program.as_ref().expressions,
             &mut self.state,
-            &self.program.source,
+            &self.program.as_ref().source,
         )?;
         Ok(self.state.stack.last())
     }
 
     pub fn eval(
         &mut self,
-        mut expressions: Vec<Expr>,
+        ast: ResolvedAst,
     ) -> Result<Option<&RuntimeValue>, PileError> {
-        let old_size = self.program.expressions.len();
-        self.program.expressions.append(&mut expressions);
+        let old_size = self.program.as_ref().expressions.len();
+        self.program.append(ast);
 
         Interpreter::call(
-            &self.program.expressions[old_size..],
+            &self.program.as_ref().expressions[old_size..],
             &mut self.state,
-            &self.program.source,
+            &self.program.as_ref().source,
         )?;
         Ok(self.state.stack.last())
     }

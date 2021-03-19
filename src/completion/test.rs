@@ -156,7 +156,7 @@ fn test_comp_prefix1() {
 30 -> var3
 ",
     );
-    map_completions("var", 4, ast, &mut |name| comps.push(name.to_owned()));
+    map_completions("var", 4, &ast, &mut |name| comps.push(name.to_owned()));
     assert_eq!(comps, vec!["var1", "var2"])
 }
 
@@ -165,7 +165,7 @@ fn test_comp_prefix2() {
     let mut comps = vec![];
     let ast = parse_prog("");
 
-    map_completions("pri", 1, ast, &mut |name| comps.push(name.to_owned()));
+    map_completions("pri", 1, &ast, &mut |name| comps.push(name.to_owned()));
     assert_eq!(comps, vec!["print"])
 }
 
@@ -174,7 +174,7 @@ fn test_comp_prefix3() {
     let mut comps = vec![];
     let ast = parse_prog("");
 
-    map_completions("l", 1, ast, &mut |name| comps.push(name.to_owned()));
+    map_completions("l", 1, &ast, &mut |name| comps.push(name.to_owned()));
     assert_eq!(comps, vec!["length", "let"])
 }
 
@@ -183,6 +183,6 @@ fn test_comp_prefix4() {
     let mut comps = vec![];
     let ast = parse_prog("");
 
-    map_completions("f", 1, ast, &mut |name| comps.push(name.to_owned()));
+    map_completions("f", 1, &ast, &mut |name| comps.push(name.to_owned()));
     assert_eq!(comps, vec!["float", "format", "false"])
 }

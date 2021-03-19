@@ -131,7 +131,7 @@ where
 pub fn map_completions<O>(
     prefix: &str,
     line: u64,
-    ast: ResolvedAst,
+    ast: &ResolvedAst,
     operation: &mut O,
 ) where
     O: FnMut(&str),
@@ -149,7 +149,7 @@ pub fn map_completions<O>(
     map_identifiers(&ast.as_ref().expressions, (0, u64::MAX), line, &mut filter)
 }
 
-pub fn complete_to_stdout(prefix: &str, line: u64, ast: ResolvedAst) {
+pub fn complete_to_stdout(prefix: &str, line: u64, ast: &ResolvedAst) {
     let mut completions = HashSet::new();
 
     map_completions(prefix, line, ast, &mut |name| {
@@ -159,6 +159,18 @@ pub fn complete_to_stdout(prefix: &str, line: u64, ast: ResolvedAst) {
     for name in completions {
         println!("{}", name);
     }
+}
+
+pub fn complete_to_vec(
+    prefix: &str,
+    line: u64,
+    ast: &ResolvedAst,
+) -> Vec<String> {
+    let mut candidates = vec![];
+    map_completions(prefix, line, ast, &mut |c: &str| {
+        candidates.push(c.to_owned())
+    });
+    candidates
 }
 
 #[cfg(test)]
