@@ -74,6 +74,26 @@ fn test_string_simple() {
 }
 
 #[test]
+fn test_missing_quote_string() {
+    let lexer = Lexer::new(
+        "\"the beginning of the string ...",
+        Rc::new(ProgramSource::Stdin),
+    );
+
+    let expected = vec![(
+        1,
+        Err(PileError::in_line(
+            Rc::new(ProgramSource::Stdin),
+            1,
+            "Missing string delimiter.".to_owned(),
+        )),
+        "\"the beginning of the string ...",
+    )];
+
+    compare_token_lists(lexer, expected);
+}
+
+#[test]
 fn test_string_escaped() {
     let lexer = Lexer::new(
         "\"\\n\\n\\n\\t\\r\0#test#\" \"\\\\\"",

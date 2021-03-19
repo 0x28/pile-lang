@@ -328,6 +328,7 @@ impl<'a> Lexer<'a> {
     fn string(&mut self) -> Result<Token, PileError> {
         let mut string = String::with_capacity(Lexer::DEFAULT_CAPACITY);
         let mut unknown_escapes = vec![];
+        let mut closed_string = false;
 
         self.consume();
         while let Some(&lookahead) = self.input.peek() {
@@ -345,12 +346,17 @@ impl<'a> Lexer<'a> {
                         self.lex_error("Missing character after backslash.")
                     )
                 }
-                ('"', _) => break,
+                ('"', _) => {
+                    closed_string = true;
+                    break;
+                }
                 (c, _) => string.push(c),
             }
         }
 
-        if !unknown_escapes.is_empty() {
+        if !closed_string {
+            Err(self.lex_error("Missing string delimiter."))
+        } else if !unknown_escapes.is_empty() {
             let mut error = String::from("Unknown escape chars:");
             for unknown in unknown_escapes {
                 error.push_str(format!(" '\\{}'", unknown).as_ref());
