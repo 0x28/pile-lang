@@ -56,7 +56,7 @@ end
 
 #[test]
 fn test_comp_none() {
-    let mut comps: Vec<String> = vec![];
+    let mut comps = vec![];
     let ast = parse_prog(
         "
 # --- current line ---
@@ -73,7 +73,7 @@ fn test_comp_none() {
 
 #[test]
 fn test_comp_use() {
-    let mut comps: Vec<String> = vec![];
+    let mut comps = vec![];
     let ast = parse_prog(
         r#"
 use "src/completion/comp_test"
@@ -91,7 +91,7 @@ use "src/completion/comp_test"
 
 #[test]
 fn test_comp_use_empty() {
-    let mut comps: Vec<String> = vec![];
+    let mut comps = vec![];
     let ast = parse_prog(
         "
 # --- current line ---
@@ -109,7 +109,7 @@ use \"src/completion/comp_test\"
 
 #[test]
 fn test_comp_local_assign_empty() {
-    let mut comps: Vec<String> = vec![];
+    let mut comps = vec![];
     let ast = parse_prog(
         "
 let [a1]
@@ -128,7 +128,7 @@ end
 
 #[test]
 fn test_comp_local_assign() {
-    let mut comps: Vec<String> = vec![];
+    let mut comps = vec![];
     let ast = parse_prog(
         "
 begin
@@ -147,7 +147,6 @@ end
 
 #[test]
 fn test_comp_prefix1() {
-    let mut comps = vec![];
     let ast = parse_prog(
         "
 10 -> var1
@@ -156,33 +155,27 @@ fn test_comp_prefix1() {
 30 -> var3
 ",
     );
-    map_completions("var", 4, ast, &mut |name| comps.push(name.to_owned()));
+    let comps = complete_to_vec("var", 4, &ast);
     assert_eq!(comps, vec!["var1", "var2"])
 }
 
 #[test]
 fn test_comp_prefix2() {
-    let mut comps = vec![];
     let ast = parse_prog("");
-
-    map_completions("pri", 1, ast, &mut |name| comps.push(name.to_owned()));
+    let comps = complete_to_vec("pri", 1, &ast);
     assert_eq!(comps, vec!["print"])
 }
 
 #[test]
 fn test_comp_prefix3() {
-    let mut comps = vec![];
     let ast = parse_prog("");
-
-    map_completions("l", 1, ast, &mut |name| comps.push(name.to_owned()));
+    let comps = complete_to_vec("l", 1, &ast);
     assert_eq!(comps, vec!["length", "let"])
 }
 
 #[test]
 fn test_comp_prefix4() {
-    let mut comps = vec![];
     let ast = parse_prog("");
-
-    map_completions("f", 1, ast, &mut |name| comps.push(name.to_owned()));
+    let comps = complete_to_vec("f", 1, &ast);
     assert_eq!(comps, vec!["float", "format", "false"])
 }

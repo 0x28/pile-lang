@@ -1009,12 +1009,12 @@ fn test_runtime_error_fmt() {
     );
 }
 
-fn read(input: &str) -> Vec<Expr> {
+fn read(input: &str) -> ResolvedAst {
     let ast = Parser::new(Lexer::new(input, Rc::new(ProgramSource::Stdin)))
         .parse()
         .unwrap();
     let ast = locals::translate(ast);
-    using::resolve(ast).unwrap().ast().expressions
+    using::resolve(ast).unwrap()
 }
 
 #[test]

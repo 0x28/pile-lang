@@ -47,7 +47,7 @@ fn pile() -> Result<(), String> {
             interpreter.run().map_err(|e| e.to_string())?;
         }
         Some(cli::CompletionOptions { prefix, line }) => {
-            completion::complete_to_stdout(prefix, *line, ast)
+            completion::complete_to_stdout(prefix, *line, &ast)
         }
     }
 
