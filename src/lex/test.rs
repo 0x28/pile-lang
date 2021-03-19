@@ -76,14 +76,17 @@ fn test_string_simple() {
 #[test]
 fn test_string_escaped() {
     let lexer = Lexer::new(
-        "\"\\n\\n\\n\\t\\r\0#test#\"",
+        "\"\\n\\n\\n\\t\\r\0#test#\" \"\\\\\"",
         Rc::new(ProgramSource::Stdin),
     );
-    let expected = vec![(
-        1,
-        Ok(Token::String(String::from("\n\n\n\t\r\0#test#"))),
-        "\"\\n\\n\\n\\t\\r\0#test#\"",
-    )];
+    let expected = vec![
+        (
+            1,
+            Ok(Token::String(String::from("\n\n\n\t\r\0#test#"))),
+            "\"\\n\\n\\n\\t\\r\0#test#\"",
+        ),
+        (1, Ok(Token::String(String::from("\\"))), r#""\\""#),
+    ];
 
     compare_token_lists(lexer, expected);
 }
