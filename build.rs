@@ -31,6 +31,11 @@ A simple stack-oriented toy programming language.
 ```
 {pi}
 ```
+
+## Quine
+```
+{quine}
+```
 "
     };
 }
@@ -52,7 +57,8 @@ fn main() -> std::io::Result<()> {
             fact = use_example(
                 "src/interpret/file_test/proj_factorial/factorial.pile"
             )?,
-            pi = use_example("src/examples/pi.pile")?
+            pi = use_example("src/examples/pi.pile")?,
+            quine = use_example("src/examples/quine.pile")?,
         ),
     )?;
 

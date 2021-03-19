@@ -94,3 +94,8 @@ pi 3.14 > assert
 pi 3.15 < assert
 
 ```
+
+## Quine
+```
+"\"" -> q "\\" -> b q b q q q b b q q "{}{}{}{} -> q {}{}{}{} -> b q b q q q b b q q {}{}{} dup q swap format print" dup q swap format print
+```
