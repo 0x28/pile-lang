@@ -43,6 +43,7 @@
     "print"
     "showstack"
     "stacksize"
+    "readlines"
     "swap"
     "trim"
     "upcase"))

@@ -54,6 +54,7 @@ pub enum Operator {
     Pick,
     Clear,
     StackSize,
+    ReadLines,
     // casts
     Natural,
     Integer,
@@ -92,6 +93,7 @@ impl fmt::Display for Operator {
                 Operator::Less => "<",
                 Operator::Print => "print",
                 Operator::Showstack => "showstack",
+                Operator::ReadLines => "readlines",
                 Operator::Assert => "assert",
                 Operator::Dup => "dup",
                 Operator::Drop => "drop",
@@ -289,6 +291,7 @@ impl<'a> Lexer<'a> {
             "not" => Token::Operator(Operator::Not),
             "print" => Token::Operator(Operator::Print),
             "showstack" => Token::Operator(Operator::Showstack),
+            "readlines" => Token::Operator(Operator::ReadLines),
             "assert" => Token::Operator(Operator::Assert),
             "dup" => Token::Operator(Operator::Dup),
             "drop" => Token::Operator(Operator::Drop),

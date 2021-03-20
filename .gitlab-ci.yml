@@ -27,7 +27,7 @@ pages:
     - apt-get update -yqq
     - apt-get install -yqq lcov
   script:
-    - cargo tarpaulin -o Lcov --exclude-files main.rs repl.rs
+    - cargo tarpaulin -o Lcov --exclude-files main.rs repl.rs reader.rs
     - genhtml lcov.info -o public
   artifacts:
     paths:

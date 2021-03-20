@@ -12,6 +12,7 @@ mod condition;
 mod dotimes;
 mod numeric;
 mod print;
+mod reader;
 mod runtime_error;
 mod scoping;
 mod stackop;
@@ -205,6 +206,9 @@ impl Interpreter {
             Operator::Not => boolean::apply_not(stack),
             Operator::Print => print::apply_print(stack),
             Operator::Showstack => print::apply_showstack(stack),
+            Operator::ReadLines => {
+                return reader::apply_readlines(state, source);
+            }
             Operator::Assert => assert::apply_assert(stack),
             Operator::Dup => stackop::apply_dup(stack),
             Operator::Drop => stackop::apply_drop(stack),
