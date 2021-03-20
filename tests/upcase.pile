@@ -1,0 +1,8 @@
+begin
+    -> line
+    line "=> {}\n" format upcase print
+
+    # read until the user enters "quit"
+    line "quit" = not
+end
+readlines

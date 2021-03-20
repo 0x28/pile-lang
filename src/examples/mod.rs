@@ -7,7 +7,6 @@ use crate::using;
 
 use std::fs;
 use std::path::PathBuf;
-use std::process::Command;
 use std::rc::Rc;
 
 fn run_example_file(path: PathBuf) {
@@ -34,20 +33,4 @@ fn run_example_files() {
         .filter(|path| path.extension().unwrap_or_default() == "pile")
         .map(run_example_file)
         .for_each(drop);
-}
-
-#[test]
-#[cfg(not(tarpaulin))] // NOTE: causes a timeout for tarpaulin!
-fn test_quine() {
-    let quine_file =
-        env!("CARGO_MANIFEST_DIR").to_owned() + "/src/examples/quine.pile";
-
-    let output = Command::new("cargo")
-        .args(&["run", "--", &quine_file])
-        .output()
-        .expect("Couldn't run quine test!");
-
-    let output = String::from_utf8_lossy(&output.stdout);
-
-    assert_eq!(output, fs::read_to_string(quine_file).unwrap());
 }
