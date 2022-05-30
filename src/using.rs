@@ -91,7 +91,7 @@ pub fn resolve(ast: ScopedAst) -> Result<ResolvedAst, PileError> {
 }
 
 fn resolve_use(
-    current_dir: &PathBuf,
+    current_dir: &Path,
     tree: &DependencyTree,
     ast: ScopedAst,
 ) -> Result<ResolvedAst, PileError> {

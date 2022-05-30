@@ -68,7 +68,7 @@ where
     T: Into<OsString> + Clone,
 {
     let matches = App::new("pile")
-        .version(&crate_version!()[..])
+        .version(crate_version!())
         .author("created by 0x28")
         .about("A simple stack-based programming language")
         .arg(

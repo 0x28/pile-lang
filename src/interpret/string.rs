@@ -34,7 +34,7 @@ pub fn apply_contains(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
     Ok(())
 }
 
-pub fn apply_upcase(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
+pub fn apply_upcase(stack: &mut [RuntimeValue]) -> Result<(), String> {
     let string = runtime_error::ensure_string_ref(stack)?;
 
     *string = string.to_uppercase();
@@ -42,7 +42,7 @@ pub fn apply_upcase(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
     Ok(())
 }
 
-pub fn apply_downcase(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
+pub fn apply_downcase(stack: &mut [RuntimeValue]) -> Result<(), String> {
     let string = runtime_error::ensure_string_ref(stack)?;
 
     *string = string.to_lowercase();
@@ -50,7 +50,7 @@ pub fn apply_downcase(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
     Ok(())
 }
 
-pub fn apply_trim(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
+pub fn apply_trim(stack: &mut [RuntimeValue]) -> Result<(), String> {
     let string = runtime_error::ensure_string_ref(stack)?;
 
     *string = string.trim().to_owned();

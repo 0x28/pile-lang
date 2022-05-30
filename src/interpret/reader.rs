@@ -13,7 +13,7 @@ pub fn apply_readlines(
 ) -> Result<(), PileError> {
     let lines = state.current_lines;
     let to_pile_error =
-        |msg| PileError::in_range(Rc::clone(&source), lines, msg);
+        |msg| PileError::in_range(Rc::clone(source), lines, msg);
     let func = runtime_error::ensure_function(state).map_err(to_pile_error)?;
 
     for line in io::stdin().lock().lines() {

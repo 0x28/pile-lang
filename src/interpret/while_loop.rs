@@ -12,7 +12,7 @@ pub fn apply_while(
 ) -> Result<(), PileError> {
     let lines = state.current_lines;
     let to_pile_error =
-        |msg| PileError::in_range(Rc::clone(&source), lines, msg);
+        |msg| PileError::in_range(Rc::clone(source), lines, msg);
 
     let condition =
         runtime_error::ensure_function(state).map_err(to_pile_error)?;

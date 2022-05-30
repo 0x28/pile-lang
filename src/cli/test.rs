@@ -113,10 +113,10 @@ fn test_read_completion2() {
 #[test]
 fn test_read_format() {
     let options = read_options(vec!["test8", "--format", "-"]);
-    assert!(options.unwrap().format(), true);
+    assert_eq!(options.unwrap().format(), true);
 
     let options = read_options(vec!["test8", "-f", "test.pile"]);
-    assert!(options.unwrap().format(), true);
+    assert_eq!(options.unwrap().format(), true);
 
     let options = read_options(vec!["test8", "-f"]);
     assert!(options.is_err());

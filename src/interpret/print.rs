@@ -7,7 +7,7 @@ pub fn apply_print(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
     Ok(())
 }
 
-pub fn apply_showstack(stack: &mut Vec<RuntimeValue>) -> Result<(), String> {
+pub fn apply_showstack(stack: &mut [RuntimeValue]) -> Result<(), String> {
     for (index, element) in stack.iter().rev().enumerate().rev() {
         print!(" [{}]:\t", index);
 

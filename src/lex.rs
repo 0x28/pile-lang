@@ -470,10 +470,7 @@ impl<'a> Lexer<'a> {
             return Some(LexerItem {
                 line: self.line_number,
                 token,
-                lexeme: std::mem::replace(
-                    &mut self.current_lexeme,
-                    String::new(),
-                ),
+                lexeme: std::mem::take(&mut self.current_lexeme),
             });
         }
 

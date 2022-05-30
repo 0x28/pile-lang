@@ -89,10 +89,10 @@ fn map_identifiers<O>(
             } if *assign_line <= line && line <= range.1 => {
                 // NOTE: from the line of the assignment until the end of the
                 // current block
-                operation(&var)
+                operation(var)
             }
             Expr::Save { var, .. } if range.0 <= line && line <= range.1 => {
-                operation(&var)
+                operation(var)
             }
             Expr::Block {
                 expressions,
@@ -117,7 +117,7 @@ where
 {
     for expr in expressions {
         match expr {
-            Expr::Assignment { var, .. } => operation(&var),
+            Expr::Assignment { var, .. } => operation(var),
             Expr::Block { .. } => {
                 // NOTE: only top level assignments matter in used modules
             }

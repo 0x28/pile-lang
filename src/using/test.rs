@@ -37,10 +37,10 @@ fn assert_resolve_eq(s: &str, expr: Vec<Expr>) {
     });
 
     if actual_ast != expected_ast {
-        panic!(format!(
+        panic!(
             "ast doesn't match: {:#?} != {:#?}",
             actual_ast, expected_ast
-        ));
+        );
     }
 }
 

@@ -7,7 +7,7 @@ pub fn ensure_element<T>(stack: &mut Vec<T>) -> Result<T, String> {
     stack.pop().ok_or_else(|| "Stack underflow".to_owned())
 }
 
-pub fn ensure_element_ref<T>(stack: &mut Vec<T>) -> Result<&mut T, String> {
+pub fn ensure_element_ref<T>(stack: &mut [T]) -> Result<&mut T, String> {
     stack.last_mut().ok_or_else(|| "Stack underflow".to_owned())
 }
 
@@ -48,7 +48,7 @@ pub fn ensure_string(stack: &mut Vec<RuntimeValue>) -> Result<String, String> {
 }
 
 pub fn ensure_string_ref(
-    stack: &mut Vec<RuntimeValue>,
+    stack: &mut [RuntimeValue],
 ) -> Result<&mut String, String> {
     let value = ensure_element_ref(stack)?;
 

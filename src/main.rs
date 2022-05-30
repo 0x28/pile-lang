@@ -11,12 +11,9 @@ mod repl;
 mod using;
 
 fn main() {
-    match pile() {
-        Err(msg) => {
-            eprintln!("{}", msg);
-            std::process::exit(1);
-        }
-        Ok(()) => (),
+    if let Err(msg) = pile() {
+        eprintln!("{}", msg);
+        std::process::exit(1);
     }
 }
 

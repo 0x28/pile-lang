@@ -101,7 +101,7 @@ impl Interpreter {
             state.current_lines = expr.lines();
 
             if state.trace {
-                tracer::before_eval(&expr, &state.lookup);
+                tracer::before_eval(expr, &state.lookup);
             }
 
             let result = match expr {
@@ -125,7 +125,7 @@ impl Interpreter {
                         Ok(())
                     }
                     token => Err(PileError::in_range(
-                        Rc::clone(&source),
+                        Rc::clone(source),
                         state.current_lines,
                         format!("Unexpected {}", token.error_fmt()),
                     )),
@@ -156,7 +156,7 @@ impl Interpreter {
             };
 
             if state.trace {
-                tracer::after_eval(&expr);
+                tracer::after_eval(expr);
             }
 
             if let Err(e) = result {
@@ -173,7 +173,7 @@ impl Interpreter {
                             state.lookup.restore(var);
 
                             if state.trace {
-                                tracer::after_eval(&expr);
+                                tracer::after_eval(expr);
                             }
                         }
                     });
@@ -232,7 +232,7 @@ impl Interpreter {
         };
 
         operation_result.map_err(|msg| {
-            PileError::in_range(Rc::clone(&source), state.current_lines, msg)
+            PileError::in_range(Rc::clone(source), state.current_lines, msg)
         })
     }
 
@@ -252,7 +252,7 @@ impl Interpreter {
             Ok(())
         } else {
             Err(PileError::in_range(
-                Rc::clone(&source),
+                Rc::clone(source),
                 state.current_lines,
                 format!("Unknown variable '{}'", ident),
             ))
@@ -266,11 +266,7 @@ impl Interpreter {
     ) -> Result<(), PileError> {
         let value =
             runtime_error::ensure_element(&mut state.stack).map_err(|msg| {
-                PileError::in_range(
-                    Rc::clone(&source),
-                    state.current_lines,
-                    msg,
-                )
+                PileError::in_range(Rc::clone(source), state.current_lines, msg)
             })?;
 
         state.lookup.assign(var, value);
